@@ -31,13 +31,13 @@ To be paid for this opportunity meet the following criteria:
 
 ## Evaluation Criteria
 
-Your visualization will be scored on the following:
+Your **visualization** will be scored on the following:
 * Function: how easy is it to navigate and interact with the visualization (20 points).
 * Story: how does the visualization use narrative to make the data relevant and meaningful for the audience (20 points).
 * Design: how does the visualization use best design practice (e.g. good design principles, visual cues, hierarchy) so that the meaning is clear (20 points).
 * Data Analysis: how does the visualization uncover patterns and relationships in the data (20 points).
 
-Code will be scored on the following:
+**Code** will be scored on the following:
 * Instructions on how to install and run the code (5 points)
 * Is the code documented (literate programming; maintainability)
 * Does the code run on the Province of B.C. DevOps platform (a Docker / OpenShift environment). This is much easier if you setup up the infrastructure before you start coding (10 points).
