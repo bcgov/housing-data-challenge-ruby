@@ -4,13 +4,16 @@
 </div>
 ---
 
-##Background
+## Background
 
 The Province of British Columbia and other agencies collect a wealth of administrative data that relates to housing, including the market for housing, as a consequence of their regulatory and administrative authorities. These include data about legal ownership (Land Titles BC), the total stock of housing (BC Assessment), and taxation information (Ministry of Finance). In addition, socio-demographic information is available, such as ownership status (owner or renter), through the Census of Canada.
 
 The British Columbia Government seeks to develop statistics that will provide greater certainty about the state of housing in the province, including the role of foreign ownership, real estate as an investment or business strategy (rather than home ownership), and insights into the regional impact of these issues. For more information see https://github.com/bcgov/housing-data-visualization-project. 
-We are offering this issue as a paid opportunity through our experimental procurement model, Code-with-Us and under the following terms Code-with-Us Terms,
-User Story
+
+We are offering this issue as a paid opportunity through our [experimental procurement model, Code-with-Us](https://github.com/BCDevExchange/code-with-us/wiki/1.-Intro-&-Disclaimer) and under the following terms [Code-with-Us Terms](https://github.com/BCDevExchange/devex/blob/master/Code-with-Us%20Terms_BC%20Developers%20Exchange.pdf) {PDF}.
+
+## User Story
+
 Government, infrastructure planners and the wider public need to interact with an online visualization platform of B.C. housing market information (using the following types of data: population data, property assessments, property transfer tax records, home owner grant records, land title records, etc.) so that they understand and make decisions based on community growth and housing data.
 
 
@@ -41,8 +44,10 @@ Code will be scored on the following:
 * How transferable (extensible) is the code to analyze and visualize other government data (10 points).
 * Processing efficiency / responsive (10 points)* Runs on desktop required; bonus for tablet (2 points)
 
-Useful links
-How assignment works
-How payment works
+### Useful links
+
+[How assignment works](https://github.com/BCDevExchange/code-with-us/wiki/4.-How-assignment-works)
+
+[How payment works](https://github.com/BCDevExchange/code-with-us/wiki/5.-How-payment-works)
 
 
