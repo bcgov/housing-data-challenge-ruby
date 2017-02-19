@@ -1,11 +1,25 @@
-
 # BC Stats / BCIC Housing Data Visualization
 
-This app is publicly available at http://bcdevx.rubyind.com/housing/.
+This app is a solution for BC Government Data Visualization Challenge to provide 
+improved data visualization capacity and usefullness of Crown data with regards 
+to the housing market and condiotions in BC.
 
-## Installation instructions on local environment
+App is publicly available at http://bcdevx.rubyind.com/housing/.
 
-### Requirements
+## Table of Contents
+
+  * [ BC Stats / BCIC Housing Data Visualization](#bc-stats-bcic-housing-data-visualization)
+      * [Installation Instructions](#installation-instructions)
+          * [System Requirements](#system-requirements)
+          * [Installation](#installation)
+          * [Using Docker Image](#using-docker-image)
+              * [Linux / OS X](#linux-os-x)
+              * [Windows (not tested)](#windows-not-tested)
+
+
+## Installation instructions
+
+### System Requirements
 Local installation requires R statistical software to be installed.
 Following is the R session info with required packages.
 
@@ -41,9 +55,66 @@ In terminal, type the following:
 ```
 shiny::runGitHub("housing-data-challenge-ruby", "bcgov")
 ```
-This will download the app localy in your current working directory, and run the app.
+This will download the app localy in your current working directory and run the app.
 
 
 ### Using Docker image
-Docker image is in preparation, so it will be possible to install the app
-by pulling the Docker image.
+App can also be installed using Docker image (it is required that docker is installed 
+on the server or local machine).
+
+You can customize how container is started by setting the following 
+environment variables:
+
+`housing_ruby_port_host` - the port on the host machine the app will listen to.
+
+`housing_ruby_port_guest` - the port on the guest machine the app will listen to.
+
+`housing_ruby_container_name` - meaningful container name.
+
+`housing_ruby_container_hostname` - container hostname.
+
+#### Linux / OS X
+
+1. Set the environment variables (modify values if needed to suit the environment).
+
+```
+export housing_ruby_port_host=3838
+export housing_ruby_port_guest=3838
+export housing_ruby_container_name=shiny_housing
+export housing_ruby_container_hostname=housing
+```
+
+2. Run the following command to start the container. Docker image will 
+automatically be pulled from the docker hub the first time.
+
+```
+docker run -d -p $housing_ruby_port_host:$housing_ruby_port_guest \
+    --name $housing_ruby_container_name \
+    -h $housing_ruby_container_hostname \
+    -v /srv/shinyapps/:/srv/shiny-server/ \
+    -v /srv/shinylog/:/var/log/shiny-server/ \
+    rubyind/bc_housing_ruby
+```
+
+#### Windows (not tested)
+
+1. Set the environment variables (modify values if needed to suit the environment).
+
+```
+set housing_ruby_port_host=3838
+set housing_ruby_port_guest=3838
+set housing_ruby_container_name=shiny_housing
+set housing_ruby_container_hostname=housing
+```
+
+2. Run the following command to start the container. Docker image will 
+automatically be pulled from the docker hub the first time.
+
+```
+docker run -d -p %housing_ruby_port_host%:%housing_ruby_port_guest% \
+    --name %housing_ruby_container_name% \
+    -h %housing_ruby_container_hostname% \
+    -v /srv/shinyapps/:/srv/shiny-server/ \
+    -v /srv/shinylog/:/var/log/shiny-server/ \
+    rubyind/bc_housing_ruby
+```
