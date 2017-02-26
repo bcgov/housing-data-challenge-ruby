@@ -27,27 +27,28 @@ Following is the R session info with required packages.
 > sessionInfo()
 R version 3.3.2 (2016-10-31)
 Platform: x86_64-pc-linux-gnu (64-bit)
-Running under: Debian GNU/Linux 8 (jessie)
+Running under: Debian GNU/Linux stretch/sid
 
 locale:
- [1] LC_CTYPE=en_US.UTF-8       LC_NUMERIC=C               LC_TIME=en_US.UTF-8       
- [4] LC_COLLATE=en_US.UTF-8     LC_MONETARY=en_US.UTF-8    LC_MESSAGES=C             
- [7] LC_PAPER=en_US.UTF-8       LC_NAME=C                  LC_ADDRESS=C              
-[10] LC_TELEPHONE=C             LC_MEASUREMENT=en_US.UTF-8 LC_IDENTIFICATION=C       
+ [1] LC_CTYPE=en_US.UTF-8       LC_NUMERIC=C              
+ [3] LC_TIME=en_US.UTF-8        LC_COLLATE=en_US.UTF-8    
+ [5] LC_MONETARY=en_US.UTF-8    LC_MESSAGES=en_US.UTF-8   
+ [7] LC_PAPER=en_US.UTF-8       LC_NAME=C                 
+ [9] LC_ADDRESS=C               LC_TELEPHONE=C            
+[11] LC_MEASUREMENT=en_US.UTF-8 LC_IDENTIFICATION=C       
 
 attached base packages:
 [1] stats     graphics  grDevices utils     datasets  methods   base     
 
 other attached packages:
-[1] shiny_1.0.0     htmlwidgets_0.8 dplyr_0.5.0     maps_3.1.1      leaflet_1.0.1   rgdal_1.2-5    
-[7] sp_1.2-4       
+[1] rgeos_0.3-22    htmlwidgets_0.8 dplyr_0.5.0     maps_3.1.1     
+[5] leaflet_1.0.1   rgdal_1.2-5     sp_1.2-4        shiny_1.0.0    
 
 loaded via a namespace (and not attached):
- [1] Rcpp_0.12.9        magrittr_1.5       munsell_0.4.3      xtable_1.8-2       colorspace_1.3-2  
- [6] lattice_0.20-34    R6_2.2.0           plyr_1.8.4         tools_3.3.2        grid_3.3.2        
-[11] DBI_0.5-1          htmltools_0.3.5    yaml_2.1.14        lazyeval_0.2.0     assertthat_0.1    
-[16] digest_0.6.12      tibble_1.2         RColorBrewer_1.1-2 mime_0.5           scales_0.4.1      
-[21] jsonlite_1.2       httpuv_1.3.3      
+ [1] Rcpp_0.12.9     lattice_0.20-34 assertthat_0.1  digest_0.6.11  
+ [5] mime_0.5        grid_3.3.2      R6_2.2.0        xtable_1.8-2   
+ [9] DBI_0.5-1       magrittr_1.5    tools_3.3.2     httpuv_1.3.3   
+[13] htmltools_0.3.5 tibble_1.2     
 ```
 
 ### Installation
