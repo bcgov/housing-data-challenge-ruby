@@ -9,6 +9,7 @@ library(DT)
 library(rgeos)
 library(tidyr)
 library(crosstalk)
+library(plotly)
 
 # read objects
 # propoerty tax
@@ -75,10 +76,6 @@ selectionMetrics <- c("Transactions #" = "no_mkt_trans",
              "FMV Sum of Foreign Transactions" = "sum_FMV_foreign",
              "Additional Tax Paid" = "add_tax_paid")
 
-# Selection of property tax variables
-pt_names <- names(select_if(propertyTax, is.numeric))
-pt_names
-
 propertyTaxPeriod <-
     subset(propertyTax, trans_period == max(transPeriods))
 
@@ -107,18 +104,26 @@ shinyApp(ui = navbarPage(theme = "bcgov.css",
                 sidebarPanel(width = 3,
                     # selectInput("pt_trans_period", "Transaction Period", transPeriods),
                     selectInput("pt_trans_period", "Transaction Period", levels(propertyTax$trans_period), multiple = FALSE),
-                    selectInput("pt_resolution", "Resolution",
+                    selectInput("pt_view", "View",
                         c("Regional District" = "regdis",
                             "Development Region" = "devreg",
                             "Municipality" = "mun")
                     ),
-                    selectInput("metric", "Metric", selectionMetrics),
+                    selectInput("pt_metric", "Metric", selectionMetrics, multiple = TRUE),
                     verbatimTextOutput("text"),
                     verbatimTextOutput("text2")
                 ),
                 mainPanel(width = 9,
-                    leafletOutput("map")
+                    # column(7,
+                        leafletOutput("map", height = 450)
+                    # ),
+                    # column(5,
+                    #     plotlyOutput("trend", height = 450)
+                    # )
                 )
+            ),
+            fluidRow(
+                plotlyOutput("trend")
             ),
             fluidRow(
                 dataTableOutput("dt")
@@ -133,6 +138,15 @@ shinyApp(ui = navbarPage(theme = "bcgov.css",
 
 
 server <- function(input, output, session) {
+    
+    # transPeriod <- reactive({
+    #     input$trans_period
+    # })
+    # 
+    # view <- reactive({
+    #     
+    # })
+    
     # display 10 rows initially
     output$ex1 <- DT::renderDataTable(
         DT::datatable(iris, options = list(pageLength = 25))
@@ -207,12 +221,14 @@ server <- function(input, output, session) {
                 ),
                 group = "divisions"
             ) %>%
-            # addLegend(
-            #     "bottomleft",
-            #     pal = pal,
-            #     values = ~ bcCensusDivsMap@data$no_mkt_trans,
-            #     title = "Legend"
-            # ) %>%
+            addLegend(
+                "bottomleft",
+                pal = pal,
+                values = bcCensusDivsMap$no_mkt_trans,
+                title = "Transactions #",
+                labFormat = labelFormat(prefix = "$"),
+                opacity = 0.8
+            ) %>%
             addLayersControl(
                 overlayGroups = c("Census Divisions"),
                 options = layersControlOptions(collapsed = FALSE)
@@ -225,43 +241,7 @@ server <- function(input, output, session) {
     #   "Foreign Involvement Transactions (count)" = "no_foreign",
     #   "FMV sum of Foreign Involvement Transactions ($ sum)" = "sum_FMV_foreign",
     #   "Additional Tax Paid ($ sum)" = "add_tax_paid")
-    output$dt = DT::renderDataTable(
-        datatable(propertyTax %>% 
-                filter(trans_period == max(transPeriods)) %>%
-                group_by(RegionalDistrict) %>%
-                select(no_mkt_trans, sum_FMV, sum_PPT_paid, no_foreign, sum_FMV_foreign, add_tax_paid) %>%
-                summarise(no_mkt_trans = sum(no_mkt_trans, na.rm=TRUE),
-                          sum_FMV = sum(sum_FMV, na.rm=TRUE),
-                          sum_PPT_paid = sum(sum_PPT_paid, na.rm=TRUE),
-                          no_foreign = sum(no_foreign, na.rm=TRUE),
-                          sum_FMV_foreign = sum(sum_FMV_foreign, na.rm=TRUE),
-                          add_tax_paid = sum(add_tax_paid, na.rm=TRUE)) %>%
-                arrange(desc(no_mkt_trans)),
-            options = list(
-                lengthChange = TRUE,
-                initComplete = JS("
-                    function(settings, json) {
-                        $(this.api().table().header()).css({
-                            'background-color': 'rgba(0, 51, 102, 0.80)',
-                            'border-bottom': '5px solid #fcba19',
-                            'color': '#fff'
-                        });
-                    }")),
-            colnames = selectionMetrics,
-            selection = list(target = 'row+column')) %>% 
-        formatCurrency(
-            c('FMV Sum', 'PTT Paid', 'FMV Sum of Foreign Transactions', 'Additional Tax Paid'), 
-            currency = "$",
-            digits = 0
-        ) %>%
-        formatCurrency(
-            c('Transactions #', 'Foreign Transactions #'), 
-            currency = "",
-            digits = 0
-        ) 
-    )
 
-    
     # observeEvent(input$map_shape_click, {
     #     #create object for clicked polygon
     #     click <- input$map_shape_click
@@ -307,17 +287,43 @@ server <- function(input, output, session) {
     # This observer is responsible for maintaining the circles and legend,
     # according to the variables the user has chosen to map to color and size.
     observe({
-        pt_resolution <- input$pt_resolution
+        pt_view <- input$pt_view
         pt_trans_period <- input$pt_trans_period
+        # pt_metric <- input$pt_metric
         
-        switch(pt_resolution, 
+        # propertyTax <- propertyTax %>% 
+        #     filter(trans_period == pt_trans_period) %>%
+        #     group_by(Regional.District) %>%
+        #     select(no_mkt_trans, sum_FMV, sum_PPT_paid, no_foreign, sum_FMV_foreign, add_tax_paid) %>%
+        #     summarise(no_mkt_trans = sum(no_mkt_trans, na.rm=TRUE),
+        #               sum_FMV = sum(sum_FMV, na.rm=TRUE),
+        #               sum_PPT_paid = sum(sum_PPT_paid, na.rm=TRUE),
+        #               no_foreign = sum(no_foreign, na.rm=TRUE),
+        #               sum_FMV_foreign = sum(sum_FMV_foreign, na.rm=TRUE),
+        #               add_tax_paid = sum(add_tax_paid, na.rm=TRUE)) %>%
+        #     arrange(desc(no_mkt_trans))
+        
+        switch(pt_view, 
                "regdis" = {
-                   propertyTaxPeriod <-
-                       subset(ptRegDisMth, trans_period == pt_trans_period)
+                   # propertyTaxPeriod <-
+                   #     subset(ptRegDisMth, trans_period == pt_trans_period)
+                   propertyTaxPeriod <- ptRegDisMth %>% 
+                       filter(trans_period == pt_trans_period) %>%
+                       group_by(Regional.District) %>%
+                       select(Regional.District, no_mkt_trans, sum_FMV, sum_PPT_paid, 
+                              no_foreign, sum_FMV_foreign, add_tax_paid) %>%
+                       summarise(no_mkt_trans = sum(no_mkt_trans, na.rm=TRUE),
+                                 sum_FMV = sum(sum_FMV, na.rm=TRUE),
+                                 sum_PPT_paid = sum(sum_PPT_paid, na.rm=TRUE),
+                                 no_foreign = sum(no_foreign, na.rm=TRUE),
+                                 sum_FMV_foreign = sum(sum_FMV_foreign, na.rm=TRUE),
+                                 add_tax_paid = sum(add_tax_paid, na.rm=TRUE)) %>%
+                       arrange(desc(no_mkt_trans))
+                   
                    # Convert join columns to uppercase to avoid mismatches due to case sensitivity
                    bcCensusDivs@data$CDNAME <- toupper(bcCensusDivs@data$CDNAME)
                    geoUnit <- as.character(bcCensusDivs$CDNAME)
-                   
+                   byY <- "Regional.District"
                    shapesDF <-
                        merge(
                            bcCensusDivs,
@@ -329,8 +335,21 @@ server <- function(input, output, session) {
                        )
                },
                "devreg" = {
-                   propertyTaxPeriod <-
-                       subset(ptDevRegMth, trans_period == pt_trans_period)
+                   # propertyTaxPeriod <-
+                   #     subset(ptDevRegMth, trans_period == pt_trans_period)
+                   propertyTaxPeriod <- ptDevRegMth %>% 
+                       filter(trans_period == pt_trans_period) %>%
+                       group_by(DevelopmentRegion) %>%
+                       select(DevelopmentRegion, no_mkt_trans, sum_FMV, sum_PPT_paid, 
+                              no_foreign, sum_FMV_foreign, add_tax_paid) %>%
+                       summarise(no_mkt_trans = sum(no_mkt_trans, na.rm=TRUE),
+                                 sum_FMV = sum(sum_FMV, na.rm=TRUE),
+                                 sum_PPT_paid = sum(sum_PPT_paid, na.rm=TRUE),
+                                 no_foreign = sum(no_foreign, na.rm=TRUE),
+                                 sum_FMV_foreign = sum(sum_FMV_foreign, na.rm=TRUE),
+                                 add_tax_paid = sum(add_tax_paid, na.rm=TRUE)) %>%
+                       arrange(desc(no_mkt_trans))
+                   
                    # Convert join columns to uppercase to avoid mismatches due to case sensitivity
                    
                    erData <- bcCensusEconRegs@data
@@ -357,6 +376,7 @@ server <- function(input, output, session) {
                    bcCensusEconRegs@data$ERNAME <- erData$ERNAME_E
                    
                    geoUnit <- as.character(bcCensusEconRegs$ERNAME)
+                   byY <- "DevelopmentRegion"
                    shapesDF <-
                        merge(
                            bcCensusEconRegs,
@@ -368,8 +388,21 @@ server <- function(input, output, session) {
                        )
                },
                "mun" = {
-                   propertyTaxPeriod <-
-                       subset(ptMunMth, trans_period == pt_trans_period)
+                   # propertyTaxPeriod <-
+                   #     subset(ptMunMth, trans_period == pt_trans_period)
+                   propertyTaxPeriod <- ptMunMth %>% 
+                       filter(trans_period == pt_trans_period) %>%
+                       group_by(Municipality) %>%
+                       select(Municipality, no_mkt_trans, sum_FMV, sum_PPT_paid, no_foreign, sum_FMV_foreign, add_tax_paid) %>%
+                       summarise(no_mkt_trans = sum(no_mkt_trans, na.rm=TRUE),
+                                 sum_FMV = sum(sum_FMV, na.rm=TRUE),
+                                 sum_PPT_paid = sum(sum_PPT_paid, na.rm=TRUE),
+                                 no_foreign = sum(no_foreign, na.rm=TRUE),
+                                 sum_FMV_foreign = sum(sum_FMV_foreign, na.rm=TRUE),
+                                 add_tax_paid = sum(add_tax_paid, na.rm=TRUE)) %>%
+                       arrange(desc(no_mkt_trans))
+                   
+                   
                    # Convert join columns to uppercase to avoid mismatches due to case sensitivity
                    bcCensusMetroAreas@data$CMANAME <- toupper(bcCensusMetroAreas@data$CMANAME)
                    
@@ -377,6 +410,7 @@ server <- function(input, output, session) {
                        gsub("ABBOTSFORD", "ABBOTSFORD - MISSION", propertyTaxPeriod$Municipality)
                    
                    geoUnit <- as.character(bcCensusMetroAreas$CMANAME)
+                   byY <- "Municipality"
                    shapesDF <-
                        merge(
                            bcCensusMetroAreas,
@@ -430,8 +464,8 @@ server <- function(input, output, session) {
             ) %>%
             # addLegend(
             #     "bottomleft",
-            #     colors = pal,
-            #     values = ~ shapesDF$no_mkt_trans,
+            #     pal = pal,
+            #     values = shapesDF$no_mkt_trans,
             #     title = "Legend"
             # ) %>%
             addLayersControl(
@@ -439,7 +473,54 @@ server <- function(input, output, session) {
                 options = layersControlOptions(collapsed = FALSE)
             ) %>%
             clearGroup(group = "selected")
+        
+        output$dt = DT::renderDataTable(
+            datatable(propertyTaxPeriod,
+                      options = list(
+                          lengthChange = TRUE,
+                          initComplete = JS("
+                                            function(settings, json) {
+                                            $(this.api().table().header()).css({
+                                            'background-color': 'rgba(0, 51, 102, 0.80)',
+                                            'border-bottom': '5px solid #fcba19',
+                                            'color': '#fff'
+                                            });
+                                            }")),
+            colnames = selectionMetrics,
+            selection = list(target = 'row+column')) %>% 
+                formatCurrency(
+                    c('FMV Sum', 'PTT Paid', 'FMV Sum of Foreign Transactions', 'Additional Tax Paid'), 
+                    currency = "$",
+                    digits = 0
+                ) %>%
+                formatCurrency(
+                    c('Transactions #', 'Foreign Transactions #'), 
+                    currency = "",
+                    digits = 0
+                ) 
+        )
+        
+        output$trend <- renderPlotly({
+            plot_ly(propertyTaxPeriod, x = ~as.name(byY), y = ~no_mkt_trans, type = "bar") %>%
+                add_trace(y = ~no_foreign) %>%
+                # layout(yaxis = list(title = 'Count'), barmode = 'group')
+                layout(xaxis = list(title = "", tickangle = -45),
+                    yaxis = list(title = ""),
+                    margin = list(b = 100),
+                    barmode = 'group')
+        })
+        
+        
+        
     })
+    # output$trend <- renderPlotly({
+    #     plot_ly(propertyTax, x = ~trans_period, y = ~no_mkt_trans, type = "bar") %>%
+    #         add_trace(y = ~no_foreign) %>%
+    #         layout(yaxis = list(title = 'Count'), barmode = 'group')
+    # })
     
+    # output$trend <- renderPlot({
+    #     plot(propertyTax)
+    # })
     
 })
