@@ -29,3 +29,7 @@ body {
 .leaflet-container {
     font-family: Myriad-Pro, Calibri, Arial, 'sans serif';;
 }
+
+.nav-tabs {
+    margin: 40px;
+}
