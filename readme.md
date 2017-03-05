@@ -94,7 +94,7 @@ docker run -d -p $housing_ruby_port_host:$housing_ruby_port_guest \
     -h $housing_ruby_container_hostname \
     -v /srv/shinyapps/:/srv/shiny-server/ \
     -v /srv/shinylog/:/var/log/shiny-server/ \
-    rubyind/bc_housing_ruby
+    rubyind/housing-data-challenge-ruby
 ```
 
 #### Windows (not tested)

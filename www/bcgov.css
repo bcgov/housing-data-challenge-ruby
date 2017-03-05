@@ -22,7 +22,7 @@ body {
 /*    background-color:  rgba(0, 51, 102, 0.80); */
 }
 
-.navbar-default .navbar-brand {
+.navbar-default .navbar-brand, .navbar-default .navbar-brand:hover {
     color: #fff;
 }
 
@@ -33,3 +33,4 @@ body {
 .nav-tabs {
     margin: 40px;
 }
+
