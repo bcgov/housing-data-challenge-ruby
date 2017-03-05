@@ -104,9 +104,13 @@ propertyTax <- ptRegDisMth
 chartHeight <- 400
 mapHeight <- 300
 
+# pt_view <- 'regdis'
+# pt_trans_period <- '2016-12-01'
+# pt_metric <- 'no_mkt_trans'
+
 shinyApp(ui = navbarPage(theme = "bcgov.css",
     title = "Housing Market",
-    tabPanel('Property Sales',
+    tabPanel('Monthly Data',
         fluidPage(
             titlePanel("BC Housing Data Visualization"),
             tags$p(
@@ -134,7 +138,7 @@ shinyApp(ui = navbarPage(theme = "bcgov.css",
                     column(4, plotlyOutput("interactive", height = chartHeight))
                 ),
                 tabPanel("Foreign Involvement", 
-                    column(4, plotlyOutput("foreign_period_fmv", height = chartHeight)),
+                    column(4, plotlyOutput("no_foreign_period", height = chartHeight)),
                     column(4, plotlyOutput("foreign_period_mn", height = chartHeight)),
                     column(4, plotlyOutput("foreign_period_md", height = chartHeight))
                 ),
@@ -142,14 +146,43 @@ shinyApp(ui = navbarPage(theme = "bcgov.css",
             )
         )
     ),
-    tabPanel('Monthly overview',
+    tabPanel('Overview',
+             fluidPage(
+                 titlePanel("Property Sales Monthly Overview"),
+                 column(4, plotlyOutput("pt_mothly_fmv", height = chartHeight)),
+                 column(4, plotlyOutput("pt_mothly_mnd_fmv", height = chartHeight)),
+                 column(4, plotlyOutput("pt_mothly_ptt", height = chartHeight)),
+                 column(4, plotlyOutput("pt_mothly", height = chartHeight)),
+                 column(4, plotlyOutput("pt_mothly_res", height = chartHeight)),
+                 column(4, plotlyOutput("pt_mothly_comm", height = chartHeight))
+             )
+    ),
+    tabPanel('Your Dataviz',
         fluidPage(
-            titlePanel("Property Sales Monthly Overview"),
-            column(4, plotlyOutput("pt_mothly", height = chartHeight)),
-            column(4, plotlyOutput("pt_mothly_fmv", height = chartHeight)),
-            column(4, plotlyOutput("pt_mothly_mnd_fmv", height = chartHeight)),
-            column(4, plotlyOutput("pt_mothly_res", height = chartHeight)),
-            column(4, plotlyOutput("pt_mothly_comm", height = chartHeight))
+            titlePanel("Make Your Own Data Visualization"),
+            tags$p(
+                "This is where you can make your own data visualization based on
+                existing data, or your own data uploaded as csv file."
+            ),
+            sidebarLayout(
+                sidebarPanel(width = 3,
+                             tags$p("Selections")
+                    # # selectInput("pt_trans_period", "Transaction Period", transPeriods),
+                    # selectInput("pt_trans_period", "Transaction Period", levels(propertyTax$trans_period), multiple = FALSE),
+                    # selectInput("pt_view", "View",
+                    #     c("Regional District" = "regdis",
+                    #         "Development Region" = "devreg",
+                    #         "Municipality" = "mun")
+                    # ),
+                    # selectInput("pt_metric", "Metric", selectionMetrics),
+                    # verbatimTextOutput("text"),
+                    # verbatimTextOutput("text2")
+                ),
+                mainPanel(width = 9,
+                          tags$p("Dataviz")
+                          # leafletOutput("map", height = mapHeight)
+                )
+            )
         )
     )
 ),
@@ -328,8 +361,8 @@ server <- function(input, output, session) {
                no_resid_fam, no_res_1fam, no_resid_strata, no_resid_non_strata, 
                no_resid_other, no_comm_tot, no_comm_comm, no_comm_strata_nores, 
                no_comm_other, no_recr_tot, no_farm_tot, no_unkn_tot, sum_FMV, 
-               mn_FMV, md_FMV, sum_PPT_paid, md_PPT, no_foreign, 
-               sum_FMV_foreign, mn_FMV_foreign, md_FMV_foreign, add_tax_paid) %>% 
+               mn_FMV, md_FMV, sum_PPT_paid, md_PPT, no_foreign, sum_FMV_foreign, 
+               mn_FMV_foreign, md_FMV_foreign, add_tax_paid, no_foreign_perc) %>% 
             group_by(trans_period) %>% 
             summarize(
                 no_mkt_trans = sum(no_mkt_trans, na.rm=TRUE), 
@@ -358,7 +391,8 @@ server <- function(input, output, session) {
                 sum_FMV_foreign = sum(sum_FMV_foreign, na.rm=TRUE), 
                 mn_FMV_foreign = mean(mn_FMV_foreign, na.rm=TRUE), 
                 md_FMV_foreign = median(md_FMV_foreign, na.rm=TRUE), 
-                add_tax_paid = sum(add_tax_paid, na.rm=TRUE)
+                add_tax_paid = sum(add_tax_paid, na.rm=TRUE),
+                no_foreign_perc = mean(no_foreign_perc, na.rm = TRUE)
             )
         
         # reorder data for chart sorting 
@@ -462,22 +496,30 @@ server <- function(input, output, session) {
                     digits = 0
                 ) 
         )
+
+        fontFamily <- "Myriad-Pro, Calibri, Arial, 'sans serif'"
+        tickfontBl <- list(
+            family = fontFamily,
+            size = 12,
+            color = "black"
+        )
+        
+        tickfontRd = list(
+            family = fontFamily,
+            size = 12,
+            color = "#C40C0C"
+        )
         
         axisFormat <- list(
             title = "",
             showticklabels = TRUE,
             # tickangle = 45,
-            tickfont = list(
-                family = "Myriad-Pro, Calibri, Arial, 'sans serif'",
-                size = 12,
-                color = "black"
-            )#,
-            # exponentformat = "E"
+            tickfont = tickfontBl
         )
         
         legendFormat <- list(
             font = list(
-                family = "Myriad-Pro, Calibri, Arial, 'sans serif'",
+                family = fontFamily,
                 size = 11,
                 color = "#696969"),
             bgcolor = "#f3f3f3",
@@ -494,112 +536,162 @@ server <- function(input, output, session) {
 
         output$interactive <- renderPlotly({
             plot_ly(propertyTaxPeriod, 
-                    x = ~propertyTaxPeriod[[pt_metric]],
-                    y = ~geoUnit, 
-                    type = "bar", orientation = "h") %>%
-                layout(title = pt_metric, #"Number of market transactions",
-                    xaxis = axisFormat,
-                    yaxis = axisFormat,
-                    margin = list(b = 100, l = 150),
-                    barmode = 'group',
-                    legend = legendFormat
-                ) %>% 
-                config(displayModeBar = F)
+                x = ~propertyTaxPeriod[[pt_metric]],
+                y = ~geoUnit, 
+                type = "bar", orientation = "h") %>%
+            layout(title = pt_metric, #"Number of market transactions",
+                xaxis = axisFormat,
+                yaxis = axisFormat,
+                margin = list(b = 100, l = 150),
+                barmode = 'group',
+                legend = legendFormat
+            ) %>% 
+            config(displayModeBar = F)
         })
 
-        output$foreign_period_fmv <- renderPlotly({
-            plot_ly(propertyTaxPeriod, 
-                    x = ~no_foreign,
-                    y = ~geoUnit, 
-                    type = "bar", orientation = "h") %>%
-                layout(title = "Number of Foreign Transactions",
-                       xaxis = axisFormat,
-                       yaxis = axisFormat,
-                       margin = list(b = 100, l = 150),
-                       legend = legendFormat
-                ) %>% 
-                config(displayModeBar = F)
+        output$no_foreign_period <- renderPlotly({
+            plot_ly(propertyTaxPeriod %>% 
+                        arrange(desc(no_foreign)), 
+                x = ~geoUnit, 
+                y = ~no_foreign,
+                type = "bar",
+                marker = list(color = 'rgb(62, 180, 240)')) %>%
+            layout(title = "Number of Foreign Transactions",
+                   xaxis = axisFormat,
+                   yaxis = axisFormat,
+                   margin = marginFormat,
+                   legend = legendFormat
+            ) %>% 
+            config(displayModeBar = F)
         })
         
         output$foreign_period_mn <- renderPlotly({
             plot_ly(propertyTaxPeriod %>% 
-                        filter(mn_FMV != 0), 
-                    x = ~mn_FMV,
-                    y = ~geoUnit, 
-                    name = "Canadian",
-                    type = "bar", orientation = "h") %>%
-                add_trace(x = ~mn_FMV_foreign, name = "Foreign") %>% 
-                layout(title = "FMV Mean",
-                       xaxis = axisFormat,
-                       yaxis = axisFormat,
-                       margin = list(b = 100, l = 150),
-                       barmode = 'group',
-                       legend = legendFormat
-                ) %>% 
-                config(displayModeBar = F)
-        })
-        
-        output$foreign_period_md <- renderPlotly({
-            plot_ly(propertyTaxPeriod, 
-                    x = ~md_FMV,
-                    y = ~geoUnit, 
-                    name = "Canadian",
-                    type = "bar", orientation = "h") %>%
-                add_trace(x = ~md_FMV_foreign, name = "Foreign") %>% 
-            layout(title = "FMV Median",
+                        filter(!is.na(mn_FMV_foreign)) %>% 
+                arrange(desc(mn_FMV)), 
+                x = ~geoUnit, 
+                y = ~mn_FMV,
+                name = "Canadian",
+                marker = list(color = '#C40C0C'),
+                type = "bar"
+            ) %>%
+            add_trace(y = ~mn_FMV_foreign, name = "Foreign", marker = list(color = 'rgb(62, 180, 240)')) %>% 
+            layout(title = "FMV Mean",
                    xaxis = axisFormat,
                    yaxis = axisFormat,
-                   margin = list(b = 100, l = 150),
+                   margin = marginFormat,
                    barmode = 'group',
                    legend = legendFormat
             ) %>% 
-                config(displayModeBar = F)
+            config(displayModeBar = F)
+        })
+        
+        output$foreign_period_md <- renderPlotly({
+            plot_ly(propertyTaxPeriod %>% 
+                filter(!is.na(md_FMV_foreign)) %>% 
+                    arrange(desc(md_FMV)), 
+                x = ~geoUnit, 
+                y = ~md_FMV,
+                name = "Canadian",
+                marker = list(color = '#C40C0C'),
+                type = "bar"
+            ) %>%
+            add_trace(y = ~md_FMV_foreign, name = "Foreign", marker = list(color = 'rgb(62, 180, 240)')) %>% 
+            layout(title = "FMV Median",
+                   xaxis = axisFormat,
+                   yaxis = axisFormat,
+                   margin = marginFormat,
+                   barmode = 'group',
+                   legend = legendFormat
+            ) %>% 
+            config(displayModeBar = F)
         })
         
         output$pt_mothly <- renderPlotly({
             plot_ly(propertyTax, 
-                    x = ~trans_period, 
-                    y = ~no_resid_trans, 
-                    name = "Residential", 
-                    type = "bar",
-                    hoverinfo = "y+name"
-                ) %>%
-                add_trace(y = ~no_comm_tot, name = "Commercial") %>%
-                add_trace(y = ~no_recr_tot, name = "Recreational") %>% 
-                add_trace(y = ~no_farm_tot, name = "Farms") %>% 
-                add_trace(y = ~no_unkn_tot, name = "Unknown") %>% 
-                layout(title = "Number of market transactions",
-                    xaxis = axisFormat,
-                    yaxis = axisFormat,
-                    margin = marginFormat,
-                    barmode = 'stack',
-                    legend = legendFormat) %>% 
-                config(displayModeBar = F)
+                x = ~trans_period, 
+                y = ~no_resid_trans, 
+                name = "Residential", 
+                type = "bar",
+                hoverinfo = "y+name"
+            ) %>%
+            add_trace(y = ~no_comm_tot, name = "Commercial") %>%
+            add_trace(y = ~no_recr_tot, name = "Recreational") %>% 
+            add_trace(y = ~no_farm_tot, name = "Farms") %>% 
+            add_trace(y = ~no_unkn_tot, name = "Unknown") %>% 
+            layout(title = "Number of market transactions",
+                xaxis = axisFormat,
+                yaxis = axisFormat,
+                margin = marginFormat,
+                barmode = 'stack',
+                legend = legendFormat) %>% 
+            config(displayModeBar = F)
         })
         
         output$pt_mothly_fmv <- renderPlotly({
             plot_ly(
                 propertyTaxOverview,
-                x = ~trans_period, y = ~sum_FMV, name = "Total FMV", type = 'scatter', mode = 'lines', line = list(shape = "spline")) %>%
-                add_lines(y = ~sum_PPT_paid, name = "Total PTT", line = list(shape = "spline")) %>% 
-                layout(
-                    title = "FMV and PTT",
-                    xaxis = axisFormat,
-                    yaxis = axisFormat,
-                    margin = marginFormat,
-                    legend = legendFormat
-                ) %>% 
-                config(displayModeBar = F)
+                x = ~trans_period, y = ~sum_FMV, name = "Total FMV", 
+                type = 'scatter', mode = 'lines', 
+                line = list(shape = "spline", color = "#C40C0C")
+            ) %>%
+            add_lines(y = ~sum_FMV_foreign, name = "Total FMV Foreign", 
+                      line = list(shape = "spline", color = 'rgb(42, 120, 180)')) %>% 
+            add_lines(y = ~no_foreign_perc, name = "Foreign %", yaxis = "y2",
+                      line = list(shape = "spline", color = '#396', dash = 'dot')) %>%
+            layout(
+                title = "FMV (Fair Market Value)",
+                xaxis = axisFormat,
+                yaxis = axisFormat,
+                yaxis2 = list(
+                    tickfont = tickfontRd,
+                    overlaying = "y",
+                    side = "right",
+                    title = "Foreign %"
+                ),
+                margin = marginFormat,
+                legend = legendFormat
+            ) %>% 
+            config(displayModeBar = F)
         })
         
         output$pt_mothly_mnd_fmv <- renderPlotly({
             plot_ly(
                 propertyTaxOverview,
-                x = ~trans_period, y = ~mn_FMV, name = "Mean FMV", type = 'scatter', mode = 'lines', line = list(shape = "spline")) %>%
-                add_lines(y = ~md_FMV, name = "Median FMV", line = list(shape = "spline")) %>%
-                add_lines(y = ~md_PPT, name = "Median PTT", line = list(shape = "spline")) %>% 
+                x = ~trans_period, y = ~mn_FMV, name = "Mean FMV", 
+                type = 'scatter', mode = 'lines', 
+                line = list(shape = "spline", color = '#C40C0C')
+            ) %>%
+            add_lines(y = ~mn_FMV_foreign, name = "Mean FMV Foreign", 
+                      line = list(shape = "spline", color = 'rgb(62, 180, 240)')
+            ) %>%
+            add_lines(y = ~md_FMV, name = "Median FMV", 
+                line = list(shape = "spline", color = '#C40C0C', dash = 'dot')
+            ) %>%
+            add_lines(y = ~md_FMV_foreign, name = "Median FMV Foreign", 
+                line = list(shape = "spline", color = 'rgb(62, 180, 240)', dash = 'dot')
+            ) %>%
+            # add_lines(y = ~md_PPT, name = "Median PTT", line = list(shape = "spline")) %>% 
+            layout(
+                title = "Average FMV",
+                xaxis = axisFormat,
+                yaxis = axisFormat,
+                margin = marginFormat,
+                legend = legendFormat
+            ) %>% 
+            config(displayModeBar = F)
+        })
+        
+        output$pt_mothly_ptt <- renderPlotly({
+            plot_ly(
+                propertyTaxOverview,
+                x = ~trans_period, 
+                y = ~sum_PPT_paid, 
+                name = "PTT", 
+                type = 'scatter', mode = 'lines', line = list(shape = "spline")) %>%
+                add_lines(y = ~add_tax_paid, name = "Additional PTT", line = list(shape = "spline")) %>% 
                 layout(
-                    title = "Mean and Median FMV and PTT",
+                    title = "Property Transfer Tax", 
                     xaxis = axisFormat,
                     yaxis = axisFormat,
                     margin = marginFormat,
