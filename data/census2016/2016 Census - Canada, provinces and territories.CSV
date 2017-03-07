@@ -1,0 +1,29 @@
+"Geographic code","Geographic name, english","Geographic name, french","Provincial / territory abbreviation, english","Provincial / territory abbreviation, french","Population, 2016","Incompletely enumerated Indian reserves and Indian settlements, 2016","Population, 2011","2011 adjusted population flag","Incompletely enumerated Indian reserves and Indian settlements, 2011","Population, % change","Total private dwellings, 2016","Total private dwellings, 2011","2011 adjusted total private dwellings flag","Total private dwellings, % change","Private dwellings occupied by usual residents, 2016","Private dwellings occupied by usual residents, 2011","2011 adjusted private dwellings occupied by usual residents flag","Private dwellings occupied by usual residents, % change","Land area in square kilometres, 2016","Population density per square kilometre, 2016"
+"01","Canada","Canada",,,35151728,T,33476688,F,T,5.0,15412443,14569633,F,5.8,14072079,13320614,F,5.6,8965588.85,3.9
+"10","Newfoundland and Labrador","Terre-Neuve-et-Labrador","N.L.","T.-N.-L.",519716,F,514536,F,F,1.0,265739,250275,F,6.2,218673,208842,F,4.7,370514.08,1.4
+"11","Prince Edward Island","Île-du-Prince-Édouard","P.E.I.","Î.-P.-É.",142907,F,140204,F,F,1.9,71119,66943,F,6.2,59472,56462,F,5.3,5686.03,25.1
+"12","Nova Scotia","Nouvelle-Écosse","N.S.","N.-É.",923598,F,921727,F,F,0.2,458568,442155,F,3.7,401990,390279,F,3.0,52942.27,17.4
+"13","New Brunswick","Nouveau-Brunswick","N.B.","N.-B.",747101,F,751171,F,F,-0.5,359721,348465,F,3.2,319773,314007,F,1.8,71388.81,10.5
+"24","Quebec","Québec","Que.","Qc",8164361,T,7903001,F,T,3.3,3858943,3685926,F,4.7,3531663,3395343,F,4.0,1356625.27,6.0
+"35","Ontario","Ontario","Ont.","Ont.",13448494,T,12851821,F,T,4.6,5598391,5308785,F,5.5,5169174,4887508,F,5.8,908699.33,14.8
+"46","Manitoba","Manitoba","Man.","Man.",1278365,F,1208268,F,T,5.8,539748,512689,F,5.3,489050,466138,F,4.9,552370.99,2.3
+"47","Saskatchewan","Saskatchewan","Sask.","Sask.",1098352,F,1033381,F,T,6.3,495582,460512,F,7.6,432622,409645,F,5.6,588243.54,1.9
+"48","Alberta","Alberta","Alta.","Alb.",4067175,T,3645257,F,T,11.6,1654129,1505007,F,9.9,1527678,1390275,F,9.9,640330.46,6.4
+"59","British Columbia","Colombie-Britannique","B.C.","C.-B.",4648055,T,4400057,F,T,5.6,2063417,1945365,F,6.1,1881969,1764637,F,6.6,922503.01,5.0
+"60","Yukon","Yukon","Y.T.","Yn",35874,F,33897,F,F,5.8,17987,16259,F,10.6,15215,14117,F,7.8,474712.68,0.1
+"61","Northwest Territories","Territoires du Nord-Ouest","N.W.T.","T.N.-O.",41786,F,41462,F,F,0.8,17666,17175,F,2.9,14981,14700,F,1.9,1143793.86,0.0
+"62","Nunavut","Nunavut","Nvt.","Nt",35944,F,31906,F,F,12.7,11433,10077,F,13.5,9819,8661,F,13.4,1877778.53,0.0
+
+Note:
+"Incompletely enumerated Indian reserves and Indian settlements, 2016","T = excludes census data for one or more incompletely enumerated Indian reserves or Indian settlements."
+"Incompletely enumerated Indian reserves and Indian settlements, 2011","T = excludes census data for one or more incompletely enumerated Indian reserves or Indian settlements."
+"2011 adjusted population flag","T = adjusted figure due to boundary change."
+"2011 adjusted total private dwellings flag","T = adjusted figure due to boundary change."
+"2011 adjusted private dwellings occupied by usual residents flag","T = adjusted figure due to boundary change."
+"For further information, refer to: http://www12.statcan.gc.ca/census-recensement/2016/dp-pd/hlt-fst/pd-pl/About.cfm."
+
+"Source: Statistics Canada, 2016 Census of Population."
+"How to cite: Statistics Canada. 2017. Population and Dwelling Count Highlight Tables. 2016 Census."
+"Statistics Canada Catalogue no. 98-402-X2016001. Ottawa. Released February 8, 2017."
+
+

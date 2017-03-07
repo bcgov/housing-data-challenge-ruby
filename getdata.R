@@ -1,3 +1,5 @@
+library(dtplyr)
+
 # /** 
 #  * PROPERTY TAX 
 #  */
@@ -36,25 +38,21 @@ savePropertyTaxRds <- function(
     read.csv(ptFilePath, header = TRUE)
     
     # Convert to uppercase
-    # propertyTax <- propertyTax %>% mutate_each(funs(toupper), RegionalDistrict)
-    # propertyTax <- as.data.frame(sapply(propertyTax, toupper))
     propertyTax <- data.frame(lapply(propertyTax, function(v) {
         if (is.factor(v)) return(toupper(v))
         else return(v)
     }))
     
-    # Get unique geo-concordance unit names
-    unqGeoConcordance <- geoConcordance[, c(gcJoinCol, sfJoinCol)]
-    unqGeoConcordance <-
-        unqGeoConcordance[!duplicated(unqGeoConcordance[, c(gcJoinCol)]), ]
-    
-    # Convert to uppercase
-    # unqGeoConcordance <-
-    #     unqGeoConcordance %>% mutate_each(funs(toupper), c("RD.PTT.grp"))
-    unqGeoConcordance <- as.data.frame((sapply(unqGeoConcordance, toupper)))
-    
     # Merge Property Tax and Geo Concordance
     if (doMerge == TRUE) {
+        # Get unique geo-concordance unit names
+        unqGeoConcordance <- geoConcordance[, c(gcJoinCol, sfJoinCol)]
+        unqGeoConcordance <-
+            unqGeoConcordance[!duplicated(unqGeoConcordance[, c(gcJoinCol)]), ]
+        # Convert to uppercase
+        unqGeoConcordance <- as.data.frame((sapply(unqGeoConcordance, toupper)))
+        
+        # Merge
         propertyTax <-
             merge(propertyTax,
                   unqGeoConcordance,
@@ -118,7 +116,7 @@ savePropertyTaxRds(
 )
 
 # /**
-#  * development Region Weekly
+#  * Development Region Weekly
 #  */
 savePropertyTaxRds(
     "./data/propertytax/development-region-weekly.csv",
@@ -129,6 +127,116 @@ savePropertyTaxRds(
     "./data/pt-development-region-weekly.rds",
     TRUE
 )
+
+# /**
+#  * Provincial Monthly
+#  */
+savePropertyTaxRds(
+    "./data/propertytax/provincial-monthly.csv",
+    c(""),
+    "",
+    "",
+    "",
+    "./data/pt-provincial-monthly.rds",
+    FALSE
+)
+
+
+# /**
+#  * Census 2016 - Census Divisions
+#  */
+csv <- read.csv("./data/census2016/2016 Census - Census divisions.CSV", header = TRUE)
+csv <- csv[csv$Geographic.code..Province...territory %in% "59", -c(3:8,10,12,13,17,21)]
+setnames(csv, old = names(csv), new = c("CDUID"
+    ,"CDNAME"
+    ,"Population.2016"
+    ,"Population.2011"
+    ,"Population.Change"
+    ,"Total.Private.Dwellings.2016"
+    ,"Total.Private.Dwellings.2011"
+    ,"Total.Private.Dwellings.Change"
+    ,"Private.Dwellings.Occupied.by.Usual.Residents.2016"
+    ,"Private.Dwellings.Occupied.by.Usual.Residents.2011"
+    ,"Private.Dwellings.Occupied.by.Usual.Residents.Change"
+    ,"Land.Area.in.Square.Kilometres.2016"
+    ,"Population.Density.per.Square.Kilometre.2016"
+    ,"National.Population.Rank.2016"
+    ,"Provincial.Territorial.Population.Rank..2016")
+)
+csv$CDNAME <- toupper(csv$CDNAME)
+saveRDS(csv, "./data/census2016-divisions.rds")
+
+
+# /**
+#  * Census 2016 - Economic Regions
+#  */
+csv <- read.csv("./data/census2016/2016 Census - Economic regions.CSV", header = TRUE)
+csv <- csv[csv$Geographic.code..Province...territory %in% "59", -c(3:6,8,10,16)]
+names(csv)
+setnames(csv, old = names(csv), new = c(
+    "ERUID"
+    ,"ERNAME"
+    ,"Population.2016"
+    ,"Population.2011"
+    ,"Population.Change"
+    ,"Total.Private.Dwellings.2016"
+    ,"Private.Dwellings.Occupied.by.Usual.Residents.2016"
+    ,"Land.Area.in.Square.Kilometres.2016"
+    ,"Population.Density.per.Square.Kilometre.2016")
+)
+csv$ERNAME <- toupper(csv$ERNAME)
+saveRDS(csv, "./data/census2016-economic-regions.rds")
+
+
+# /**
+#  * Census 2016 - Metro Areas
+#  */
+csv <- read.csv("./data/census2016/2016 Census - Census metropolitan areas and census agglomerations.CSV", header = TRUE)
+csv <- csv[csv$Geographic.code..Province...territory %in% "59", -c(3:9,11,13,14,18,22)]
+names(csv)
+setnames(csv, old = names(csv), new = c(
+    "CMAUID"
+    ,"CMANAME"
+    ,"Population.2016"
+    ,"Population.2011"
+    ,"Population.Change"
+    ,"Total.Private.Dwellings.2016"
+    ,"Total.Private.Dwellings.2011"
+    ,"Total.Private.Dwellings.Change"
+    ,"Private.Dwellings.Occupied.by.Usual.Residents.2016"
+    ,"Private.Dwellings.Occupied.by.Usual.Residents.2011"
+    ,"Private.Dwellings.Occupied.by.Usual.Residents.Change"
+    ,"Land.Area.in.Square.Kilometres.2016"
+    ,"Population.Density.per.Square.Kilometre.2016"
+    ,"National.Population.Rank.2016"
+    ,"Provincial.Territorial.Population.Rank..2016")
+)
+csv$CMANAME <- toupper(csv$CMANAME)
+saveRDS(csv, "./data/census2016-metro-areas.rds")
+
+
+# /**
+#  * Census 2016 - Tracts
+#  */
+csv <- read.csv("./data/census2016/2016 Census - Census tracts.CSV", header = TRUE)
+csv <- csv[csv$Geographic.code..Province...territory %in% "59", -c(2:4,6,7,9,11,17)]
+names(csv)
+setnames(csv, old = names(csv), new = c(
+    "TUID"
+    ,"CMANAME"
+    ,"Population.2016"
+    ,"Population.2011"
+    ,"Population.Change"
+    ,"Total.Private.Dwellings.2016"
+    ,"Private.Dwellings.Occupied.by.Usual.Residents.2016"
+    ,"Land.Area.in.Square.Kilometres.2016"
+    ,"Population.Density.per.Square.Kilometre.2016")
+)
+csv$CMANAME <- toupper(csv$CMANAME)
+saveRDS(csv, "./data/census2016-tracts.rds")
+
+
+
 
 # /**
 #  * Load boundaries files, filter out non-BC data and save object as rds
