@@ -15,7 +15,8 @@ RUN R -e "install.packages(c('shiny', 'rmarkdown', 'rgdal', 'leaflet', 'maps', \
     repos='https://cran.rstudio.com/')" && \
     cd /opt/shiny-server/samples/sample-apps/ && \
     git clone https://github.com/bcgov/housing-data-challenge-ruby.git && \
-    ln -s /opt/shiny-server/samples/sample-apps/housing-data-challenge-ruby /srv/shiny-server/housing
+    ln -s /opt/shiny-server/samples/sample-apps/housing-data-challenge-ruby /srv/shiny-server/housing \
+    sudo echo "0 9 * * * Rscript /srv/shiny-server/housing/download_ptt.R" >> /etc/crontab
 
 EXPOSE 3838
 

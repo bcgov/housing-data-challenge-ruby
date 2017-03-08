@@ -37,6 +37,42 @@ body {
 }
 
 .nav-tabs {
-    margin: 40px;
+    margin: 20px 0 0;
 }
 
+hr {
+    border-top: 1px solid #ccc;
+}
+
+.container .jumbotron, .container-fluid .jumbotron {
+    min-height: 680px;
+    background: url("/images/vancouver.jpg");
+    border-radius: 0;
+}
+
+.container .jumbotron, .container-fluid .jumbotron h1 {
+    color: #333;
+    text-shadow: 5px 5px 5px #fff;
+}
+
+.container .jumbotron, .container-fluid .jumbotron ul {
+    list-style: none;
+}
+
+.container .jumbotron, .container-fluid .jumbotron ul li {
+    padding: 30px;
+    margin: 30px;
+    font-size: 28px;
+    background-color: #fff;
+    background-color: rgba(255, 255, 255, 0.85);
+    border: 1px solid #cfcfcf;
+    width: 45%;
+}
+
+.container .jumbotron, .container-fluid .jumbotron ul li.left {
+    float: left;
+}
+
+.container .jumbotron, .container-fluid .jumbotron ul li.right {
+    float: right;
+}

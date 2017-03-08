@@ -9,7 +9,6 @@ library(rgeos)
 library(tidyr)
 library(crosstalk)
 library(plotly)
-library(RColorBrewer)
 
 # Read objects
 # Property transfer tax
@@ -29,6 +28,7 @@ c16Divs <- readRDS("./data/census2016-divisions.rds")
 c16EconRegs <- readRDS("./data/census2016-economic-regions.rds")
 c16Tracts <- readRDS("./data/census2016-tracts.rds")
 c16MetroAreas <- readRDS("./data/census2016-metro-areas.rds")
+c16Prov <- readRDS("./data/census2016-province.rds")
 
 #  Cleanup - @TODO Move this to getdata.R
 c16EconRegs$ERNAME <- 
@@ -43,6 +43,7 @@ ptDevRegMth$DevelopmentRegion <-
     gsub("MAINLAND/SOUTHWEST", "LOWER MAINLAND/SOUTHWEST", ptDevRegMth$DevelopmentRegion)
 ptDevRegMth$DevelopmentRegion <- 
     gsub("VANCOUVER ISLAND/COAST", "VANCOUVER ISLAND AND COAST", ptDevRegMth$DevelopmentRegion)
+ptDevRegMth$Total.Private.Dwellings.Change <- 0
 
 ptMunMth$Municipality <- 
     gsub("ABBOTSFORD", "ABBOTSFORD - MISSION", ptMunMth$Municipality)
@@ -127,7 +128,7 @@ selectionMetricsDF <- data.frame(
             "FMV Sum of Foreign Transactions", "Additional Tax Paid")
 )
 
-
+maxTransPeriod <- max(levels(ptProvMth$trans_period))
 propertyTax <- ptRegDisMth
 chartHeight <- 400
 mapHeight <- 300
@@ -136,18 +137,69 @@ pt_view <- 'devreg'
 pt_trans_period <- '2016-12-01'
 pt_metric <- 'no_mkt_trans'
 
+# Add a homepage Jumbotron
+jumbotron <- function(header, popPerc = 0, popInc = TRUE, dwellPerc = 0, dwellInc = TRUE,
+                      trans_period, no_mkt_trans = 0, no_foreign_perc = 0, 
+                      sum_FMV = 0, sum_FMV_foreign_perc = 0) {
+    
+    popChange <- "increased"
+    if (popInc == FALSE) {
+        popChange <- "decreased"
+    }
+    
+    dwellChange <- "increased"
+    if (dwellInc == FALSE) {
+        dwellChange <- "decreased"
+    }
+    
+    HTML(paste0("<div class=\"jumbotron\">
+                <h1> ", header, "</h1>
+                <ul>
+                    <li class=\"left\">Between 2011 and 2016 census, BC&nbsp;population 
+                        has ", popChange ," by <strong>", popPerc , "%</strong>.</li>
+                    <li class=\"right\">At the same time, the number of private 
+                        dwellings has ", dwellChange ," by <strong>", dwellPerc , 
+                        "%</strong>.</li>
+                    <li class=\"left\">For the month starting ", trans_period, ", 
+                        there were <strong>", format(no_mkt_trans, big.mark=","), 
+                        "</strong> housing market transactions, <strong>", 
+                        paste("$", format(no_foreign_perc, big.mark=","), sep=""), 
+                        "%</strong> of which involved foreign citizens.</li>
+                    <li class=\"right\">The volume of these transactions was <strong>", 
+                        paste("$", format(sum_FMV, big.mark=","), sep="") ,
+                        "</strong> (<strong>", sum_FMV_foreign_perc , "%</strong> foreign).</li>
+                </ul>
+                </div>") )
+}
+
 shinyApp(ui = navbarPage(theme = "css/bcgov.css",
     title = "Housing Market",
+    tabPanel("Home",
+        fluidPage(
+            jumbotron(
+                header = "BC Housing Market Data Visualization project", 
+                popPerc = c16Prov$Population.Change,
+                popInc = TRUE,
+                dwellPerc = c16Prov$Total.Private.Dwellings.Change,
+                dwellInc = TRUE,
+                trans_period = maxTransPeriod,
+                no_mkt_trans = ptProvMth[ptProvMth$trans_period == maxTransPeriod,"no_mkt_trans"],
+                no_foreign_perc = ptProvMth[ptProvMth$trans_period == maxTransPeriod,"no_foreign_perc"] ,
+                sum_FMV = ptProvMth[ptProvMth$trans_period == maxTransPeriod,"sum_FMV"],
+                sum_FMV_foreign_perc = ptProvMth[ptProvMth$trans_period == maxTransPeriod,"sum_FMV_foreign_perc"]
+            )
+        )
+    ),
     tabPanel('Overview',
-             fluidPage(
-                 titlePanel("Property Sales Monthly Overview"),
-                 column(4, plotlyOutput("pt_mothly_fmv", height = chartHeight)),
-                 column(4, plotlyOutput("pt_mothly_mnd_fmv", height = chartHeight)),
-                 column(4, plotlyOutput("pt_mothly_ptt", height = chartHeight)),
-                 column(4, plotlyOutput("pt_mothly", height = chartHeight)),
-                 column(4, plotlyOutput("pt_mothly_res", height = chartHeight)),
-                 column(4, plotlyOutput("pt_mothly_comm", height = chartHeight))
-             )
+        fluidPage(
+            titlePanel("Property Sales Monthly Overview"),
+            column(4, plotlyOutput("pt_mothly_fmv", height = chartHeight)),
+            column(4, plotlyOutput("pt_mothly_mnd_fmv", height = chartHeight)),
+            column(4, plotlyOutput("pt_mothly_ptt", height = chartHeight)),
+            column(4, plotlyOutput("pt_mothly", height = chartHeight)),
+            column(4, plotlyOutput("pt_mothly_res", height = chartHeight)),
+            column(4, plotlyOutput("pt_mothly_comm", height = chartHeight))
+        )
     ),
     tabPanel('Monthly Data',
         fluidPage(
@@ -156,7 +208,7 @@ shinyApp(ui = navbarPage(theme = "css/bcgov.css",
                 "Current map is based on census division boundaries and property transfer tax data"
             ),
             sidebarLayout(
-                sidebarPanel(width = 3,
+                sidebarPanel(width = 2,
                     # selectInput("pt_trans_period", "Transaction Period", transPeriods),
                     selectInput("pt_trans_period", "Transaction Period", levels(propertyTax$trans_period), multiple = FALSE),
                     selectInput("pt_view", "View",
@@ -164,37 +216,88 @@ shinyApp(ui = navbarPage(theme = "css/bcgov.css",
                             "Development Region" = "devreg",
                             "Municipality" = "mun")
                     ),
-                    selectInput("pt_metric", "Metric", selectionMetrics),
-                    verbatimTextOutput("text"),
-                    verbatimTextOutput("text2")
+                    selectInput("pt_metric", "Metric", selectionMetrics)
                 ),
-                mainPanel(width = 9,
-                    leafletOutput("map", height = mapHeight)
+                mainPanel(width = 10,
+                    column(7, leafletOutput("map", height = mapHeight)),
+                    column(5, plotlyOutput("interactive", height = mapHeight))
                 )
             ),
             tabsetPanel(
-                tabPanel("Number of Transactions", 
-                    column(4, plotlyOutput("interactive", height = chartHeight)),
-                    column(4, plotlyOutput("c16pop", height = chartHeight)),
-                    column(4, plotlyOutput("c16dwell", height = chartHeight))
-                ),
                 tabPanel("Foreign Involvement", 
                     column(4, plotlyOutput("no_foreign_period", height = chartHeight)),
                     column(4, plotlyOutput("foreign_period_mn", height = chartHeight)),
                     column(4, plotlyOutput("foreign_period_md", height = chartHeight))
                 ),
-                tabPanel("Tabular Data", dataTableOutput("dt"))
+                tabPanel("Tabular Data", dataTableOutput("dt")),
+                tabPanel("Population and Dwellings", 
+                    column(4, plotlyOutput("c16pop", height = chartHeight)),
+                    column(4, plotlyOutput("c16dwell", height = chartHeight)),
+                    column(4, plotlyOutput("c16change", height = chartHeight))
+                )
             )
         )
+    ),
+    tabPanel('Your Dataviz',
+        fluidPage(
+            titlePanel("Make Your Own Data Visualization"),
+                tags$p("This is where you can make your own data visualization based on
+                    existing data, or your own data uploaded as csv file."
+                ),
+                fluidRow(
+                    column(width = 3,
+                        sidebarPanel(width = 12,
+                            selectInput('dataset', "Pre-loaded datasets", c(
+                                "Choose one" = "",
+                                "PTT - Regional District" = "regdis",
+                                "PTT - Development Region" = "devreg",
+                                "PTT - Municipality" = "mun",
+                                "Census 2016 - Population and Dwellings" = "c16"
+                            ), selected = "", selectize = TRUE),
+                            tags$hr(),
+                            fileInput('uploadFile', 'or upload CSV File',
+                                accept=c('text/csv', 
+                                    'text/comma-separated-values,text/plain', 
+                                    '.csv')
+                            ),
+                            checkboxInput('header', 'First line is a header', TRUE),
+                            radioButtons('separator', 'Columns separated by',
+                                c(Comma=',',
+                                    Semicolon=';',
+                                    Tab='\t'),
+                                    ','
+                            ),
+                            radioButtons('quote', 'Columns enclosed by',
+                                c(None='',
+                                    'Double Quote'='"',
+                                    'Single Quote'="'"),
+                                    '"')
+                        )
+                    ),
+                    column(width = 9,
+                        mainPanel(width = 9,
+                            tags$p("Dataviz"),
+                            plotlyOutput("doVizPlot")
+                        ),
+                        sidebarPanel(width = 3,
+                            selectInput('xAxisCol', 'X Axis Variable', ""),
+                            selectInput('yAxisCol', 'Y Axis Variable', "", selected = ""),
+                            selectInput('variable', 'Color Variable', "", selected = "")
+                        )
+                    )
+                ),
+                fluidRow(
+                    uiOutput("doVizDt")
+                )
+            )
     )
 ),
 
 
 server <- function(input, output, session) {
     
-    #initial map output
     propertyTaxPeriod <- ptRegDisMth %>% 
-        filter(trans_period %in% max(levels(ptRegDisMth$trans_period)))
+        filter(trans_period %in% maxTransPeriod)
     
     propertyTaxPeriod$geoUnit <- propertyTaxPeriod$Regional.District
     
@@ -219,6 +322,7 @@ server <- function(input, output, session) {
     pal <- colorQuantile("YlGnBu", n = 9, as.integer(shapesDF$no_mkt_trans))
     data <- shapesDF@data
     
+    # Initial map output
     # Have to fully draw the map, it doesn't go through observe when it's not 
     # in the first tab
     output$map <- renderLeaflet({
@@ -362,7 +466,7 @@ server <- function(input, output, session) {
     marginFormatMonthly <- list(
         l = 150,
         r = 50,
-        b = 100,
+        b = 50,
         t = 50,
         pad = 4
     )
@@ -387,6 +491,8 @@ server <- function(input, output, session) {
                 propertyTax$geoUnit <- ptRegDisMth$Regional.District
                 
                 c16 <- c16Divs
+                c16$geoUnitVal <- c16Divs$CDNAME
+                
                 propertyTax <-
                     merge(
                         propertyTax,
@@ -419,6 +525,8 @@ server <- function(input, output, session) {
                 propertyTaxPeriod$geoUnit <- propertyTaxPeriod$DevelopmentRegion
 
                 c16 <- c16EconRegs
+                c16$geoUnitVal <- c16EconRegs$ERNAME
+                c16$Total.Private.Dwellings.Change <- 0
                 
                 # For use in overview charts
                 propertyTax <- ptDevRegMth
@@ -451,17 +559,6 @@ server <- function(input, output, session) {
                         sort = FALSE,
                         by = ALL
                     )
-                
-                c16 <- c16EconRegs
-                shapesDF <-
-                    merge(
-                        shapesDF,
-                        c16,
-                        by.x = "ERNAME",
-                        by.y = "ERNAME",
-                        sort = FALSE,
-                        by = ALL
-                    )
             },
             "mun" = {
                 propertyTaxPeriod <- ptMunMth %>% 
@@ -471,6 +568,8 @@ server <- function(input, output, session) {
                 propertyTaxPeriod$geoUnit <- propertyTaxPeriod$Municipality
                 
                 c16 <- c16MetroAreas
+                c16$geoUnitVal <- c16MetroAreas$CMANAME
+                
                 # For use in overview charts
                 propertyTax <- ptMunMth
                 propertyTax$geoUnit <- ptMunMth$Municipality
@@ -499,17 +598,6 @@ server <- function(input, output, session) {
                         sort = FALSE,
                         by = ALL
                     )
-                
-                c16 <- c16MetroAreas
-                shapesDF <-
-                    merge(
-                        shapesDF,
-                        c16,
-                        by.x = "CMANAME",
-                        by.y = "CMANAME",
-                        sort = FALSE,
-                        by = ALL
-                    )
             }
         )
         
@@ -517,6 +605,9 @@ server <- function(input, output, session) {
         propertyTaxPeriod$geoUnit <- factor(propertyTaxPeriod$geoUnit, 
             levels = unique(propertyTaxPeriod$geoUnit)
             [order(propertyTaxPeriod[[pt_metric]], decreasing = FALSE)])
+        c16$geoUnitVal <- factor(c16$geoUnitVal, 
+            levels = unique(c16$geoUnitVal)
+            [order(c16$Population.2016, decreasing = FALSE)])
         
         pal <- colorQuantile("YlGnBu", n = 9, as.integer(shapesDF[[pt_metric]]))
         data <- shapesDF@data
@@ -642,8 +733,8 @@ server <- function(input, output, session) {
         
         # Census 2016 population
         output$c16pop <- renderPlotly({
-            plot_ly(propertyTax,
-                    y = ~geoUnit, 
+            plot_ly(c16,
+                    y = ~geoUnitVal, 
                     x = ~Population.2016,
                     name = "Population 2016",
                     marker = list(color = '#C40C0C'),
@@ -661,10 +752,10 @@ server <- function(input, output, session) {
                 config(displayModeBar = F)
         })
         
-        # Census 2016 population
+        # Census 2016 dwellings
         output$c16dwell <- renderPlotly({
-            plot_ly(propertyTax,
-                    y = ~geoUnit, 
+            plot_ly(c16,
+                    y = ~geoUnitVal, 
                     x = ~Total.Private.Dwellings.2016,
                     name = "Dwellings 2016",
                     marker = list(color = '#C40C0C'),
@@ -677,6 +768,27 @@ server <- function(input, output, session) {
                        yaxis = axisFormat,
                        margin = marginFormatMonthly,
                        barmode = 'group',
+                       legend = legendFormat
+                ) %>% 
+                config(displayModeBar = F)
+        })
+        
+        # Census 2016 change
+        output$c16change <- renderPlotly({
+            plot_ly(c16,
+                    y = ~geoUnitVal, 
+                    x = ~Population.Change,
+                    name = "Population",
+                    marker = list(color = '#C40C0C'),
+                    type = "bar"
+            ) %>%
+                add_trace(x = ~Total.Private.Dwellings.Change, name = "Dwellings", 
+                          marker = list(color = 'rgb(62, 180, 240)')) %>% 
+                layout(title = "Change from 2011 Census (%)",
+                       xaxis = axisFormat,
+                       yaxis = axisFormat,
+                       margin = marginFormatMonthly,
+                       # barmode = 'group',
                        legend = legendFormat
                 ) %>% 
                 config(displayModeBar = F)
@@ -890,6 +1002,75 @@ server <- function(input, output, session) {
                    barmode = 'stack',
                    legend = legendFormat) %>% 
             config(displayModeBar = F)
+    })
+    
+    
+    # Your own dataviz
+    
+    #This function is repsonsible for loading in the selected file
+    uploadedData <- reactive({
+        uploadedFile <- input$uploadFile
+        if (is.null(uploadedFile)) {
+            return(NULL)
+        }
+        
+        data <- read.csv(uploadedFile$datapath, header=input$header, sep=input$separator, 
+                 quote=input$quote)
+        
+        updateSelectInput(session, inputId = 'xAxisCol', label = 'X Variable',
+                          choices = names(data), selected = names(data)[1])
+        updateSelectInput(session, inputId = 'yAxisCol', label = 'Y Variable',
+                          choices = names(data), selected = names(data)[2])
+        updateSelectInput(session, inputId = 'variable', label = 'Variable',
+                          choices = names(data), selected = names(data)[3])
+        data
+        
+    })
+    
+    #This previews the CSV data file
+    output$doVizDt <- renderUI({
+        output$vizDt <- renderDataTable(uploadedData(),
+            options = list(
+                lengthChange = TRUE,
+                initComplete = JS("
+                    function(settings, json) {
+                        $(this.api().table().header()).css({
+                            'background-color': 'rgba(0, 51, 102, 0.80)',
+                            'border-bottom': '5px solid #fcba19',
+                            'color': '#fff'
+                        });
+                    }"
+                )
+            )
+        )
+        dataTableOutput("vizDt")
+    })
+    
+    # Do your data visualization
+    output$doVizPlot <- renderPlotly({
+        # if (input$doViz == 0) {
+        #     return(NULL)
+        # }
+        df = uploadedData()
+        if (is.null(df)) {
+            return(NULL)
+        }
+
+        plot_ly(df,
+                x = ~df[,input$xAxisCol],
+                y = ~df[,input$yAxisCol],
+                z = ~df[,input$variable], type="heatmap"
+            ) %>% 
+            # add_trace(~df[,input$variable]) %>% 
+            layout(title = input$xAxisCol,
+                   xaxis = axisFormat,
+                   yaxis = axisFormat,
+                   margin = marginFormatMonthly,
+                   # barmode = 'group',
+                   legend = legendFormat
+            ) %>%
+            config(displayModeBar = F)
+        
     })
     
 })

@@ -1,4 +1,4 @@
-library(dtplyr)
+library(data.table)
 
 # /** 
 #  * PROPERTY TAX 
@@ -234,6 +234,30 @@ setnames(csv, old = names(csv), new = c(
 )
 csv$CMANAME <- toupper(csv$CMANAME)
 saveRDS(csv, "./data/census2016-tracts.rds")
+
+# /**
+#  * Census 2016 - Province
+#  */
+csv <- read.csv("./data/census2016/2016 Census - Canada, provinces and territories.CSV", header = TRUE)
+csv <- csv[csv$Geographic.code %in% "59", -c(3:5,7,9,10,14,18)]
+names(csv)
+setnames(csv, old = names(csv), new = c(
+    "PRUID"
+    ,"PRNAME"
+    ,"Population.2016"
+    ,"Population.2011"
+    ,"Population.Change"
+    ,"Total.Private.Dwellings.2016"
+    ,"Total.Private.Dwellings.2011"
+    ,"Total.Private.Dwellings.Change"
+    ,"Private.Dwellings.Occupied.by.Usual.Residents.2016"
+    ,"Private.Dwellings.Occupied.by.Usual.Residents.2011"
+    ,"Private.Dwellings.Occupied.by.Usual.Residents.Change"
+    ,"Land.Area.in.Square.Kilometres.2016"
+    ,"Population.Density.per.Square.Kilometre.2016")
+)
+# csv$PRNAME <- toupper(csv$PRNAME)
+saveRDS(csv, "./data/census2016-province.rds")
 
 
 
