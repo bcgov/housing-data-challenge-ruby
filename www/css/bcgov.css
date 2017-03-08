@@ -46,7 +46,7 @@ hr {
 
 .container .jumbotron, .container-fluid .jumbotron {
     min-height: 680px;
-    background: url("/images/vancouver.jpg");
+    background: url("../images/vancouver.jpg");
     border-radius: 0;
 }
 
