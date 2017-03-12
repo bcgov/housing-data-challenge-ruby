@@ -26,29 +26,27 @@ Following is the R session info with required packages.
 ```
 > sessionInfo()
 R version 3.3.2 (2016-10-31)
-Platform: x86_64-pc-linux-gnu (64-bit)
-Running under: Debian GNU/Linux stretch/sid
+Platform: x86_64-apple-darwin13.4.0 (64-bit)
+Running under: macOS Sierra 10.12.3
 
 locale:
- [1] LC_CTYPE=en_US.UTF-8       LC_NUMERIC=C              
- [3] LC_TIME=en_US.UTF-8        LC_COLLATE=en_US.UTF-8    
- [5] LC_MONETARY=en_US.UTF-8    LC_MESSAGES=en_US.UTF-8   
- [7] LC_PAPER=en_US.UTF-8       LC_NAME=C                 
- [9] LC_ADDRESS=C               LC_TELEPHONE=C            
-[11] LC_MEASUREMENT=en_US.UTF-8 LC_IDENTIFICATION=C       
+[1] en_CA.UTF-8/en_CA.UTF-8/en_CA.UTF-8/C/en_CA.UTF-8/en_CA.UTF-8
 
 attached base packages:
 [1] stats     graphics  grDevices utils     datasets  methods   base     
 
 other attached packages:
-[1] rgeos_0.3-22    htmlwidgets_0.8 dplyr_0.5.0     maps_3.1.1     
-[5] leaflet_1.0.1   rgdal_1.2-5     sp_1.2-4        shiny_1.0.0    
+ [1] plotly_4.5.6.9000  ggplot2_2.2.1.9000 crosstalk_1.0.1    tidyr_0.6.1        rgeos_0.3-22      
+ [6] DT_0.2             htmlwidgets_0.8    dplyr_0.5.0        maps_3.1.1         leaflet_1.0.2.9010
+[11] rgdal_1.2-5        sp_1.2-4           shiny_1.0.0       
 
 loaded via a namespace (and not attached):
- [1] Rcpp_0.12.9     lattice_0.20-34 assertthat_0.1  digest_0.6.11  
- [5] mime_0.5        grid_3.3.2      R6_2.2.0        xtable_1.8-2   
- [9] DBI_0.5-1       magrittr_1.5    tools_3.3.2     httpuv_1.3.3   
-[13] htmltools_0.3.5 tibble_1.2     
+ [1] Rcpp_0.12.9        colourpicker_0.3   RColorBrewer_1.1-2 plyr_1.8.4         base64enc_0.1-3   
+ [6] tools_3.3.2        digest_0.6.12      jsonlite_1.2       tibble_1.2         gtable_0.2.0      
+[11] lattice_0.20-34    viridisLite_0.1.3  DBI_0.5-1          yaml_2.1.14        httr_1.2.1        
+[16] grid_3.3.2         R6_2.2.0           purrr_0.2.2        magrittr_1.5       scales_0.4.1      
+[21] htmltools_0.3.5    assertthat_0.1     mime_0.5           xtable_1.8-2       colorspace_1.3-2  
+[26] httpuv_1.3.3       miniUI_0.1.1       lazyeval_0.2.0     munsell_0.4.3     
 ```
 
 ### Installation
@@ -63,59 +61,13 @@ This will download the app localy in your current working directory and run the 
 App can also be installed using Docker image (it is required that docker is installed 
 on the server or local machine).
 
-You can customize how container is started by setting the following 
-environment variables:
+There is a separate repo forked from [simple-R-shiny](https://github.com/bcgov/simple-R-shiny)
+which can be utilized to build Docker image with all required libraries and packages.
 
-`housing_ruby_port_host` - the port on the host machine the app will listen to.
-
-`housing_ruby_port_guest` - the port on the guest machine the app will listen to.
-
-`housing_ruby_container_name` - meaningful container name.
-
-`housing_ruby_container_hostname` - container hostname.
-
-#### Linux / OS X
-
-1. Set the environment variables (modify values if needed to suit the environment).
+Use the following code to use it.
 
 ```
-export housing_ruby_port_host=3838
-export housing_ruby_port_guest=3838
-export housing_ruby_container_name=shiny_housing
-export housing_ruby_container_hostname=housing
-```
-
-2. Run the following command to start the container. Docker image will 
-automatically be pulled from the docker hub the first time.
-
-```
-docker run -d -p $housing_ruby_port_host:$housing_ruby_port_guest \
-    --name $housing_ruby_container_name \
-    -h $housing_ruby_container_hostname \
-    -v /srv/shinyapps/:/srv/shiny-server/ \
-    -v /srv/shinylog/:/var/log/shiny-server/ \
-    rubyind/housing-data-challenge-ruby
-```
-
-#### Windows (not tested)
-
-1. Set the environment variables (modify values if needed to suit the environment).
-
-```
-set housing_ruby_port_host=3838
-set housing_ruby_port_guest=3838
-set housing_ruby_container_name=shiny_housing
-set housing_ruby_container_hostname=housing
-```
-
-2. Run the following command to start the container. Docker image will 
-automatically be pulled from the docker hub the first time.
-
-```
-docker run -d -p %housing_ruby_port_host%:%housing_ruby_port_guest% \
-    --name %housing_ruby_container_name% \
-    -h %housing_ruby_container_hostname% \
-    -v /srv/shinyapps/:/srv/shiny-server/ \
-    -v /srv/shinylog/:/var/log/shiny-server/ \
-    rubyind/bc_housing_ruby
+git clone https://github.com/sasha-ruby/simple-R-shiny.git
+cd simple-R-shiny
+./dev.sh
 ```
