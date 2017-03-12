@@ -53,26 +53,16 @@ hr {
 .container .jumbotron, .container-fluid .jumbotron h1 {
     color: #333;
     text-shadow: 5px 5px 5px #fff;
+    margin-bottom: 50px;
 }
 
-.container .jumbotron, .container-fluid .jumbotron ul {
-    list-style: none;
-}
-
-.container .jumbotron, .container-fluid .jumbotron ul li {
-    padding: 30px;
-    margin: 30px;
+.container-fluid .jumbotron .quick-fact {
     font-size: 28px;
     background-color: #fff;
     background-color: rgba(255, 255, 255, 0.85);
     border: 1px solid #cfcfcf;
-    width: 45%;
+    padding: 30px;
+    margin-bottom: 30px;
+
 }
 
-.container .jumbotron, .container-fluid .jumbotron ul li.left {
-    float: left;
-}
-
-.container .jumbotron, .container-fluid .jumbotron ul li.right {
-    float: right;
-}
