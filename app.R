@@ -154,21 +154,41 @@ jumbotron <- function(header, popPerc = 0, popInc = TRUE, dwellPerc = 0, dwellIn
     
     HTML(paste0("<div class=\"jumbotron\">
                 <h1> ", header, "</h1>
-                <ul>
-                    <li class=\"left\">Between 2011 and 2016 census, BC&nbsp;population 
-                        has ", popChange ," by <strong>", popPerc , "%</strong>.</li>
-                    <li class=\"right\">At the same time, the number of private 
-                        dwellings has ", dwellChange ," by <strong>", dwellPerc , 
-                        "%</strong>.</li>
-                    <li class=\"left\">For the month starting ", trans_period, ", 
-                        there were <strong>", format(no_mkt_trans, big.mark=","), 
-                        "</strong> housing market transactions, <strong>", 
-                        paste("$", format(no_foreign_perc, big.mark=","), sep=""), 
-                        "%</strong> of which involved foreign citizens.</li>
-                    <li class=\"right\">The volume of these transactions was <strong>", 
-                        paste("$", format(sum_FMV, big.mark=","), sep="") ,
-                        "</strong> (<strong>", sum_FMV_foreign_perc , "%</strong> foreign).</li>
-                </ul>
+                <div class=\"container-fluid\">
+                    <div class=\"row\">
+                        <div class=\"col-sm-5 \">
+                            <div class=\"quick-fact\">
+                                Between 2011 and 2016 census, BC&nbsp;population 
+                                has ", popChange ," by <strong>", popPerc , "%</strong>.
+                            </div>
+                        </div>
+                        <div class=\"col-sm-5 col-sm-offset-2\">
+                            <div class=\"quick-fact\">
+                                At the same time, the number of private 
+                                dwellings has ", dwellChange ," by <strong>", dwellPerc , 
+                                "%</strong>.
+                            </div>
+                        </div>
+                    </div>
+                    <div class=\"row\">
+                        <div class=\"col-sm-5\">
+                            <div class=\"quick-fact\">
+                                In ", format(strptime(trans_period, "%Y-%m-%d"), "%B %Y"), ", 
+                                there were <strong>", format(no_mkt_trans, big.mark=","), 
+                                "</strong> housing market transactions, <strong>", 
+                                format(no_foreign_perc, big.mark=","), 
+                                "%</strong> of which involved foreign citizens.
+                            </div>
+                        </div>
+                        <div class=\"col-sm-5 col-sm-offset-2\">
+                            <div class=\"quick-fact\">
+                                The volume of these transactions was <strong>", 
+                                paste("$", format(sum_FMV, big.mark=","), sep="") ,
+                                "</strong> (<strong>", sum_FMV_foreign_perc , "%</strong> foreign).
+                            </div>
+                        </div>
+                    </div>
+                </div>
                 </div>") )
 }
 
@@ -193,12 +213,16 @@ shinyApp(ui = navbarPage(theme = "css/bcgov.css",
     tabPanel('Overview',
         fluidPage(
             titlePanel("Property Sales Monthly Overview"),
-            column(4, plotlyOutput("pt_mothly_fmv", height = chartHeight)),
-            column(4, plotlyOutput("pt_mothly_mnd_fmv", height = chartHeight)),
-            column(4, plotlyOutput("pt_mothly_ptt", height = chartHeight)),
-            column(4, plotlyOutput("pt_mothly", height = chartHeight)),
-            column(4, plotlyOutput("pt_mothly_res", height = chartHeight)),
-            column(4, plotlyOutput("pt_mothly_comm", height = chartHeight))
+            fluidRow(
+                column(4, plotlyOutput("pt_mothly_fmv", height = chartHeight)),
+                column(4, plotlyOutput("pt_mothly_mnd_fmv", height = chartHeight)),
+                column(4, plotlyOutput("pt_mothly_ptt", height = chartHeight))
+            ),
+            fluidRow(
+                column(4, plotlyOutput("pt_mothly", height = chartHeight)),
+                column(4, plotlyOutput("pt_mothly_res", height = chartHeight)),
+                column(4, plotlyOutput("pt_mothly_comm", height = chartHeight))
+            )
         )
     ),
     tabPanel('Monthly Data',
@@ -375,10 +399,10 @@ server <- function(input, output, session) {
                 labFormat = labelFormat(prefix = "$"),
                 opacity = 0.8
             ) %>%
-            addLayersControl(
-                overlayGroups = c("Census Divisions"),
-                options = layersControlOptions(collapsed = FALSE)
-            ) %>%
+            # addLayersControl(
+            #     overlayGroups = c("Census Divisions"),
+            #     options = layersControlOptions(collapsed = FALSE)
+            # ) %>%
             clearGroup(group = "selected")
         
     })
@@ -451,7 +475,7 @@ server <- function(input, output, session) {
             family = fontFamily,
             size = 11,
             color = "#696969"),
-        bgcolor = "#f3f3f3",
+        bgcolor = "#f9f9f9",
         bordercolor = "#e6e6e6",
         borderwidth = 1)
     
@@ -471,6 +495,20 @@ server <- function(input, output, session) {
         pad = 4
     )
     
+    # color schema
+    colResidential <- "#80b1d3"
+    colSingleFam <- "#4292c6"
+    colMultiFam <- "#9ecae1"
+    colStrata <- "#abdda4"
+    colNonStrataRental <- "#c7eae5"
+    colCommercial <- "#fdae61"
+    colRecreational <- "#80cdc1"
+    colFarms <- "#fee08b"
+    colUnknown <- "#d9d9d9"
+    colAcreage <- "#dfc27d"
+    colC16 <- colCanadian <- "#c40c0c"
+    colC11 <- colForeign <- "#3eb4f0"
+
     # This observer is responsible for maintaining the circles and legend,
     # according to the variables the user has chosen to map to color and size.
     observe({
@@ -610,6 +648,7 @@ server <- function(input, output, session) {
             [order(c16$Population.2016, decreasing = FALSE)])
         
         pal <- colorQuantile("YlGnBu", n = 9, as.integer(shapesDF[[pt_metric]]))
+        # pal <- colorBin("YlGnBu", shapesDF[[pt_metric]])
         data <- shapesDF@data
 
         leafletProxy("map") %>%
@@ -657,10 +696,10 @@ server <- function(input, output, session) {
                 labFormat = labelFormat(prefix = "$"),
                 opacity = 0.8
             ) %>%
-            addLayersControl(
-                overlayGroups = c("Census Divisions"),
-                options = layersControlOptions(collapsed = FALSE)
-            ) %>%
+            # addLayersControl(
+            #     overlayGroups = c("Census Divisions"),
+            #     options = layersControlOptions(collapsed = FALSE)
+            # ) %>%
             clearGroup(group = "selected")
         
         output$dt = DT::renderDataTable(
@@ -737,11 +776,11 @@ server <- function(input, output, session) {
                     y = ~geoUnitVal, 
                     x = ~Population.2016,
                     name = "Population 2016",
-                    marker = list(color = '#C40C0C'),
+                    marker = list(color = colC16),
                     type = "bar"
             ) %>%
                 add_trace(x = ~Population.2011, name = "Population 2011", 
-                          marker = list(color = 'rgb(62, 180, 240)')) %>% 
+                          marker = list(color = colC11)) %>% 
                 layout(title = "Census Population",
                        xaxis = axisFormat,
                        yaxis = axisFormat,
@@ -758,11 +797,11 @@ server <- function(input, output, session) {
                     y = ~geoUnitVal, 
                     x = ~Total.Private.Dwellings.2016,
                     name = "Dwellings 2016",
-                    marker = list(color = '#C40C0C'),
+                    marker = list(color = colC16),
                     type = "bar"
             ) %>%
                 add_trace(x = ~Total.Private.Dwellings.2011, name = "Dwellings 2011", 
-                          marker = list(color = 'rgb(62, 180, 240)')) %>% 
+                          marker = list(color = colC11)) %>% 
                 layout(title = "Census Private Dwellings",
                        xaxis = axisFormat,
                        yaxis = axisFormat,
@@ -779,11 +818,11 @@ server <- function(input, output, session) {
                     y = ~geoUnitVal, 
                     x = ~Population.Change,
                     name = "Population",
-                    marker = list(color = '#C40C0C'),
+                    marker = list(color = colC16),
                     type = "bar"
             ) %>%
                 add_trace(x = ~Total.Private.Dwellings.Change, name = "Dwellings", 
-                          marker = list(color = 'rgb(62, 180, 240)')) %>% 
+                          marker = list(color = colC11)) %>% 
                 layout(title = "Change from 2011 Census (%)",
                        xaxis = axisFormat,
                        yaxis = axisFormat,
@@ -803,7 +842,7 @@ server <- function(input, output, session) {
                 x = ~geoUnit, 
                 y = ~no_foreign,
                 type = "bar",
-                marker = list(color = 'rgb(62, 180, 240)')) %>%
+                marker = list(color = colForeign)) %>%
             layout(title = "Number of Foreign Transactions",
                    xaxis = axisFormat,
                    yaxis = axisFormat,
@@ -821,10 +860,10 @@ server <- function(input, output, session) {
                 x = ~geoUnit, 
                 y = ~mn_FMV,
                 name = "Canadian",
-                marker = list(color = '#C40C0C'),
+                marker = list(color = colCanadian),
                 type = "bar"
             ) %>%
-            add_trace(y = ~mn_FMV_foreign, name = "Foreign", marker = list(color = 'rgb(62, 180, 240)')) %>% 
+            add_trace(y = ~mn_FMV_foreign, name = "Foreign", marker = list(color = colForeign)) %>% 
             layout(title = "FMV Mean",
                    xaxis = axisFormat,
                    yaxis = axisFormat,
@@ -843,10 +882,10 @@ server <- function(input, output, session) {
                 x = ~geoUnit, 
                 y = ~md_FMV,
                 name = "Canadian",
-                marker = list(color = '#C40C0C'),
+                marker = list(color = colCanadian),
                 type = "bar"
             ) %>%
-            add_trace(y = ~md_FMV_foreign, name = "Foreign", marker = list(color = 'rgb(62, 180, 240)')) %>% 
+            add_trace(y = ~md_FMV_foreign, name = "Foreign", marker = list(color = colForeign)) %>% 
             layout(title = "FMV Median",
                    xaxis = axisFormat,
                    yaxis = axisFormat,
@@ -865,12 +904,12 @@ server <- function(input, output, session) {
             ptProvMth,
             x = ~trans_period, y = ~sum_FMV, name = "Total FMV", 
             type = 'scatter', mode = 'lines', 
-            line = list(shape = "spline", color = "#C40C0C")
+            line = list(shape = "spline", color = colCanadian)
         ) %>%
             add_lines(y = ~sum_FMV_foreign, name = "Total FMV Foreign", 
-                      line = list(shape = "spline", color = 'rgb(42, 120, 180)')) %>% 
+                      line = list(shape = "spline", color = colForeign)) %>% 
             add_lines(y = ~no_foreign_perc, name = "Foreign %", yaxis = "y2",
-                      line = list(shape = "spline", color = '#396', dash = 'dot')) %>%
+                      line = list(shape = "spline", color = colForeign, dash = 'dot')) %>%
             layout(
                 title = "FMV (Fair Market Value)",
                 xaxis = axisFormat,
@@ -893,18 +932,17 @@ server <- function(input, output, session) {
             ptProvMth,
             x = ~trans_period, y = ~mn_FMV, name = "Mean FMV", 
             type = 'scatter', mode = 'lines', 
-            line = list(shape = "spline", color = '#C40C0C')
+            line = list(shape = "spline", color = colCanadian)
         ) %>%
             add_lines(y = ~mn_FMV_foreign, name = "Mean FMV Foreign", 
-                      line = list(shape = "spline", color = 'rgb(62, 180, 240)')
+                      line = list(shape = "spline", color = colForeign)
             ) %>%
             add_lines(y = ~md_FMV, name = "Median FMV", 
-                      line = list(shape = "spline", color = '#C40C0C', dash = 'dot')
+                      line = list(shape = "spline", color = colCanadian, dash = 'dot')
             ) %>%
             add_lines(y = ~md_FMV_foreign, name = "Median FMV Foreign", 
-                      line = list(shape = "spline", color = 'rgb(62, 180, 240)', dash = 'dot')
+                      line = list(shape = "spline", color = colForeign, dash = 'dot')
             ) %>%
-            # add_lines(y = ~md_PPT, name = "Median PTT", line = list(shape = "spline")) %>% 
             layout(
                 title = "Average FMV",
                 xaxis = axisFormat,
@@ -922,16 +960,19 @@ server <- function(input, output, session) {
             x = ~trans_period, 
             y = ~sum_PPT_paid, 
             name = "PTT", 
-            type = 'scatter', mode = 'lines', line = list(shape = "spline")) %>%
-            add_lines(y = ~add_tax_paid, name = "Additional PTT", line = list(shape = "spline")) %>% 
-            layout(
-                title = "Property Transfer Tax", 
-                xaxis = axisFormat,
-                yaxis = axisFormat,
-                margin = marginFormat,
-                legend = legendFormat
-            ) %>% 
-            config(displayModeBar = F)
+            type = 'scatter', mode = 'lines', 
+            line = list(shape = "spline", color = colCanadian)
+        ) %>%
+        add_lines(y = ~add_tax_paid, name = "Additional PTT", 
+            line = list(shape = "spline", color = colForeign)) %>% 
+        layout(
+            title = "Property Transfer Tax", 
+            xaxis = axisFormat,
+            yaxis = axisFormat,
+            margin = marginFormat,
+            legend = legendFormat
+        ) %>% 
+        config(displayModeBar = F)
     })
     
     # Monthly Overview - Number of market transactions
@@ -941,13 +982,13 @@ server <- function(input, output, session) {
                 y = ~no_resid_trans, 
                 name = "Residential", 
                 type = "bar",
-                # marker = list(color = brewer.pal(5, "Paired")),
+                marker = list(color = colResidential),
                 hoverinfo = "y+name"
         ) %>%
-            add_trace(y = ~no_comm_tot, name = "Commercial") %>%
-            add_trace(y = ~no_recr_tot, name = "Recreational") %>% 
-            add_trace(y = ~no_farm_tot, name = "Farms") %>% 
-            add_trace(y = ~no_unkn_tot, name = "Unknown") %>% 
+            add_trace(y = ~no_comm_tot, name = "Commercial", marker = list(color = colCommercial)) %>%
+            add_trace(y = ~no_recr_tot, name = "Recreational", marker = list(color = colRecreational)) %>% 
+            add_trace(y = ~no_farm_tot, name = "Farms", marker = list(color = colFarms)) %>% 
+            add_trace(y = ~no_unkn_tot, name = "Unknown", marker = list(color = colUnknown)) %>% 
             layout(title = "Number of market transactions",
                    xaxis = axisFormat,
                    yaxis = axisFormat,
@@ -964,16 +1005,23 @@ server <- function(input, output, session) {
                 y = ~no_res_1fam, 
                 name = "Single Family", 
                 type = "bar",
-                # marker = list(color = brewer.pal(6, "Set1")),
+                marker = list(color = colSingleFam),
                 hoverinfo = "y+name"
         ) %>%
-            add_trace(y = ~no_resid_fam, name = "Multi Family") %>%
-            add_trace(y = ~no_resid_strata, name = "Strata") %>% 
-            add_trace(y = ~no_resid_non_strata, name = "Non-strata / Rental") %>% 
-            add_trace(y = ~no_resid_acreage_trans, name = "Acreage") %>% 
-            add_trace(y = ~resid_comm_count, name = "Commercial") %>% 
-            add_trace(y = ~no_resid_farm, name = "Farm") %>% 
-            add_trace(y = ~no_resid_other, name = "Other") %>% 
+            add_trace(y = ~no_resid_fam, name = "Multi Family", 
+                marker = list(color = colMultiFam)) %>%
+            add_trace(y = ~no_resid_strata, name = "Strata", 
+                marker = list(color = colStrata)) %>% 
+            add_trace(y = ~no_resid_non_strata, name = "Non-strata / Rental", 
+                marker = list(color = colNonStrataRental)) %>% 
+            add_trace(y = ~no_resid_acreage_trans, name = "Acreage", 
+                marker = list(color = colAcreage)) %>% 
+            add_trace(y = ~resid_comm_count, name = "Commercial", 
+                marker = list(color = colCommercial)) %>% 
+            add_trace(y = ~no_resid_farm, name = "Farm", 
+                marker = list(color = colFarms)) %>% 
+            add_trace(y = ~no_resid_other, name = "Other", 
+                marker = list(color = colUnknown)) %>% 
             layout(title = "Number of market transactions - Residential",
                    xaxis = axisFormat,
                    yaxis = axisFormat,
@@ -990,11 +1038,13 @@ server <- function(input, output, session) {
                 y = ~no_comm_comm, 
                 name = "Commerce", 
                 type = "bar",
-                # marker = list(color = brewer.pal(6, "Set1")),
+                marker = list(color = colCommercial),
                 hoverinfo = "y+name"
         ) %>%
-            add_trace(y = ~no_comm_strata_nores, name = "Strata non-residential") %>%
-            add_trace(y = ~no_comm_other, name = "Other") %>% 
+            add_trace(y = ~no_comm_strata_nores, name = "Strata non-residential", 
+                marker = list(color = colStrata)) %>%
+            add_trace(y = ~no_comm_other, name = "Other", 
+                marker = list(color = colUnknown)) %>% 
             layout(title = "Number of market transactions - Commercial",
                    xaxis = axisFormat,
                    yaxis = axisFormat,
