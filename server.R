@@ -1,0 +1,1007 @@
+server <- function(input, output, session) {
+    propertyTaxPeriod <- ptRegDisMth %>%
+        filter(trans_period %in% maxTransPeriod)
+    
+    propertyTaxPeriod$geoUnit <- propertyTaxPeriod$Regional.District
+    
+    # For use in overview charts
+    propertyTax <- ptRegDisMth
+    propertyTax$geoUnit <- ptRegDisMth$Regional.District
+    
+    # Convert join columns to uppercase to avoid mismatches due to case sensitivity
+    bcCensusDivs@data$CDNAME <- toupper(bcCensusDivs@data$CDNAME)
+    geoUnit <- as.character(bcCensusDivs$CDNAME)
+    byY <- "Regional.District"
+    shapesDF <-
+        merge(
+            bcCensusDivs,
+            propertyTaxPeriod,
+            by.x = "CDNAME",
+            by.y = "Regional.District",
+            sort = FALSE,
+            by = ALL
+        )
+    
+    pal <-
+        colorQuantile("YlGnBu", n = 9, as.integer(shapesDF$no_mkt_trans))
+    data <- shapesDF@data
+    
+    # Initial map output
+    # Have to fully draw the map, it doesn't go through observe when it's not
+    # in the first tab
+    output$map <- renderLeaflet({
+        leaflet(shapesDF) %>%
+            setView(lng = -125,
+                    lat = 53,
+                    zoom = 5) %>%
+            addTiles(group = "OpenStreetMap") %>%
+            addProviderTiles("CartoDB.Positron") %>%
+            
+            addPolygons(
+                data = shapesDF,
+                stroke = TRUE,
+                weight = 1,
+                fillOpacity = 0.5,
+                smoothFactor = 1,
+                color = '#333',
+                layerId = shapesDF@data$OBJECTID,
+                fillColor = ~ pal(shapesDF$no_mkt_trans),
+                popup = paste0(
+                    "<strong>",
+                    geoUnit,
+                    "</strong>",
+                    "<table class=\"leaflet-popup-table\">
+                    <tr><td>Period</td><td>",
+                    as.Date(shapesDF$trans_period),
+                    "</td></tr><tr><td>Number of transactions</td><td>",
+                    format(shapesDF$no_mkt_trans, big.mark = ","),
+                    "</td></tr><tr><td>Number of foreign transactions</td><td>",
+                    format(shapesDF$no_foreign, big.mark = ","),
+                    "</td></tr><tr><td>Number % by foreign purchasers</td><td>",
+                    format(shapesDF$no_foreign_perc, big.mark = ","),
+                    "</td></tr><tr><td>Total value</td><td>",
+                    paste("$", format(shapesDF$sum_FMV, big.mark = ","), sep =
+                              ""),
+                    "</td></tr><tr><td>Total value by foreign purchasers</td><td>",
+                    paste(
+                        "$",
+                        format(shapesDF$sum_FMV_foreign, big.mark = ","),
+                        sep = ""
+                    ),
+                    "</td></tr><tr><td>Value % by foreign purchasers</td><td>",
+                    format(shapesDF$sum_FMV_foreign_perc, big.mark = ","),
+                    "</td></tr><tr><td>PTT Paid</td><td>",
+                    paste(
+                        "$",
+                        format(shapesDF$sum_PPT_paid, big.mark = ","),
+                        sep = ""
+                    ),
+                    "</td></tr><tr><td>Additional Tax Paid</td><td>",
+                    paste(
+                        "$",
+                        format(shapesDF$add_tax_paid, big.mark = ","),
+                        sep = ""
+                    ),
+                    "</td></tr></table>"
+                ),
+                group = "divisions"
+            ) %>%
+            addLegend(
+                "bottomleft",
+                pal = pal,
+                values = shapesDF$no_mkt_trans,
+                title = "Transactions #",
+                labFormat = labelFormat(prefix = "$"),
+                opacity = 0.8
+            ) %>%
+            # addLayersControl(
+            #     overlayGroups = c("Census Divisions"),
+            #     options = layersControlOptions(collapsed = FALSE)
+            # ) %>%
+            clearGroup(group = "selected")
+        
+    })
+    
+    # observeEvent(input$map_shape_click, {
+    #     #create object for clicked polygon
+    #     click <- input$map_shape_click
+    #
+    #     #define leaflet proxy for second regional level map
+    #     proxy <- leafletProxy("map")
+    #
+    #     #subset regions shapefile by the clicked on polygons
+    #     selectedReg <-
+    #         bcCensusDivsMap[bcCensusDivsMap@data$OBJECTID == click$id, ]
+    #
+    #     output$text <- renderText({
+    #         paste0(" Selected CDNAME: ", selectedReg@data$CDNAME)
+    #     })
+    #
+    #     output$text2 <- renderText({
+    #         paste0(" Selected regional district: ",
+    #                selectedReg@data$RegionalDistrict)
+    #     })
+    #
+    #     #map clicked on polygons
+    #     proxy %>% addPolygons(
+    #         data = selectedReg,
+    #         fillColor = "red",
+    #         fillOpacity = 0.7,
+    #         weight = 1,
+    #         color = "black",
+    #         stroke = T,
+    #         group = "selected",
+    #         # layerId = "selected")
+    #         layerId = selectedReg@data$OBJECTID
+    #     )
+    #
+    #
+    #     #remove polygon group that are clicked twice
+    #     if (click$group == "selected") {
+    #         proxy %>%
+    #             clearGroup(group = "selected")
+    #     }
+    #
+    # })
+    
+    # Chart formatting
+    fontFamily <- "Myriad-Pro, Calibri, Arial, 'sans serif'"
+    tickfontBl <- list(family = fontFamily,
+                       size = 12,
+                       color = "black")
+    
+    tickfontRd = list(family = fontFamily,
+                      size = 12,
+                      color = "#C40C0C")
+    
+    axisFormat <- list(title = "",
+                       showticklabels = TRUE,
+                       # tickangle = 45,
+                       tickfont = tickfontBl)
+    
+    legendFormat <- list(
+        font = list(
+            family = fontFamily,
+            size = 11,
+            color = "#696969"
+        ),
+        bgcolor = "#f9f9f9",
+        bordercolor = "#e6e6e6",
+        borderwidth = 1
+    )
+    
+    marginFormat <- list(
+        l = 50,
+        r = 50,
+        b = 100,
+        t = 100,
+        pad = 4
+    )
+    
+    marginFormatMonthly <- list(
+        l = 150,
+        r = 50,
+        b = 50,
+        t = 50,
+        pad = 4
+    )
+    
+    # color schema
+    colResidential <- "#80b1d3"
+    colSingleFam <- "#4292c6"
+    colMultiFam <- "#9ecae1"
+    colStrata <- "#abdda4"
+    colNonStrataRental <- "#c7eae5"
+    colCommercial <- "#fdae61"
+    colRecreational <- "#80cdc1"
+    colFarms <- "#fee08b"
+    colUnknown <- "#d9d9d9"
+    colAcreage <- "#dfc27d"
+    colC16 <- colCanadian <- "#c40c0c"
+    colC11 <- colForeign <- "#3eb4f0"
+    
+    # This observer is responsible for maintaining the circles and legend,
+    # according to the variables the user has chosen to map to color and size.
+    observe({
+        pt_view <- input$pt_view
+        pt_trans_period <- input$pt_trans_period
+        pt_metric <- input$pt_metric
+        
+        
+        switch(
+            pt_view,
+            "regdis" = {
+                propertyTaxPeriod <- ptRegDisMth %>%
+                    filter(trans_period %in% pt_trans_period)
+                
+                propertyTaxPeriod$geoUnit <-
+                    propertyTaxPeriod$Regional.District
+                
+                # For use in overview charts
+                propertyTax <- ptRegDisMth
+                propertyTax$geoUnit <-
+                    ptRegDisMth$Regional.District
+                
+                c16 <- c16Divs
+                c16$geoUnitVal <- c16Divs$CDNAME
+                
+                propertyTax <-
+                    merge(
+                        propertyTax,
+                        c16,
+                        by.x = "Regional.District",
+                        by.y = "CDNAME",
+                        sort = FALSE,
+                        by = ALL
+                    )
+                
+                # Convert join columns to uppercase to avoid mismatches due to case sensitivity
+                bcCensusDivs@data$CDNAME <-
+                    toupper(bcCensusDivs@data$CDNAME)
+                geoUnit <- as.character(bcCensusDivs$CDNAME)
+                byY <- "Regional.District"
+                shapesDF <-
+                    merge(
+                        bcCensusDivs,
+                        propertyTaxPeriod,
+                        by.x = "CDNAME",
+                        by.y = "Regional.District",
+                        sort = FALSE,
+                        by = ALL
+                    )
+            },
+            "devreg" = {
+                propertyTaxPeriod <- ptDevRegMth %>%
+                    filter(trans_period %in% pt_trans_period) %>%
+                    arrange_(.dots = c(paste0("desc(", pt_metric, ")")))
+                
+                propertyTaxPeriod$geoUnit <-
+                    propertyTaxPeriod$DevelopmentRegion
+                
+                c16 <- c16EconRegs
+                c16$geoUnitVal <- c16EconRegs$ERNAME
+                c16$Total.Private.Dwellings.Change <- 0
+                
+                # For use in overview charts
+                propertyTax <- ptDevRegMth
+                propertyTax$geoUnit <-
+                    ptDevRegMth$DevelopmentRegion
+                
+                propertyTax <-
+                    merge(
+                        propertyTax,
+                        c16,
+                        by.x = "DevelopmentRegion",
+                        by.y = "ERNAME",
+                        sort = FALSE,
+                        by = ALL
+                    )
+                
+                # Convert join columns to uppercase to avoid mismatches due to case sensitivity
+                erData <- bcCensusEconRegs@data
+                erData <-
+                    separate(
+                        data = erData,
+                        col = ERNAME,
+                        into = c("ERNAME_E", "ERNAME_F"),
+                        sep = "\\/",
+                        fill = "right"
+                    )
+                erData$ERNAME_E <-
+                    trimws(toupper(gsub("--", "/", erData$ERNAME_E)))
+                bcCensusEconRegs@data$ERNAME <- erData$ERNAME_E
+                
+                geoUnit <- as.character(bcCensusEconRegs$ERNAME)
+                byY <- "DevelopmentRegion"
+                shapesDF <-
+                    merge(
+                        bcCensusEconRegs,
+                        propertyTaxPeriod,
+                        by.x = "ERNAME",
+                        by.y = "DevelopmentRegion",
+                        sort = FALSE,
+                        by = ALL
+                    )
+            },
+            "mun" = {
+                propertyTaxPeriod <- ptMunMth %>%
+                    filter(trans_period %in% pt_trans_period) %>%
+                    arrange_(.dots = c(paste0("desc(", pt_metric, ")")))
+                
+                propertyTaxPeriod$geoUnit <-
+                    propertyTaxPeriod$Municipality
+                
+                c16 <- c16MetroAreas
+                c16$geoUnitVal <- c16MetroAreas$CMANAME
+                
+                # For use in overview charts
+                propertyTax <- ptMunMth
+                propertyTax$geoUnit <- ptMunMth$Municipality
+                
+                propertyTax <-
+                    merge(
+                        propertyTax,
+                        c16,
+                        by.x = "Municipality",
+                        by.y = "CMANAME",
+                        sort = FALSE,
+                        by = ALL
+                    )
+                
+                # Convert join columns to uppercase to avoid mismatches due to case sensitivity
+                bcCensusMetroAreas@data$CMANAME <-
+                    toupper(bcCensusMetroAreas@data$CMANAME)
+                
+                geoUnit <-
+                    as.character(bcCensusMetroAreas$CMANAME)
+                byY <- "Municipality"
+                shapesDF <-
+                    merge(
+                        bcCensusMetroAreas,
+                        propertyTaxPeriod,
+                        by.x = "CMANAME",
+                        by.y = "Municipality",
+                        sort = FALSE,
+                        by = ALL
+                    )
+            }
+        )
+        
+        # reorder data for chart sorting
+        propertyTaxPeriod$geoUnit <-
+            factor(propertyTaxPeriod$geoUnit,
+                   levels = unique(propertyTaxPeriod$geoUnit)
+                   [order(propertyTaxPeriod[[pt_metric]], decreasing = FALSE)])
+        c16$geoUnitVal <- factor(c16$geoUnitVal,
+                                 levels = unique(c16$geoUnitVal)
+                                 [order(c16$Population.2016, decreasing = FALSE)])
+        
+        pal <-
+            colorQuantile("YlGnBu", n = 9, as.integer(shapesDF[[pt_metric]]))
+        # pal <- colorBin("YlGnBu", shapesDF[[pt_metric]])
+        data <- shapesDF@data
+        
+        leafletProxy("map") %>%
+            clearControls() %>%
+            clearShapes() %>%
+            addPolygons(
+                data = shapesDF,
+                stroke = TRUE,
+                weight = 1,
+                fillOpacity = 0.5,
+                smoothFactor = 1,
+                color = '#333',
+                layerId = shapesDF@data$OBJECTID,
+                fillColor = ~ pal(shapesDF[[pt_metric]]),
+                popup = paste0(
+                    "<strong>",
+                    geoUnit,
+                    "</strong>",
+                    "<table class=\"leaflet-popup-table\">
+                    <tr><td>Period</td><td>",
+                    as.Date(shapesDF$trans_period),
+                    "</td></tr><tr><td>Number of transactions</td><td>",
+                    format(shapesDF$no_mkt_trans, big.mark = ","),
+                    "</td></tr><tr><td>Number of foreign transactions</td><td>",
+                    format(shapesDF$no_foreign, big.mark = ","),
+                    "</td></tr><tr><td>Number % by foreign purchasers</td><td>",
+                    format(shapesDF$no_foreign_perc, big.mark = ","),
+                    "</td></tr><tr><td>Total value</td><td>",
+                    paste("$", format(shapesDF$sum_FMV, big.mark = ","), sep =
+                              ""),
+                    "</td></tr><tr><td>Total value by foreign purchasers</td><td>",
+                    paste(
+                        "$",
+                        format(shapesDF$sum_FMV_foreign, big.mark = ","),
+                        sep = ""
+                    ),
+                    "</td></tr><tr><td>Value % by foreign purchasers</td><td>",
+                    format(shapesDF$sum_FMV_foreign_perc, big.mark = ","),
+                    "</td></tr><tr><td>PTT Paid</td><td>",
+                    paste(
+                        "$",
+                        format(shapesDF$sum_PPT_paid, big.mark = ","),
+                        sep = ""
+                    ),
+                    "</td></tr><tr><td>Additional Tax Paid</td><td>",
+                    paste(
+                        "$",
+                        format(shapesDF$add_tax_paid, big.mark = ","),
+                        sep = ""
+                    ),
+                    "</td></tr></table>"
+                ),
+                group = "divisions"
+            ) %>%
+            addLegend(
+                "bottomleft",
+                pal = pal,
+                values = shapesDF[[pt_metric]],
+                title = pt_metric,
+                #"Transactions #",
+                labFormat = labelFormat(prefix = "$"),
+                opacity = 0.8
+            ) %>%
+            # addLayersControl(
+            #     overlayGroups = c("Census Divisions"),
+            #     options = layersControlOptions(collapsed = FALSE)
+            # ) %>%
+            clearGroup(group = "selected")
+        
+        output$dt = DT::renderDataTable(
+            datatable(
+                propertyTaxPeriod,
+                #%>%
+                # select_(.dots = selectionMetricsDF$Metric),
+                options = list(
+                    lengthChange = TRUE,
+                    initComplete = JS(
+                        "
+                        function(settings, json) {
+                        $(this.api().table().header()).css({
+                        'background-color': 'rgba(0, 51, 102, 0.80)',
+                        'border-bottom': '5px solid #fcba19',
+                        'color': '#fff'
+                        });
+                        }"
+)
+                    ),
+colnames = allMetrics,
+selection = list(target = 'row+column')
+                    ) %>%
+    formatCurrency(
+        c(
+            "FMV Sum",
+            "FMV Average",
+            "FMV Median",
+            "PTT Paid",
+            "PTT Paid Median",
+            "FMV sum of Foreign Transactions",
+            "FMV Mean of Foreign Transactions",
+            "FMV Median of Foreign Transactions",
+            "Additional Tax Paid"
+        ),
+        currency = "$",
+        digits = 0
+    ) %>%
+    formatCurrency(
+        c(
+            "Total Market Transactions #",
+            "Res. Total #",
+            "Res. - Acreage #",
+            "Res. - Commerce #",
+            "Res. - Farm #",
+            "Res. - Multi-family #",
+            "Res. - Single-family Res. #",
+            "Res. - Strata Res. #",
+            "Res. - Strata Non- Res. or Rental #",
+            "Res. - Other #",
+            "Comm. Total #",
+            "Comm. - Comm. #",
+            "Comm. - Strata Non-Res. #",
+            "Comm. - Other #",
+            "Recr. Total #",
+            "Farm Total #",
+            "Other/Unknown Total #",
+            "Foreign Transactions #"
+        ),
+        currency = "",
+        digits = 0
+    )
+            )
+        
+        # Interactive based on user input
+        output$interactive <- renderPlotly({
+            plot_ly(
+                propertyTaxPeriod,
+                x = ~ propertyTaxPeriod[[pt_metric]],
+                y = ~ geoUnit,
+                type = "bar",
+                orientation = "h"
+            ) %>%
+                layout(
+                    title = pt_metric,
+                    #"Number of market transactions",
+                    xaxis = axisFormat,
+                    yaxis = axisFormat,
+                    margin = marginFormatMonthly,
+                    barmode = 'group',
+                    legend = legendFormat
+                ) %>%
+                config(displayModeBar = F)
+        })
+        
+        # Census 2016 population
+        output$c16pop <- renderPlotly({
+            plot_ly(
+                c16,
+                y = ~ geoUnitVal,
+                x = ~ Population.2016,
+                name = "Population 2016",
+                marker = list(color = colC16),
+                type = "bar"
+            ) %>%
+                add_trace(
+                    x = ~ Population.2011,
+                    name = "Population 2011",
+                    marker = list(color = colC11)
+                ) %>%
+                layout(
+                    title = "Census Population",
+                    xaxis = axisFormat,
+                    yaxis = axisFormat,
+                    margin = marginFormatMonthly,
+                    barmode = 'group',
+                    legend = legendFormat
+                ) %>%
+                config(displayModeBar = F)
+        })
+        
+        # Census 2016 dwellings
+        output$c16dwell <- renderPlotly({
+            plot_ly(
+                c16,
+                y = ~ geoUnitVal,
+                x = ~ Total.Private.Dwellings.2016,
+                name = "Dwellings 2016",
+                marker = list(color = colC16),
+                type = "bar"
+            ) %>%
+                add_trace(
+                    x = ~ Total.Private.Dwellings.2011,
+                    name = "Dwellings 2011",
+                    marker = list(color = colC11)
+                ) %>%
+                layout(
+                    title = "Census Private Dwellings",
+                    xaxis = axisFormat,
+                    yaxis = axisFormat,
+                    margin = marginFormatMonthly,
+                    barmode = 'group',
+                    legend = legendFormat
+                ) %>%
+                config(displayModeBar = F)
+        })
+        
+        # Census 2016 change
+        output$c16change <- renderPlotly({
+            plot_ly(
+                c16,
+                y = ~ geoUnitVal,
+                x = ~ Population.Change,
+                name = "Population",
+                marker = list(color = colC16),
+                type = "bar"
+            ) %>%
+                add_trace(
+                    x = ~ Total.Private.Dwellings.Change,
+                    name = "Dwellings",
+                    marker = list(color = colC11)
+                ) %>%
+                layout(
+                    title = "Change from 2011 Census (%)",
+                    xaxis = axisFormat,
+                    yaxis = axisFormat,
+                    margin = marginFormatMonthly,
+                    # barmode = 'group',
+                    legend = legendFormat
+                ) %>%
+                config(displayModeBar = F)
+        })
+        
+        # add_lines(y = ~Total.Private.Dwellings.2016, name = "Total.Private.Dwellings.2016",
+        
+        # Foreign - Number of Foreign Transactions
+        output$no_foreign_period <- renderPlotly({
+            plot_ly(
+                propertyTaxPeriod %>%
+                    arrange(desc(no_foreign)),
+                x = ~ geoUnit,
+                y = ~ no_foreign,
+                type = "bar",
+                marker = list(color = colForeign)
+            ) %>%
+                layout(
+                    title = "Number of Foreign Transactions",
+                    xaxis = axisFormat,
+                    yaxis = axisFormat,
+                    margin = marginFormat,
+                    legend = legendFormat
+                ) %>%
+                config(displayModeBar = F)
+        })
+        
+        # Foreign - FMV Mean
+        output$foreign_period_mn <- renderPlotly({
+            plot_ly(
+                propertyTaxPeriod %>%
+                    filter(!is.na(mn_FMV_foreign)) %>%
+                    arrange(desc(mn_FMV)),
+                x = ~ geoUnit,
+                y = ~ mn_FMV,
+                name = "Canadian",
+                marker = list(color = colCanadian),
+                type = "bar"
+            ) %>%
+                add_trace(
+                    y = ~ mn_FMV_foreign,
+                    name = "Foreign",
+                    marker = list(color = colForeign)
+                ) %>%
+                layout(
+                    title = "FMV Mean",
+                    xaxis = axisFormat,
+                    yaxis = axisFormat,
+                    margin = marginFormat,
+                    barmode = 'group',
+                    legend = legendFormat
+                ) %>%
+                config(displayModeBar = F)
+        })
+        
+        # Foreign - FMV Median
+        output$foreign_period_md <- renderPlotly({
+            plot_ly(
+                propertyTaxPeriod %>%
+                    filter(!is.na(md_FMV_foreign)) %>%
+                    arrange(desc(md_FMV)),
+                x = ~ geoUnit,
+                y = ~ md_FMV,
+                name = "Canadian",
+                marker = list(color = colCanadian),
+                type = "bar"
+            ) %>%
+                add_trace(
+                    y = ~ md_FMV_foreign,
+                    name = "Foreign",
+                    marker = list(color = colForeign)
+                ) %>%
+                layout(
+                    title = "FMV Median",
+                    xaxis = axisFormat,
+                    yaxis = axisFormat,
+                    margin = marginFormat,
+                    barmode = 'group',
+                    legend = legendFormat
+                ) %>%
+                config(displayModeBar = F)
+        })
+        
+        })
+    
+    # Monthly Overview - FMV (Fair Market Value)
+    output$pt_mothly_fmv <- renderPlotly({
+        plot_ly(
+            ptProvMth,
+            x = ~ trans_period,
+            y = ~ sum_FMV,
+            name = "Total FMV",
+            type = 'scatter',
+            mode = 'lines',
+            line = list(shape = "spline", color = colCanadian)
+        ) %>%
+            add_lines(
+                y = ~ sum_FMV_foreign,
+                name = "Total FMV Foreign",
+                line = list(shape = "spline", color = colForeign)
+            ) %>%
+            add_lines(
+                y = ~ no_foreign_perc,
+                name = "Foreign %",
+                yaxis = "y2",
+                line = list(
+                    shape = "spline",
+                    color = colForeign,
+                    dash = 'dot'
+                )
+            ) %>%
+            layout(
+                title = "FMV (Fair Market Value)",
+                xaxis = axisFormat,
+                yaxis = axisFormat,
+                yaxis2 = list(
+                    tickfont = tickfontRd,
+                    overlaying = "y",
+                    side = "right",
+                    title = "Foreign %"
+                ),
+                margin = marginFormat,
+                legend = legendFormat
+            ) %>%
+            config(displayModeBar = F)
+    })
+    
+    # Monthly Overview - Average FMV
+    output$pt_mothly_mnd_fmv <- renderPlotly({
+        plot_ly(
+            ptProvMth,
+            x = ~ trans_period,
+            y = ~ mn_FMV,
+            name = "Mean FMV",
+            type = 'scatter',
+            mode = 'lines',
+            line = list(shape = "spline", color = colCanadian)
+        ) %>%
+            add_lines(
+                y = ~ mn_FMV_foreign,
+                name = "Mean FMV Foreign",
+                line = list(shape = "spline", color = colForeign)
+            ) %>%
+            add_lines(
+                y = ~ md_FMV,
+                name = "Median FMV",
+                line = list(
+                    shape = "spline",
+                    color = colCanadian,
+                    dash = 'dot'
+                )
+            ) %>%
+            add_lines(
+                y = ~ md_FMV_foreign,
+                name = "Median FMV Foreign",
+                line = list(
+                    shape = "spline",
+                    color = colForeign,
+                    dash = 'dot'
+                )
+            ) %>%
+            layout(
+                title = "Average FMV",
+                xaxis = axisFormat,
+                yaxis = axisFormat,
+                margin = marginFormat,
+                legend = legendFormat
+            ) %>%
+            config(displayModeBar = F)
+    })
+    
+    # Monthly Overview - Property Transfer Tax
+    output$pt_mothly_ptt <- renderPlotly({
+        plot_ly(
+            ptProvMth,
+            x = ~ trans_period,
+            y = ~ sum_PPT_paid,
+            name = "PTT",
+            type = 'scatter',
+            mode = 'lines',
+            line = list(shape = "spline", color = colCanadian)
+        ) %>%
+            add_lines(
+                y = ~ add_tax_paid,
+                name = "Additional PTT",
+                line = list(shape = "spline", color = colForeign)
+            ) %>%
+            layout(
+                title = "Property Transfer Tax",
+                xaxis = axisFormat,
+                yaxis = axisFormat,
+                margin = marginFormat,
+                legend = legendFormat
+            ) %>%
+            config(displayModeBar = F)
+    })
+    
+    # Monthly Overview - Number of market transactions
+    output$pt_mothly <- renderPlotly({
+        plot_ly(
+            ptProvMth,
+            x = ~ trans_period,
+            y = ~ no_resid_trans,
+            name = "Residential",
+            type = "bar",
+            marker = list(color = colResidential),
+            hoverinfo = "y+name"
+        ) %>%
+            add_trace(
+                y = ~ no_comm_tot,
+                name = "Commercial",
+                marker = list(color = colCommercial)
+            ) %>%
+            add_trace(
+                y = ~ no_recr_tot,
+                name = "Recreational",
+                marker = list(color = colRecreational)
+            ) %>%
+            add_trace(
+                y = ~ no_farm_tot,
+                name = "Farms",
+                marker = list(color = colFarms)
+            ) %>%
+            add_trace(
+                y = ~ no_unkn_tot,
+                name = "Unknown",
+                marker = list(color = colUnknown)
+            ) %>%
+            layout(
+                title = "Number of market transactions",
+                xaxis = axisFormat,
+                yaxis = axisFormat,
+                margin = marginFormat,
+                barmode = 'stack',
+                legend = legendFormat
+            ) %>%
+            config(displayModeBar = F)
+    })
+    
+    # Monthly Overview - Number of market transactions - Residential
+    output$pt_mothly_res <- renderPlotly({
+        plot_ly(
+            ptProvMth,
+            x = ~ trans_period,
+            y = ~ no_res_1fam,
+            name = "Single Family",
+            type = "bar",
+            marker = list(color = colSingleFam),
+            hoverinfo = "y+name"
+        ) %>%
+            add_trace(
+                y = ~ no_resid_fam,
+                name = "Multi Family",
+                marker = list(color = colMultiFam)
+            ) %>%
+            add_trace(
+                y = ~ no_resid_strata,
+                name = "Strata",
+                marker = list(color = colStrata)
+            ) %>%
+            add_trace(
+                y = ~ no_resid_non_strata,
+                name = "Non-strata / Rental",
+                marker = list(color = colNonStrataRental)
+            ) %>%
+            add_trace(
+                y = ~ no_resid_acreage_trans,
+                name = "Acreage",
+                marker = list(color = colAcreage)
+            ) %>%
+            add_trace(
+                y = ~ resid_comm_count,
+                name = "Commercial",
+                marker = list(color = colCommercial)
+            ) %>%
+            add_trace(
+                y = ~ no_resid_farm,
+                name = "Farm",
+                marker = list(color = colFarms)
+            ) %>%
+            add_trace(
+                y = ~ no_resid_other,
+                name = "Other",
+                marker = list(color = colUnknown)
+            ) %>%
+            layout(
+                title = "Number of market transactions - Residential",
+                xaxis = axisFormat,
+                yaxis = axisFormat,
+                margin = marginFormat,
+                barmode = 'stack',
+                legend = legendFormat
+            ) %>%
+            config(displayModeBar = F)
+    })
+    
+    # Monthly Overview - Number of market transactions - Commercial
+    output$pt_mothly_comm <- renderPlotly({
+        plot_ly(
+            ptProvMth,
+            x = ~ trans_period,
+            y = ~ no_comm_comm,
+            name = "Commerce",
+            type = "bar",
+            marker = list(color = colCommercial),
+            hoverinfo = "y+name"
+        ) %>%
+            add_trace(
+                y = ~ no_comm_strata_nores,
+                name = "Strata non-residential",
+                marker = list(color = colStrata)
+            ) %>%
+            add_trace(
+                y = ~ no_comm_other,
+                name = "Other",
+                marker = list(color = colUnknown)
+            ) %>%
+            layout(
+                title = "Number of market transactions - Commercial",
+                xaxis = axisFormat,
+                yaxis = axisFormat,
+                margin = marginFormat,
+                barmode = 'stack',
+                legend = legendFormat
+            ) %>%
+            config(displayModeBar = F)
+    })
+    
+    
+    # Your own dataviz
+    
+    #This function is repsonsible for loading in the selected file
+    uploadedData <- reactive({
+        uploadedFile <- input$uploadFile
+        if (is.null(uploadedFile)) {
+            return(NULL)
+        }
+        
+        data <-
+            read.csv(
+                uploadedFile$datapath,
+                header = input$header,
+                sep = input$separator,
+                quote = input$quote
+            )
+        
+        updateSelectInput(
+            session,
+            inputId = 'xAxisCol',
+            label = 'X Variable',
+            choices = names(data),
+            selected = names(data)[1]
+        )
+        updateSelectInput(
+            session,
+            inputId = 'yAxisCol',
+            label = 'Y Variable',
+            choices = names(data),
+            selected = names(data)[2]
+        )
+        updateSelectInput(
+            session,
+            inputId = 'variable',
+            label = 'Variable',
+            choices = names(data),
+            selected = names(data)[3]
+        )
+        data
+        
+    })
+    
+    #This previews the CSV data file
+    output$doVizDt <- renderUI({
+        output$vizDt <- renderDataTable(uploadedData(),
+                                        options = list(
+                                            lengthChange = TRUE,
+                                            initComplete = JS(
+                                                "
+                                                function(settings, json) {
+                                                $(this.api().table().header()).css({
+                                                'background-color': 'rgba(0, 51, 102, 0.80)',
+                                                'border-bottom': '5px solid #fcba19',
+                                                'color': '#fff'
+                                                });
+                                                }"
+                )
+                                            ))
+        dataTableOutput("vizDt")
+        })
+    
+    # Do your data visualization
+    output$doVizPlot <- renderPlotly({
+        # if (input$doViz == 0) {
+        #     return(NULL)
+        # }
+        df = uploadedData()
+        if (is.null(df)) {
+            return(NULL)
+        }
+        
+        plot_ly(
+            df,
+            x = ~ df[, input$xAxisCol],
+            y = ~ df[, input$yAxisCol],
+            z = ~ df[, input$variable],
+            type = "heatmap"
+        ) %>%
+            # add_trace(~df[,input$variable]) %>%
+            layout(
+                title = input$xAxisCol,
+                xaxis = axisFormat,
+                yaxis = axisFormat,
+                margin = marginFormatMonthly,
+                # barmode = 'group',
+                legend = legendFormat
+            ) %>%
+            config(displayModeBar = F)
+        
+    })
+    
+    }
