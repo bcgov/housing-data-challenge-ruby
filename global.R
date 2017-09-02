@@ -137,6 +137,33 @@ pt_view <- 'devreg'
 pt_trans_period <- '2016-12-01'
 pt_metric <- 'no_mkt_trans'
 
+propertyTaxPeriod <- ptRegDisMth %>%
+    filter(trans_period %in% maxTransPeriod)
+
+propertyTaxPeriod$geoUnit <- propertyTaxPeriod$Regional.District
+
+# For use in overview charts
+propertyTax <- ptRegDisMth
+propertyTax$geoUnit <- ptRegDisMth$Regional.District
+
+# Convert join columns to uppercase to avoid mismatches due to case sensitivity
+bcCensusDivs@data$CDNAME <- toupper(bcCensusDivs@data$CDNAME)
+geoUnit <- as.character(bcCensusDivs$CDNAME)
+byY <- "Regional.District"
+shapesDF <-
+    merge(
+        bcCensusDivs,
+        propertyTaxPeriod,
+        by.x = "CDNAME",
+        by.y = "Regional.District",
+        sort = FALSE,
+        by = ALL
+    )
+
+pal <-
+    colorQuantile("YlGnBu", n = 9, as.integer(shapesDF$no_mkt_trans))
+data <- shapesDF@data
+
 # Add a homepage Jumbotron
 jumbotron <- function(header, popPerc = 0, popInc = TRUE, dwellPerc = 0, dwellInc = TRUE,
                       trans_period, no_mkt_trans = 0, no_foreign_perc = 0, 

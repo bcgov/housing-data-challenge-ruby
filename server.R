@@ -1,31 +1,4 @@
 server <- function(input, output, session) {
-    propertyTaxPeriod <- ptRegDisMth %>%
-        filter(trans_period %in% maxTransPeriod)
-    
-    propertyTaxPeriod$geoUnit <- propertyTaxPeriod$Regional.District
-    
-    # For use in overview charts
-    propertyTax <- ptRegDisMth
-    propertyTax$geoUnit <- ptRegDisMth$Regional.District
-    
-    # Convert join columns to uppercase to avoid mismatches due to case sensitivity
-    bcCensusDivs@data$CDNAME <- toupper(bcCensusDivs@data$CDNAME)
-    geoUnit <- as.character(bcCensusDivs$CDNAME)
-    byY <- "Regional.District"
-    shapesDF <-
-        merge(
-            bcCensusDivs,
-            propertyTaxPeriod,
-            by.x = "CDNAME",
-            by.y = "Regional.District",
-            sort = FALSE,
-            by = ALL
-        )
-    
-    pal <-
-        colorQuantile("YlGnBu", n = 9, as.integer(shapesDF$no_mkt_trans))
-    data <- shapesDF@data
-    
     # Initial map output
     # Have to fully draw the map, it doesn't go through observe when it's not
     # in the first tab
