@@ -10,6 +10,10 @@ library(tidyr)
 library(crosstalk)
 library(plotly)
 
+# source files
+source("modules/controls.R")
+source("modules/chartFormat.R")
+
 # Read objects
 # Property transfer tax
 ptRegDisMth <- readRDS("./data/pt-regional-district-monthly.rds")
@@ -29,6 +33,11 @@ c16EconRegs <- readRDS("./data/census2016-economic-regions.rds")
 c16Tracts <- readRDS("./data/census2016-tracts.rds")
 c16MetroAreas <- readRDS("./data/census2016-metro-areas.rds")
 c16Prov <- readRDS("./data/census2016-province.rds")
+
+censusData <- readRDS("./data/census2016.rds")
+censusDataSpatial <- readRDS("./data/censusSpatial2016.rds")
+censusCategories <- label_vectors(censusData)
+censusCategoriesList <- setNames(split(censusCategories, seq(nrow(censusCategories))), rownames(censusCategories))
 
 #  Cleanup - @TODO Move this to getdata.R
 c16EconRegs$ERNAME <- 
@@ -130,8 +139,8 @@ selectionMetricsDF <- data.frame(
 
 maxTransPeriod <- max(levels(ptProvMth$trans_period))
 propertyTax <- ptRegDisMth
-chartHeight <- 400
-mapHeight <- 300
+chartHeight <- 600
+mapHeight <- 600
 
 pt_view <- 'devreg'
 pt_trans_period <- '2016-12-01'
@@ -160,9 +169,24 @@ shapesDF <-
         by = ALL
     )
 
+# Color palette
 pal <-
     colorQuantile("YlGnBu", n = 9, as.integer(shapesDF$no_mkt_trans))
 data <- shapesDF@data
+
+# viridis
+getPal <- function(pal, dom, bins) {
+  colorBin(palette = pal,
+           domain = dom,
+           bins = bins)
+}
+
+palViridis <-
+  getPal(
+    viridis::viridis(4),
+    censusData$v_CA16_2447,
+    c(0, 30000, 60000, 75000, 90000, 100000, 120000)
+  )
 
 # Add a homepage Jumbotron
 jumbotron <- function(header, popPerc = 0, popInc = TRUE, dwellPerc = 0, dwellInc = TRUE,
@@ -218,3 +242,46 @@ jumbotron <- function(header, popPerc = 0, popInc = TRUE, dwellPerc = 0, dwellIn
                 </div>
                 </div>") )
 }
+
+# Function to dynamically create plotly charts
+plotmy <-
+  function(pmData,
+           pmxAxis,
+           pmyAxis,
+           pmName,
+           pmType,
+           pmMarker,
+           pmTitle,
+           pmTraces) {
+    # configure chart
+    plotme <- plot_ly(
+      pmData %>% arrange(desc(pmyAxis)),
+      x = pmxAxis,
+      y = pmyAxis,
+      name = pmName,
+      type = pmType,
+      marker = list(color = pmMarker)
+    ) %>%
+      layout(
+        title = pmTitle,
+        xaxis = axisFormat,
+        yaxis = axisFormat,
+        margin = marginFormat,
+        legend = legendFormat
+      ) %>%
+      config(displayModeBar = F)
+    
+    # add traces dynamically
+    for (pmTrace in pmTraces) {
+      plotme <- add_trace(
+        plotme,
+        y = pmTrace[['y']],
+        x = pmTrace[['x']],
+        name = pmTrace[['name']],
+        marker = list(color = pmTrace[['color']]) #,
+        #evaluate = TRUE
+      )
+    }
+    
+    plotme
+  }
