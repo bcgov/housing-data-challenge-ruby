@@ -128,7 +128,6 @@ ui <- navbarPage(
         ),
         mainPanel(
           width = 10,
-          tags$p("some text"),
           leafletOutput("mapCensus", height = mapHeight)
         )
       ),
@@ -146,11 +145,63 @@ ui <- navbarPage(
         tabPanel("Type of Dwelling",
           column(12, plotlyOutput("c16dwellType", height = chartHeight))
         ),
-        tabPanel("Families & Households"),
+        tabPanel("Families & Households",
+          column(6, plotlyOutput("c16incomeAvgFamSize", height = chartHeight))
+        ),
         tabPanel("Income",
-          column(4, plotlyOutput("c16incomeTotalMed", height = chartHeight)),
-          column(4, plotlyOutput("c16incomeTotalMedaT", height = chartHeight)),
-          column(4, plotlyOutput("c16incomeAvgFamSize", height = chartHeight))
+          column(6, plotlyOutput("c16incomeTotalMed", height = chartHeight)),
+          column(6, plotlyOutput("c16incomeTotalMedaT", height = chartHeight))
+        )
+      )
+    )
+  ),
+  tabPanel(
+    'Census Search',
+    fluidPage(
+      titlePanel("Census Search"),
+
+      tabsetPanel(
+        tabPanel(
+          "Search vectors",
+          tags$p(
+            "Search census variables by keyword."
+          ),
+          sidebarLayout(
+            sidebarPanel(
+              width = 2,
+              textInput("c_search_keyword", label = "Keyword", placeholder = "search term"),
+              selectInput("c_search_year",
+                          "Period",
+                          c("2016", "2011", "2006"),
+                          multiple = FALSE),
+              actionButton("c_search", "Search")
+            ),
+            mainPanel(
+              width = 10,
+              dataTableOutput("c_dt")
+            )
+          )
+        ),
+        tabPanel(
+          "Search data",
+          tags$p(
+            "Search census data by variable."
+          ),
+          sidebarLayout(
+            sidebarPanel(
+              width = 2,
+              textInput("c_search_vector", label = "Variable", placeholder = "search variable"),
+              selectInput("c_search_data_year",
+                          "Period",
+                          c("2016", "2011", "2006"),
+                          multiple = FALSE),
+              actionButton("c_search_data", "Search")
+            ),
+            mainPanel(
+              width = 10,
+              dataTableOutput("c_dt_data")
+            )
+          )
         )
       )
     )

@@ -116,7 +116,7 @@ server <- function(input, output, session) {
         opacity = 0.5
       )
   })
-  
+
   # observeEvent(input$map_shape_click, {
   #     #create object for clicked polygon
   #     click <- input$map_shape_click
@@ -166,7 +166,222 @@ server <- function(input, output, session) {
     pt_trans_period <- input$pt_trans_period
     pt_metric <- input$pt_metric
 
+    c_view <- input$c_view
+    c_year <- input$c_year
+    c_metric <- input$c_metric
 
+    # Census observer switch
+    switch(
+      c_view,
+      "cma" = {
+        censusData <- readRDS("./data/census2016-CMA.rds")
+        censusDataSpatial <-
+          readRDS("./data/censusSpatial2016-CMA.rds")
+      },
+      "csd" = {
+        censusData <- readRDS("./data/census2016-CSD.rds")
+        censusDataSpatial <-
+          readRDS("./data/censusSpatial2016-CSD.rds")
+      },
+      "cd" = {
+        censusData <- readRDS("./data/census2016-CD.rds")
+        censusDataSpatial <-
+          readRDS("./data/censusSpatial2016-CD.rds")
+      },
+      "ct" = {
+        censusData <- readRDS("./data/census2016-CT.rds")
+        censusDataSpatial <-
+          readRDS("./data/censusSpatial2016-CT.rds")
+      }
+    )
+    censusCategories <- label_vectors(censusData)
+
+    output$mapCensus <- renderLeaflet({
+      censusDataSpatial %>%
+        leaflet() %>%
+        addProviderTiles(provider = "CartoDB.Positron") %>%
+        addPolygons(
+          label = ~ name,
+          # color = ~ pal(v_CA16_2447),
+          stroke = TRUE,
+          weight = 1,
+          fillOpacity = 0.5,
+          smoothFactor = 1,
+          color = '#333',
+          fillColor = ~ palViridis(censusData$v_CA16_2447),
+          popup = paste0(
+            "<strong>",
+            censusData$`Region Name`,
+            "</strong>",
+            "<table class=\"leaflet-popup-table\">
+            <tr><td>Census Year</td><td>2016</td></tr>",
+            "<tr><td>Population</td><td>",
+            format(censusData$Population, big.mark = ","),
+            "</td></tr><tr><td>Dwellings</td><td>",
+            format(censusData$Dwellings, big.mark = ","),
+            "</td></tr><tr><td>Households</td><td>",
+            format(censusData$Households, big.mark = ","),
+            "</td></tr><tr><td>Median total income</td><td>",
+            paste("$", format(censusData$v_CA16_2447, big.mark = ","), sep =
+                    ""),
+            "</td></tr><tr><td>Average Age</td><td>",
+            censusData$v_CA16_379,
+            "</td></tr><tr><td>Provate dwellings occupied by usual residents</td><td>",
+            format(censusData$v_CA16_405, big.mark = ","),
+            "</td></tr><tr><td>Single detahed houses</td><td>",
+            format(censusData$v_CA16_412, big.mark = ","),
+            "</td></tr><tr><td>Average family size</td><td>",
+            format(censusData$v_CA16_2449, big.mark = ","),
+            "</td></tr></table>"
+          )
+        ) %>%
+        addLegend(
+          "bottomleft",
+          pal = palViridis,
+          values = ~ v_CA16_2447,
+          title = "Median total income of <br> economic families in 2015",
+          opacity = 0.5
+        )
+    })
+
+    # Dwelling type
+    traces = list(
+      list(
+        x = censusData$`Region Name`,
+        y = censusData$v_CA16_410,
+        color = colNonStrataRental,
+        name = "Appartment in tall building"
+      ),
+      list(
+        x = censusData$`Region Name`,
+        y = censusData$v_CA16_412,
+        color = colCanadian,
+        name = "Semi-detached house"
+      ),
+      list(
+        x = censusData$`Region Name`,
+        y = censusData$v_CA16_413,
+        color = colResidential,
+        name = "Row house"
+      ),
+      list(
+        x = censusData$`Region Name`,
+        y = censusData$v_CA16_414,
+        color = colMultiFam,
+        name = "Appartment in duplex"
+      ),
+      list(
+        x = censusData$`Region Name`,
+        y = censusData$v_CA16_415,
+        color = colStrata,
+        name = "Appartment in small building"
+      ),
+      list(
+        x = censusData$`Region Name`,
+        y = censusData$v_CA16_416,
+        color = colAcreage,
+        name = "Other single-attached house"
+      ),
+      list(
+        x = censusData$`Region Name`,
+        y = censusData$v_CA16_417,
+        color = colForeign,
+        name = "Movable dwelling"
+      )
+    )
+    c16dwellTypePlot <- plotmy(
+      censusData,
+      censusData$`Region Name`,
+      censusData$v_CA16_409,
+      "Single-detached house",
+      "bar",
+      colSingleFam,
+      "Type of dwelling",
+      traces
+    )
+    output$c16dwellType <- renderPlotly({
+      c16dwellTypePlot
+    })
+
+    # Income
+    traces = list()
+
+    c16incomeTotalMed <- plotmy(
+      censusData,
+      censusData$`Region Name`,
+      censusData$v_CA16_2447,
+      "Median total income of economic families in 2015 ($)",
+      "bar",
+      colResidential,
+      "Median after-tax income of economic families in 2015 ($)",
+      traces
+    )
+    output$c16incomeTotalMed <- renderPlotly({
+      c16incomeTotalMed
+    })
+
+    c16incomeTotalMedaT <- plotmy(
+      censusData,
+      censusData$`Region Name`,
+      censusData$v_CA16_2448,
+      "Median total income of economic families in 2015 ($)",
+      "bar",
+      colResidential,
+      "Median after-tax income of economic families in 2015 ($)",
+      traces
+    )
+    output$c16incomeTotalMedaT <-
+      renderPlotly({
+        c16incomeTotalMedaT
+      })
+
+    c16incomeAvgFamSize <- plotmy(
+      censusData,
+      censusData$`Region Name`,
+      censusData$v_CA16_2449,
+      "Average Family Size",
+      "bar",
+      colResidential,
+      "Average Family Size",
+      traces
+    )
+    output$c16incomeAvgFamSize <-
+      renderPlotly({
+        c16incomeAvgFamSize
+      })
+
+    # Age
+    c16avgAge <- plotmy(
+      censusData,
+      censusData$`Region Name`,
+      censusData$v_CA16_379,
+      "Average Age",
+      "bar",
+      colResidential,
+      "Average Age",
+      traces
+    )
+    output$c16avgAge <- renderPlotly({
+      c16avgAge
+    })
+
+    c16ageDist <- plotmy(
+      censusData,
+      censusData$`Region Name`,
+      censusData$v_CA16_382,
+      "Age group distribution",
+      "bar",
+      colResidential,
+      "Age group distribution",
+      traces
+    )
+    output$c16ageDist <- renderPlotly({
+      c16ageDist
+    })
+
+
+
+    # PTT observer switch
     switch(pt_view,
            "regdis" = {
              propertyTaxPeriod <- ptRegDisMth %>%
@@ -472,16 +687,16 @@ selection = list(target = 'row+column')
     #   )
     # )
     # c16popPlot <- plotmy(
-    #   c16, 
-    #   c16$Population.2016, 
-    #   c16$geoUnitVal, 
+    #   c16,
+    #   c16$Population.2016,
+    #   c16$geoUnitVal,
     #   "Population 2016",
-    #   "bar", 
-    #   list(color = colC16), 
+    #   "bar",
+    #   list(color = colC16),
     #   "Census Population",
     #   traces
     # )
-    # 
+    #
     # output$c16pop <- renderPlotly({c16popPlot})
     output$c16pop <- renderPlotly({
       plot_ly(
@@ -851,127 +1066,6 @@ selection = list(target = 'row+column')
       config(displayModeBar = F)
   })
 
-  # Dwelling type
-  traces = list(
-    list(
-      x = censusData$`Region Name`,
-      y = censusData$v_CA16_410,
-      color = colNonStrataRental,
-      name = "Appartment in tall building"
-    ),
-    list(
-      x = censusData$`Region Name`,
-      y = censusData$v_CA16_412,
-      color = colCanadian,
-      name = "Semi-detached house"
-    ),
-    list(
-      x = censusData$`Region Name`,
-      y = censusData$v_CA16_413,
-      color = colResidential,
-      name = "Row house"
-    ),
-    list(
-      x = censusData$`Region Name`,
-      y = censusData$v_CA16_414,
-      color = colMultiFam,
-      name = "Appartment in duplex"
-    ),
-    list(
-      x = censusData$`Region Name`,
-      y = censusData$v_CA16_415,
-      color = colStrata,
-      name = "Appartment in small building"
-    ),
-    list(
-      x = censusData$`Region Name`,
-      y = censusData$v_CA16_416,
-      color = colAcreage,
-      name = "Other single-attached house"
-    ),
-    list(
-      x = censusData$`Region Name`,
-      y = censusData$v_CA16_417,
-      color = colForeign,
-      name = "Movable dwelling"
-    )
-  )
-  c16dwellTypePlot <- plotmy(
-    censusData,
-    censusData$`Region Name`,
-    censusData$v_CA16_409,
-    "Single-detached house",
-    "bar",
-    colSingleFam,
-    "Type of dwelling",
-    traces
-  )
-  output$c16dwellType <- renderPlotly({c16dwellTypePlot})
-
-  # Income
-  traces = list()
-  
-  c16incomeTotalMed <- plotmy(
-    censusData,
-    censusData$`Region Name`,
-    censusData$v_CA16_2447,
-    "Median total income of economic families in 2015 ($)",
-    "bar",
-    colCanadian,
-    "Median after-tax income of economic families in 2015 ($)",
-    traces
-  )
-  output$c16incomeTotalMed <- renderPlotly({c16incomeTotalMed})
-  
-  c16incomeTotalMedaT <- plotmy(
-    censusData,
-    censusData$`Region Name`,
-    censusData$v_CA16_2448,
-    "Median total income of economic families in 2015 ($)",
-    "bar",
-    colCanadian,
-    "Median after-tax income of economic families in 2015 ($)",
-    traces
-  )
-  output$c16incomeTotalMedaT <- renderPlotly({c16incomeTotalMedaT})
-  
-  c16incomeAvgFamSize <- plotmy(
-    censusData,
-    censusData$`Region Name`,
-    censusData$v_CA16_2449,
-    "Average Family Size",
-    "bar",
-    colCanadian,
-    "Average Family Size",
-    traces
-  )
-  output$c16incomeAvgFamSize <- renderPlotly({c16incomeAvgFamSize})
-  
-  # Age
-  c16avgAge <- plotmy(
-    censusData,
-    censusData$`Region Name`,
-    censusData$v_CA16_379,
-    "Average Age",
-    "bar",
-    colResidential,
-    "Average Age",
-    traces
-  )
-  output$c16avgAge <- renderPlotly({c16avgAge})
-  
-  c16ageDist <- plotmy(
-    censusData,
-    censusData$`Region Name`,
-    censusData$v_CA16_382,
-    "Age group distribution",
-    "bar",
-    colResidential,
-    "Age group distribution",
-    traces
-  )
-  output$c16ageDist <- renderPlotly({c16ageDist})
-  
   # Monthly Overview - Number of market transactions - Commercial
   output$pt_mothly_comm <- renderPlotly({
     plot_ly(
@@ -1003,4 +1097,84 @@ selection = list(target = 'row+column')
       ) %>%
       config(displayModeBar = F)
   })
-}
+
+  # Search census vectors by keyword
+  observeEvent(input$c_search, {
+    vectorsSearch <-
+      search_census_vectors(
+        input$c_search_keyword,
+        paste0('CA', substr(paste0(
+          input$c_search_year
+        ), 3, 4)),
+        type = "Total",
+        use_cache = TRUE
+      )  %>%
+      child_census_vectors(leaves_only = FALSE)
+
+    output$c_dt = DT::renderDataTable(datatable(
+      vectorsSearch,
+      #%>%
+      # select_(.dots = selectionMetricsDF$Metric),
+      options = list(
+        lengthChange = TRUE,
+        initComplete = JS(
+          "
+          function(settings, json) {
+          $(this.api().table().header()).css({
+          'background-color': 'rgba(0, 51, 102, 0.80)',
+          'border-bottom': '5px solid #fcba19',
+          'color': '#fff'
+          });
+          }"
+          )
+        )
+        ))
+    })
+
+    # Search census data by vector
+  observeEvent(input$c_search_data, {
+    vectorsSearch <-
+      search_census_vectors(
+        input$c_search_vector,
+        paste0('CA', substr(paste0(
+          input$c_search_year
+        ), 3, 4)),
+        type = "Total",
+        use_cache = TRUE
+      )  %>%
+      child_census_vectors(leaves_only = FALSE)
+
+    censusDataSearch <-
+      get_census(
+        # paste0('CA', substr(paste0(
+        #   input$c_search_data_year
+        # ), 3, 4)),
+        level = "CD",
+        regions = regions,
+        vectors = input$c_search_vector,
+        use_cache = TRUE,
+        api_key = "CensusMapper_f17c13c7fc5e60de7cdd341d5d4db866",
+        labels = "short",
+        geo_format = NA
+      )
+
+    output$c_dt_data = DT::renderDataTable(datatable(
+      censusDataSearch,
+      #%>%
+      # select_(.dots = selectionMetricsDF$Metric),
+      options = list(
+        lengthChange = TRUE,
+        initComplete = JS(
+          "
+          function(settings, json) {
+          $(this.api().table().header()).css({
+          'background-color': 'rgba(0, 51, 102, 0.80)',
+          'border-bottom': '5px solid #fcba19',
+          'color': '#fff'
+          });
+          }"
+          )
+        )
+        ))
+    })
+  }

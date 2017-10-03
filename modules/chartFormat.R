@@ -19,9 +19,12 @@ legendFormat <- list(
     size = 11,
     color = "#696969"
   ),
-  bgcolor = "#f9f9f9",
+  # bgcolor = "#f9f9f9",
   bordercolor = "#e6e6e6",
-  borderwidth = 1
+  borderwidth = 1,
+  x = 0.75,
+  y = 0.9,
+  bgcolor = "rgba(255, 255, 255, 0.5)"
 )
 
 marginFormat <- list(
