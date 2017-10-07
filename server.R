@@ -1108,8 +1108,13 @@ selection = list(target = 'row+column')
         ), 3, 4)),
         type = "Total",
         use_cache = TRUE
-      )  %>%
-      child_census_vectors(leaves_only = FALSE)
+      ) # %>%
+      if (nrow(vectorsSearch) > 0) {
+        vectorsSearch <- vectorsSearch %>%
+          child_census_vectors(leaves_only = FALSE)
+      }
+      # https://github.com/mountainMath/cancensus/pull/95
+      # child_census_vectors(leaves_only = FALSE)
 
     output$c_dt = DT::renderDataTable(datatable(
       vectorsSearch,
