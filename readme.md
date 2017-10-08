@@ -92,5 +92,6 @@ It is built open source software tools and packages, namely:
 - tidyr (MIT)
 - crosstalk (MIT)
 - plotly (MIT)
+- cancensus (MIT)
 
 

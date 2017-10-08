@@ -42,20 +42,25 @@ censusCategories <- label_vectors(censusData)
 # censusCategoriesList <- as.list(censusCategories)
 censusCategoriesList <- setNames(censusCategories$Vector, censusCategories$Detail)
 
-regions <- list_census_regions("CA16", use_cache = TRUE)
-bc <- regions %>% filter(PR_UID == "59")
+# set cancensus options
+options(cancensus.api_key = "CensusMapper_f17c13c7fc5e60de7cdd341d5d4db866")
+# dir.create('/srv/shiny-server/cache', showWarnings = TRUE, recursive = FALSE, mode = "0777")
+# Sys.chmod(list.dirs("."), "777")
+options(cancensus.cache_path = '/srv/shiny-server/cache')
 
-cma <- bc %>% filter(level == "CMA")
-cmaRegions <- as_census_region_list(cma)
-
-cd <- bc %>% filter(level == "CD")
-cdRegions <- as_census_region_list(cd)
-
-csd <- bc %>% filter(level == "CSD")
-csdRegions <- as_census_region_list(csd)
-
-regions = as_census_region_list(rbind(cma, cd, csd))
-
+# regions <- list_census_regions("CA16", use_cache = TRUE)
+# bc <- regions %>% filter(PR_UID == "59")
+#
+# cma <- bc %>% filter(level == "CMA")
+# cmaRegions <- as_census_region_list(cma)
+#
+# cd <- bc %>% filter(level == "CD")
+# cdRegions <- as_census_region_list(cd)
+#
+# csd <- bc %>% filter(level == "CSD")
+# csdRegions <- as_census_region_list(csd)
+#
+# regions = as_census_region_list(rbind(cma, cd, csd))
 
 #  Cleanup - @TODO Move this to getdata.R
 c16EconRegs$ERNAME <-
