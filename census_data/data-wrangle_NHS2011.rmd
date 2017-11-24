@@ -1,10 +1,12 @@
 ---
 title: "R Notebook"
 output: html_notebook
+editor_options: 
+  chunk_output_type: console
 ---
 
 
-## Socio-demographic statistics by Dissemination Area
+## Socio-demographic statistics: by Dissemination Area, Census Tract, etc
 
 see [2011 National Household Survey: Data tables](http://www12.statcan.gc.ca/nhs-enm/2011/dp-pd/dt-td/Lp-eng.cfm?LANG=E&APATH=3&DETAIL=0&DIM=0&FL=A&FREE=0&GC=0&GID=0&GK=0&GRP=0&PID=0&PRID=0&PTYPE=105277&S=0&SHOWALL=Yes&StartRow=1&SUB=0&Temporal=2013&THEME=98&VID=0&VNAMEE=&VNAMEF=)
 
@@ -17,6 +19,7 @@ library(readr)
 library(stringr)
 library(tidyr)
 
+library(feather)
 
 library(ggplot2)
 
@@ -25,7 +28,7 @@ library(ggplot2)
 
 
 
-read source file and filter so only Dissemination Area stats remain
+read source file and filter so only Dissemination Area (DA) & Census Division (CD) / Census Sub-Division (CSD) stats remain
 
 ```{r  message = FALSE}
 
@@ -36,32 +39,116 @@ read source file and filter so only Dissemination Area stats remain
 #                        col_types = cols(.default = "d",
 #                                         Geography = "c"))
 
-NHS2011data <- read_csv("data/R3_SCP_Can_PR_CD_CSD_DA_AllGNRs_withSUPP_BC.csv",
+NHS2011data <- read_csv("R3_SCP_Can_PR_CD_CSD_DA_AllGNRs_withSUPP_BC.csv",
                         col_types = cols(.default = "d",
                                          Geography = "c"))
+
+write_feather(NHS2011data, "NHS2011data.feather")
+#NHS2011data <- read_feather("NHS2011data.feather")
+
+# filter to just DA
 
 NHS2011data_DA <- NHS2011data %>%
   filter(str_detect(Geography, '59'))
 
+write_feather(NHS2011data_DA, "NHS2011data_DA.feather")
+#NHS2011data_DA <- read_feather("NHS2011data_DA.feather")
+
+
+# filter to just municipalities
+
+NHS2011data_CDCSD <- NHS2011data %>%
+  filter(!str_detect(Geography, '59'))
+
+write_feather(NHS2011data_CDCSD, "NHS2011data_CDCSD.feather")
+#NHS2011data_CDCSD <- read_feather("NHS2011data_CDCSD.feather")
 
 
 ```
 
 
+
+
 ---
 
-#### Housing & related
+### Housing & related
+
+* see Statistics Canada, [National Household Survey Dictionary](http://www12.statcan.gc.ca/nhs-enm/2011/ref/dict/index-eng.cfm)
+
 
 ranges (columns) of interest:
 
 * mobility status  1718:1771
 
 * housing suitability  2536:2538
+
 * shelter costs  2539:2542/2549
+
+
+#### Mobility
+
+```{r}
+
+
+pop_mobility_DA <- NHS2011data_DA %>%
+  select(1:2,1718:1771)
+
+head(pop_mobility_DA)
+
+write_feather(pop_mobility_DA, "pop_mobility_DA.feather")
+
+pop_mobility_CDCSD <- NHS2011data_CDCSD %>%
+  select(1:2,1718:1771)
+
+head(pop_mobility_CDCSD)
+
+write_feather(pop_mobility_CDCSD, "pop_mobility_CDCSD.feather")
+
+# need to prune further!
+
+# M1 - mobility from 2010 (one year previous), total population
+
+pop_mobility_M1t_CDCSD <- NHS2011data_CDCSD %>%
+  select(1:2,1718:1726)
+
+View(pop_mobility_M1t_CDCSD)
+ls.str(pop_mobility_M1t_CDCSD)
+
+pop_mobility_M1t_CDCSD <- pop_mobility_M1t_CDCSD %>%
+  mutate(totalpop = (`Non-movers` + `Non-migrants` + `Interprovincial migrants` + `Intraprovincial migrants` + `External migrants`)) %>%
+  mutate(check_totalpop = totalpop - `Total - Mobility status 1 year ago`) 
+
+# function to calculate share of total
+
+fun_pct_totalpop <- function(mobgrp) {
+  pct_mobgrp <- mobgrp / pop_mobility_M1t_CDCSD$`Total - Mobility status 1 year ago`
+}
+
+#
+
+pop_mobility_M1t_CDCSD <- pop_mobility_M1t_CDCSD %>%
+  mutate(Nonmover_pct = fun_pct_totalpop(`Non-movers`))
+
+
+View(pop_mobility_M1t_CDCSD)
+
+```
+
+
+
+plot
+
+```{r}
+
+ls.str(pop_mobility_CDCSD)
+
+```
+
+
 
 ---
 
-#### Labour force
+### Labour force
 
 ranges (columns) of interest:
 
@@ -73,7 +160,7 @@ ranges (columns) of interest:
 
 ---
 
-#### Income and related
+### Income and related
 
 ranges (columns) of interest:
 
