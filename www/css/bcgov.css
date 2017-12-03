@@ -45,21 +45,22 @@ hr {
 }
 
 .container .jumbotron, .container-fluid .jumbotron {
-    min-height: 680px;
-    background: url("../images/vancouver.jpg");
+    min-height: 960px;
+    background: url("../images/vancouver2.jpg");
     border-radius: 0;
 }
 
 .container .jumbotron, .container-fluid .jumbotron h1 {
-    color: #333;
-    text-shadow: 5px 5px 5px #fff;
+/*    color: #333;
+    text-shadow: 5px 5px 5px #fff;*/
+    color: #e7e7e7;
     margin-bottom: 50px;
 }
 
 .container-fluid .jumbotron .quick-fact {
     font-size: 28px;
     background-color: #fff;
-    background-color: rgba(255, 255, 255, 0.85);
+    background-color: rgba(255, 255, 255, 0.75);
     border: 1px solid #cfcfcf;
     padding: 30px;
     margin-bottom: 30px;

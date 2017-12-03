@@ -128,7 +128,12 @@ ui <- navbarPage(
         ),
         mainPanel(
           width = 10,
-          leafletOutput("mapCensus", height = mapHeight)
+          column(
+            7, leafletOutput("mapCensus", height = mapHeight)
+          ),
+          column(
+            5, plotlyOutput("pyramid", height = mapHeight)
+          )
         )
       ),
       tabsetPanel(
@@ -151,6 +156,24 @@ ui <- navbarPage(
         tabPanel("Income",
           column(6, plotlyOutput("c16incomeTotalMed", height = chartHeight)),
           column(6, plotlyOutput("c16incomeTotalMedaT", height = chartHeight))
+        ),
+        tabPanel("Population Pyramid",
+                 sidebarLayout(
+                   sidebarPanel(
+                     width = 2,
+                     selectInput(
+                       "pop_pyr_view",
+                       "View",
+                       c("CMA" = "CMA")
+                     ),
+                     selectInput(
+                       "pop_pyr_geo",
+                       "View",
+                       setNames(geoCMA$CMAuid,geoCMA$CMAname)
+                     )
+                   ),
+                   mainPanel(width = 10)
+                 )
         )
       )
     )

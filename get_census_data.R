@@ -1,15 +1,13 @@
 devtools::install_github("mountainmath/cancensus")
 library(cancensus)
-# library(leaflet)
-# library(viridis)
-
-# source("modules/chartFormat.R")
+library(dplyr)
 
 options(cancensus.api_key = "CensusMapper_f17c13c7fc5e60de7cdd341d5d4db866")
+options(cancensus.cache_path = "./cache/")
 
-censusForYear <- function(year, level) {
-  year = 2016
-  censusYear = paste0('CA', substr(paste0(year), 3, 4))
+censusForYear <- function(year, level = "CD") {
+  year <- 2016
+  censusYear <- paste0('CA', substr(paste0(year), 3, 4))
 
   regions <- list_census_regions(censusYear, use_cache = TRUE)
   bc <- regions %>% filter(PR_UID == "59")
@@ -87,7 +85,7 @@ censusForYear <- function(year, level) {
 }
 
 for (censusYear in c("2006", "2011", "2016")) {
-  for (censusLevel in c("CMA", "CD", "CSD", "CT")) {
+  for (censusLevel in c("CMA", "CD", "CSD", "CT", "DA")) {
     censusForYear(censusYear, censusLevel)
   }
 }

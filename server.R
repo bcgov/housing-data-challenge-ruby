@@ -1,122 +1,4 @@
 server <- function(input, output, session) {
-  # Initial map output
-  # Have to fully draw the map, it doesn't go through observe when it's not
-  # in the first tab
-  output$map <- renderLeaflet({
-    leaflet(shapesDF) %>%
-      setView(lng = -125,
-              lat = 53,
-              zoom = 5) %>%
-      addTiles(group = "OpenStreetMap") %>%
-      addProviderTiles("CartoDB.Positron") %>%
-
-      addPolygons(
-        data = shapesDF,
-        stroke = TRUE,
-        weight = 1,
-        fillOpacity = 0.5,
-        smoothFactor = 1,
-        color = '#333',
-        layerId = shapesDF@data$OBJECTID,
-        fillColor = ~ pal(shapesDF$no_mkt_trans),
-        popup = paste0(
-          "<strong>",
-          geoUnit,
-          "</strong>",
-          "<table class=\"leaflet-popup-table\">
-          <tr><td>Period</td><td>",
-          as.Date(shapesDF$trans_period),
-          "</td></tr><tr><td>Number of transactions</td><td>",
-          format(shapesDF$no_mkt_trans, big.mark = ","),
-          "</td></tr><tr><td>Number of foreign transactions</td><td>",
-          format(shapesDF$no_foreign, big.mark = ","),
-          "</td></tr><tr><td>Number % by foreign purchasers</td><td>",
-          format(shapesDF$no_foreign_perc, big.mark = ","),
-          "</td></tr><tr><td>Total value</td><td>",
-          paste("$", format(shapesDF$sum_FMV, big.mark = ","), sep =
-                  ""),
-          "</td></tr><tr><td>Total value by foreign purchasers</td><td>",
-          paste("$",
-                format(shapesDF$sum_FMV_foreign, big.mark = ","),
-                sep = ""),
-          "</td></tr><tr><td>Value % by foreign purchasers</td><td>",
-          format(shapesDF$sum_FMV_foreign_perc, big.mark = ","),
-          "</td></tr><tr><td>PTT Paid</td><td>",
-          paste("$",
-                format(shapesDF$sum_PPT_paid, big.mark = ","),
-                sep = ""),
-          "</td></tr><tr><td>Additional Tax Paid</td><td>",
-          paste("$",
-                format(shapesDF$add_tax_paid, big.mark = ","),
-                sep = ""),
-          "</td></tr></table>"
-        ),
-        group = "divisions"
-      ) %>%
-      addLegend(
-        "bottomleft",
-        pal = pal,
-        values = shapesDF$no_mkt_trans,
-        title = "Transactions #",
-        labFormat = labelFormat(prefix = "$"),
-        opacity = 0.8
-      ) %>%
-      # addLayersControl(
-      #     overlayGroups = c("Census Divisions"),
-      #     options = layersControlOptions(collapsed = FALSE)
-      # ) %>%
-      clearGroup(group = "selected")
-
-  })
-
-  output$mapCensus <- renderLeaflet({
-    censusDataSpatial %>%
-      leaflet() %>%
-      addProviderTiles(provider = "CartoDB.Positron") %>%
-      addPolygons(
-        label = ~ name,
-        # color = ~ pal(v_CA16_2447),
-        stroke = TRUE,
-        weight = 1,
-        fillOpacity = 0.5,
-        smoothFactor = 1,
-        color = '#333',
-        fillColor = ~ palViridis(censusData$v_CA16_2447),
-        popup = paste0(
-          "<strong>",
-          censusData$`Region Name`,
-          "</strong>",
-          "<table class=\"leaflet-popup-table\">
-          <tr><td>Census Year</td><td>2016</td></tr>",
-          "<tr><td>Population</td><td>",
-          format(censusData$Population, big.mark = ","),
-          "</td></tr><tr><td>Dwellings</td><td>",
-          format(censusData$Dwellings, big.mark = ","),
-          "</td></tr><tr><td>Households</td><td>",
-          format(censusData$Households, big.mark = ","),
-          "</td></tr><tr><td>Median total income</td><td>",
-          paste("$", format(censusData$v_CA16_2447, big.mark = ","), sep =
-                  ""),
-          "</td></tr><tr><td>Average Age</td><td>",
-          censusData$v_CA16_379,
-          "</td></tr><tr><td>Provate dwellings occupied by usual residents</td><td>",
-          format(censusData$v_CA16_405, big.mark = ","),
-          "</td></tr><tr><td>Single detahed houses</td><td>",
-          format(censusData$v_CA16_412, big.mark = ","),
-          "</td></tr><tr><td>Average family size</td><td>",
-          format(censusData$v_CA16_2449, big.mark = ","),
-          "</td></tr></table>"
-        )
-      ) %>%
-      addLegend(
-        "bottomleft",
-        pal = palViridis,
-        values = ~ v_CA16_2447,
-        title = "Median total income of <br> economic families in 2015",
-        opacity = 0.5
-      )
-  })
-
   # observeEvent(input$map_shape_click, {
   #     #create object for clicked polygon
   #     click <- input$map_shape_click
@@ -208,32 +90,38 @@ server <- function(input, output, session) {
           fillOpacity = 0.5,
           smoothFactor = 1,
           color = '#333',
-          fillColor = ~ palViridis(censusData$v_CA16_2447),
+          fillColor = ~ palViridis(censusDataSpatial$v_CA16_2447),
           popup = paste0(
             "<strong>",
-            censusData$`Region Name`,
+            paste(censusDataSpatial$`Region Name`),
             "</strong>",
             "<table class=\"leaflet-popup-table\">
             <tr><td>Census Year</td><td>2016</td></tr>",
             "<tr><td>Population</td><td>",
-            format(censusData$Population, big.mark = ","),
+            format(censusDataSpatial$Population, big.mark = ","),
             "</td></tr><tr><td>Dwellings</td><td>",
-            format(censusData$Dwellings, big.mark = ","),
+            format(censusDataSpatial$Dwellings, big.mark = ","),
             "</td></tr><tr><td>Households</td><td>",
-            format(censusData$Households, big.mark = ","),
+            format(censusDataSpatial$Households, big.mark = ","),
             "</td></tr><tr><td>Median total income</td><td>",
-            paste("$", format(censusData$v_CA16_2447, big.mark = ","), sep =
+            paste("$", format(censusDataSpatial$v_CA16_2447, big.mark = ","), sep =
                     ""),
             "</td></tr><tr><td>Average Age</td><td>",
-            censusData$v_CA16_379,
+            censusDataSpatial$v_CA16_379,
             "</td></tr><tr><td>Provate dwellings occupied by usual residents</td><td>",
-            format(censusData$v_CA16_405, big.mark = ","),
+            format(censusDataSpatial$v_CA16_405, big.mark = ","),
             "</td></tr><tr><td>Single detahed houses</td><td>",
-            format(censusData$v_CA16_412, big.mark = ","),
+            format(censusDataSpatial$v_CA16_412, big.mark = ","),
             "</td></tr><tr><td>Average family size</td><td>",
-            format(censusData$v_CA16_2449, big.mark = ","),
+            format(censusDataSpatial$v_CA16_2449, big.mark = ","),
             "</td></tr></table>"
-          )
+          ),
+          highlight = highlightOptions(
+            weight = 5,
+            color = "#696969",
+            dashArray = "",
+            fillOpacity = 0.5,
+            bringToFront = TRUE)
         ) %>%
         addLegend(
           "bottomleft",
@@ -529,70 +417,83 @@ server <- function(input, output, session) {
                              [order(c16$Population.2016, decreasing = FALSE)])
 
     pal <-
-      colorQuantile("YlGnBu", n = 9, as.integer(shapesDF[[pt_metric]]))
+      colorQuantile("viridis", n = 9, shapesDF[[pt_metric]])
     # pal <- colorBin("YlGnBu", shapesDF[[pt_metric]])
+    # pal <- colorNumeric("viridis", shapesDF[[pt_metric]])
     data <- shapesDF@data
 
-    leafletProxy("map") %>%
-      clearControls() %>%
-      clearShapes() %>%
-      addPolygons(
-        data = shapesDF,
-        stroke = TRUE,
-        weight = 1,
-        fillOpacity = 0.5,
-        smoothFactor = 1,
-        color = '#333',
-        layerId = shapesDF@data$OBJECTID,
-        fillColor = ~ pal(shapesDF[[pt_metric]]),
-        popup = paste0(
-          "<strong>",
-          geoUnit,
-          "</strong>",
-          "<table class=\"leaflet-popup-table\">
-          <tr><td>Period</td><td>",
-          as.Date(shapesDF$trans_period),
-          "</td></tr><tr><td>Number of transactions</td><td>",
-          format(shapesDF$no_mkt_trans, big.mark = ","),
-          "</td></tr><tr><td>Number of foreign transactions</td><td>",
-          format(shapesDF$no_foreign, big.mark = ","),
-          "</td></tr><tr><td>Number % by foreign purchasers</td><td>",
-          format(shapesDF$no_foreign_perc, big.mark = ","),
-          "</td></tr><tr><td>Total value</td><td>",
-          paste("$", format(shapesDF$sum_FMV, big.mark = ","), sep =
-                  ""),
-          "</td></tr><tr><td>Total value by foreign purchasers</td><td>",
-          paste("$",
-                format(shapesDF$sum_FMV_foreign, big.mark = ","),
-                sep = ""),
-          "</td></tr><tr><td>Value % by foreign purchasers</td><td>",
-          format(shapesDF$sum_FMV_foreign_perc, big.mark = ","),
-          "</td></tr><tr><td>PTT Paid</td><td>",
-          paste("$",
-                format(shapesDF$sum_PPT_paid, big.mark = ","),
-                sep = ""),
-          "</td></tr><tr><td>Additional Tax Paid</td><td>",
-          paste("$",
-                format(shapesDF$add_tax_paid, big.mark = ","),
-                sep = ""),
-          "</td></tr></table>"
-        ),
-        group = "divisions"
-      ) %>%
-      addLegend(
-        "bottomleft",
-        pal = pal,
-        values = shapesDF[[pt_metric]],
-        title = pt_metric,
-        #"Transactions #",
-        labFormat = labelFormat(prefix = "$"),
-        opacity = 0.8
-      ) %>%
-      # addLayersControl(
-      #     overlayGroups = c("Census Divisions"),
-      #     options = layersControlOptions(collapsed = FALSE)
-      # ) %>%
-      clearGroup(group = "selected")
+    output$map <- renderLeaflet({
+      leaflet(shapesDF) %>%
+        setView(lng = -125,
+                lat = 53,
+                zoom = 5) %>%
+        addTiles(group = "OpenStreetMap") %>%
+        addProviderTiles("CartoDB.Positron") %>%
+    
+        addPolygons(
+          data = shapesDF,
+          stroke = TRUE,
+          weight = 1,
+          fillOpacity = 0.5,
+          smoothFactor = 1,
+          color = '#333',
+          layerId = shapesDF@data$OBJECTID,
+          fillColor = ~ pal(shapesDF[[pt_metric]]),
+          label = geoUnit,
+          popup = paste0(
+            "<strong>",
+            geoUnit,
+            "</strong>",
+            "<table class=\"leaflet-popup-table\">
+            <tr><td>Period</td><td>",
+            as.Date(shapesDF$trans_period),
+            "</td></tr><tr><td>Number of transactions</td><td>",
+            format(shapesDF$no_mkt_trans, big.mark = ","),
+            "</td></tr><tr><td>Number of foreign transactions</td><td>",
+            format(shapesDF$no_foreign, big.mark = ","),
+            "</td></tr><tr><td>Number % by foreign purchasers</td><td>",
+            format(shapesDF$no_foreign_perc, big.mark = ","),
+            "</td></tr><tr><td>Total value</td><td>",
+            paste("$", format(shapesDF$sum_FMV, big.mark = ","), sep =
+                    ""),
+            "</td></tr><tr><td>Total value by foreign purchasers</td><td>",
+            paste("$",
+                  format(shapesDF$sum_FMV_foreign, big.mark = ","),
+                  sep = ""),
+            "</td></tr><tr><td>Value % by foreign purchasers</td><td>",
+            format(shapesDF$sum_FMV_foreign_perc, big.mark = ","),
+            "</td></tr><tr><td>PTT Paid</td><td>",
+            paste("$",
+                  format(shapesDF$sum_PPT_paid, big.mark = ","),
+                  sep = ""),
+            "</td></tr><tr><td>Additional Tax Paid</td><td>",
+            paste("$",
+                  format(shapesDF$add_tax_paid, big.mark = ","),
+                  sep = ""),
+            "</td></tr></table>"
+          ),
+          # group = "divisions",
+          highlight = highlightOptions(
+            weight = 5,
+            color = "#696969",
+            dashArray = "",
+            fillOpacity = 0.5,
+            bringToFront = TRUE)
+        ) %>%
+        addLegend(
+          "bottomleft",
+          pal = pal,
+          values = shapesDF$no_mkt_trans,
+          title = "Transactions #",
+          labFormat = labelFormat(prefix = "$"),
+          opacity = 0.8
+        ) %>%
+        # addLayersControl(
+        #     overlayGroups = c("Census Divisions"),
+        #     options = layersControlOptions(collapsed = FALSE)
+        # ) %>%
+        clearGroup(group = "selected")
+    })
 
     output$dt = DT::renderDataTable(
       datatable(

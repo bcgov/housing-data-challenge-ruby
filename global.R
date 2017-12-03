@@ -14,6 +14,7 @@ library(cancensus)
 # source files
 source("modules/controls.R")
 source("modules/chartFormat.R")
+source("get_geography.R")
 
 # Read objects
 # Property transfer tax
@@ -42,13 +43,12 @@ censusCategories <- label_vectors(censusData)
 # censusCategoriesList <- as.list(censusCategories)
 censusCategoriesList <- setNames(censusCategories$Vector, censusCategories$Detail)
 
-# set cancensus options
-options(cancensus.api_key = "CensusMapper_f17c13c7fc5e60de7cdd341d5d4db866")
-# dir.create('/srv/shiny-server/cache', showWarnings = TRUE, recursive = FALSE, mode = "0777")
+# options(cancensus.api_key = "CensusMapper_f17c13c7fc5e60de7cdd341d5d4db866")
+# dir.create('./cache', showWarnings = TRUE, recursive = FALSE, mode = "0777")
 # Sys.chmod(list.dirs("."), "777")
-options(cancensus.cache_path = '/srv/shiny-server/cache')
+# options(cancensus.cache_path = "./cache/")
 
-# regions <- list_census_regions("CA16", use_cache = TRUE)
+# regions <- list_census_regions("CA16", use_cache = FALSE)
 # bc <- regions %>% filter(PR_UID == "59")
 #
 # cma <- bc %>% filter(level == "CMA")
