@@ -19,30 +19,36 @@ geo <- geo %>%
 # Discard French parts of ER and CMA names
 geo$Ername <- gsub("--", "-", gsub(" / .*", "", geo$Ername, perl = TRUE))
 geo$CMAname <- gsub(" / .*", "", geo$CMAname, perl = TRUE)
+saveRDS(geo, "data/geo.rds")
 
 # Economic regions
 geoER <- geo %>% 
   select(Pruid, Prename, Preabbr, Eruid, Ername) %>%
   distinct()
+saveRDS(geoER, "data/geoER.rds")
 
 # Census divisions
 geoCD <- geo %>% 
   select(Pruid, Prename, Preabbr, Cduid, Cdname, Cdtype) %>%
   distinct()
+saveRDS(geoCD, "data/geoCD.rds")
 
 # Census sub-divisions
 geoCSD <- geo %>% 
   select(Pruid, Prename, Preabbr, CSDuid, CSDname, CSDtype) %>%
   distinct()
+saveRDS(geoCSD, "data/geoCSD.rds")
 
 # Census metropolitan areas
 geoCMA <- geo %>% 
   select(Pruid, Prename, Preabbr, CMAPuid, CMAuid, CMAname, CMAtype) %>%
   distinct()
+saveRDS(geoCMA, "data/geoCMA.rds")
 
 # Census geo reference - all units
 geoRef <- geo %>%
   select(Pruid, Prename, Preabbr, Eruid, Ername, Cduid, Cdname, Cdtype, 
          CMAPuid, CMAuid, CMAname, CMAtype, CSDuid, CSDname, CSDtype) %>%
   distinct()
+saveRDS(geoRef, "data/geoRef.rds")
 

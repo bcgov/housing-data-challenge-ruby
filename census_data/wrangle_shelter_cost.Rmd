@@ -1,0 +1,141 @@
+---
+title: "NHS Shelter Cost Ratio"
+output:
+  html_document: default
+html_notebook: default
+editor_options:
+  chunk_output_type: inline
+---
+  
+## Load Packages and required files
+
+```{r}
+library(tidyverse)
+library(feather)
+library(stringr)
+library(plotly)
+library(htmltools)
+library(DT)
+library(knitr)
+
+geoCMA <- readRDS("../data/geoCMA.rds")
+```
+
+
+## Load Data
+
+Read data tables from csv file and wrangle geography column to filter out non-BC geographies
+
+```{r}
+data <- read_csv("./NHS_99-014-X2011031_sheltercostratio.csv")
+
+# Function to extract CMA code from Geography
+extractCMA = function(x) {
+  sapply(x, function(x){
+    x = str_split(x, " \\(", n = 2, simplify = TRUE)
+    y = str_split(x[2], "\\)", n = -1, simplify = TRUE)
+    return(as.integer(y[1]))
+  })
+}
+
+# Join to CMA geo-reference
+data <- data %>%
+  mutate(CMAuid = extractCMA(Geography)) %>%
+  filter(!str_detect(CMAuid, "part")) %>%
+  inner_join(geoCMA)
+
+# Mutate to add percentages columns
+data <- data %>%
+  mutate(less_than_15_percent = round(`Less than 15%` / `Total - Shelter-cost-to-income ratio` * 100)) %>%
+  mutate(between_15_and_30_percent = round(`15% to less than 30%` / `Total - Shelter-cost-to-income ratio` * 100)) %>%
+  mutate(between_30_and_50_percent = round(`30% to less than 50%` / `Total - Shelter-cost-to-income ratio` * 100)) %>%
+  mutate(more_than_50_percent = round(`50% or more` / `Total - Shelter-cost-to-income ratio` * 100)) %>%
+  mutate(not_applicable_percent = round(`Not applicable (private households with a household total income less than or equal to zero)` / `Total - Shelter-cost-to-income ratio` * 100)) %>%
+  arrange(desc(more_than_50_percent), desc(between_30_and_50_percent), desc(between_15_and_30_percent))
+
+```
+
+## Data Visualization
+### Data tables
+```{r}
+data %>%
+     DT::datatable(class='compact stripe hover row-border order-column',rownames=FALSE,options= list(paging = TRUE, searching = TRUE,info=FALSE))
+
+```
+
+### Stacked chart
+```{r}
+top_labels <- c('Less than 15%', 'Between 15 and 30%', 'Between 30 and 50%', 'More than 50%', 'Not applicable')
+
+p <- plot_ly(data, x = ~less_than_15_percent, y = ~CMAname, type = 'bar', orientation = 'h',
+             marker = list(color = 'rgba(38, 24, 74, 0.8)',
+                           line = list(color = 'rgb(248, 248, 249)', width = 1))) %>%
+  add_trace(x = ~between_15_and_30_percent, marker = list(color = 'rgba(71, 58, 131, 0.8)')) %>%
+  add_trace(x = ~between_30_and_50_percent, marker = list(color = 'rgba(122, 120, 168, 0.8)')) %>%
+  add_trace(x = ~more_than_50_percent, marker = list(color = 'rgba(164, 163, 204, 0.85)')) %>%
+  add_trace(x = ~not_applicable_percent, marker = list(color = 'rgba(190, 192, 213, 1)')) %>%
+  layout(xaxis = list(title = "",
+                      showgrid = FALSE,
+                      showline = FALSE,
+                      showticklabels = FALSE,
+                      zeroline = FALSE,
+                      domain = c(0.15, 1)),
+         yaxis = list(title = "",
+                      showgrid = FALSE,
+                      showline = FALSE,
+                      showticklabels = FALSE,
+                      zeroline = FALSE),
+         barmode = 'stack',
+         paper_bgcolor = 'rgb(248, 248, 255)', plot_bgcolor = 'rgb(248, 248, 255)',
+         margin = list(l = 120, r = 10, t = 140, b = 80),
+         showlegend = FALSE) %>%
+  # labeling the y-axis
+  add_annotations(xref = 'paper', yref = 'y', x = 0.14, y = ~CMAname,
+                  xanchor = 'right',
+                  text = ~CMAname,
+                  font = list(family = 'Arial', size = 12,
+                              color = 'rgb(67, 67, 67)'),
+                  showarrow = FALSE, align = 'right') %>%
+  # labeling the percentages of each bar (x_axis)
+  add_annotations(xref = 'x', yref = 'y',
+                  x = ~(less_than_15_percent / 2), y = ~CMAname,
+                  text = ~paste(less_than_15_percent, '%'),
+                  font = list(family = 'Arial', size = 12,
+                              color = 'rgb(248, 248, 255)'),
+                  showarrow = FALSE) %>%
+  add_annotations(xref = 'x', yref = 'y',
+                  x = ~(less_than_15_percent + between_15_and_30_percent / 2), y = ~CMAname,
+                  text = ~paste(between_15_and_30_percent, '%'),
+                  font = list(family = 'Arial', size = 12,
+                              color = 'rgb(248, 248, 255)'),
+                  showarrow = FALSE) %>%
+  add_annotations(xref = 'x', yref = 'y',
+                  x = ~(less_than_15_percent + between_15_and_30_percent + between_30_and_50_percent / 2), y = ~CMAname,
+                  text = ~paste(between_30_and_50_percent, '%'),
+                  font = list(family = 'Arial', size = 12,
+                              color = 'rgb(248, 248, 255)'),
+                  showarrow = FALSE) %>%
+  add_annotations(xref = 'x', yref = 'y',
+                  x = ~(less_than_15_percent + between_15_and_30_percent + between_30_and_50_percent + more_than_50_percent / 2), y = ~CMAname,
+                  text = ~paste(more_than_50_percent, '%'),
+                  font = list(family = 'Arial', size = 12,
+                              color = 'rgb(248, 248, 255)'),
+                  showarrow = FALSE) %>%
+  add_annotations(xref = 'x', yref = 'y',
+                  x = ~(less_than_15_percent + between_15_and_30_percent + between_30_and_50_percent + more_than_50_percent + not_applicable_percent / 2), y = ~CMAname,
+                  text = ~paste(not_applicable_percent, '%'),
+                  font = list(family = 'Arial', size = 12,
+                              color = 'rgb(248, 248, 255)'),
+                  showarrow = FALSE) %>%
+  # labeling the first Likert scale (on the top)
+  add_annotations(xref = 'x', yref = 'paper',
+                  x = c(21 / 2, 21 + 30 / 2, 21 + 30 + 21 / 2, 21 + 30 + 21 + 16 / 2,
+                        21 + 30 + 21 + 16 + 12 / 2),
+                  y = 1.05,
+                  text = top_labels,
+                  font = list(family = 'Arial', size = 12,
+                              color = 'rgb(67, 67, 67)'),
+                  showarrow = FALSE)
+
+p
+```
