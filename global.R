@@ -10,6 +10,10 @@ library(tidyr)
 library(crosstalk)
 library(plotly)
 library(cancensus)
+library(tidyverse)
+library(feather)
+library(stringr)
+library(htmltools)
 
 # source files
 source("modules/controls.R")
@@ -17,6 +21,13 @@ source("modules/chartFormat.R")
 source("get_geography.R")
 
 # Read objects
+
+# Geo reference
+geoER <- readRDS("data/geoER.rds")
+geoCD <- readRDS("data/geoCD.rds")
+geoCSD <- readRDS("data/geoCSD.rds")
+geoCMA <- readRDS("data/geoCMA.rds")
+
 # Property transfer tax
 ptRegDisMth <- readRDS("./data/pt-regional-district-monthly.rds")
 ptMunMth <- readRDS("./data/pt-municipal-monthly.rds")
@@ -265,6 +276,36 @@ jumbotron <- function(header, popPerc = 0, popInc = TRUE, dwellPerc = 0, dwellIn
               </div>
               </div>") )
 }
+
+# NHS data
+# Shelter cost ratio
+nhsShelterCostRatio <- read_csv("./census_data/NHS_99-014-X2011031_sheltercostratio.csv")
+
+# Function to extract CMA code from Geography
+extractCMA = function(x) {
+  sapply(x, function(x){
+    x = str_split(x, " \\(", n = 2, simplify = TRUE)
+    y = str_split(x[2], "\\)", n = -1, simplify = TRUE)
+    return(as.integer(y[1]))
+  })
+}
+
+# Join to CMA geo-reference
+nhsShelterCostRatio <- nhsShelterCostRatio %>%
+  mutate(CMAuid = extractCMA(Geography)) %>%
+  filter(!str_detect(CMAuid, "part")) %>%
+  inner_join(geoCMA)
+
+# Mutate to add percentages columns
+nhsShelterCostRatio <- nhsShelterCostRatio %>%
+  mutate(total_applicable = `Less than 15%` + `15% to less than 30%` + `30% to less than 50%` + `50% or more`) %>%
+  mutate(less_than_15_percent = round(`Less than 15%` / total_applicable * 100, digits = 2)) %>%
+  mutate(between_15_and_30_percent = round(`15% to less than 30%` / total_applicable * 100, digits = 2)) %>%
+  mutate(between_30_and_50_percent = round(`30% to less than 50%` / total_applicable * 100, digits = 2)) %>%
+  mutate(more_than_50_percent = round(`50% or more` / total_applicable * 100, digits = 2)) %>%
+  mutate(not_applicable_percent = round(`Not applicable (private households with a household total income less than or equal to zero)` / `Total - Shelter-cost-to-income ratio` * 100)) %>%
+  arrange(desc(more_than_50_percent), desc(between_30_and_50_percent), desc(between_15_and_30_percent))
+
 
 # Function to dynamically create plotly charts
 plotmy <-
