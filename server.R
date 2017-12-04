@@ -268,7 +268,6 @@ server <- function(input, output, session) {
     })
 
 
-
     # PTT observer switch
     switch(pt_view,
            "regdis" = {
@@ -1083,4 +1082,88 @@ selection = list(target = 'row+column')
         )
         ))
     })
+  
+    # NHS tab
+    topLabels <- c('More<br>than 50%', 'Between<br>30 and 50%', 'Between<br>15 and 30%', 'Less<br>than 15%') #, 'Not applicable')
+    labelPositions <- c(
+      nhsShelterCostRatio[1,"more_than_50_percent"] / 2, 
+      nhsShelterCostRatio[1,"more_than_50_percent"] + nhsShelterCostRatio[1,"between_30_and_50_percent"] / 2, 
+      nhsShelterCostRatio[1,"more_than_50_percent"] + nhsShelterCostRatio[1,"between_30_and_50_percent"] + nhsShelterCostRatio[1,"between_15_and_30_percent"] / 2,
+      nhsShelterCostRatio[1,"more_than_50_percent"] + nhsShelterCostRatio[1,"between_30_and_50_percent"] + nhsShelterCostRatio[1,"between_15_and_30_percent"] + nhsShelterCostRatio[1,"less_than_15_percent"] / 2
+    )
+    
+    # Reorder data for plotly
+    nhsShelterCostRatio$CMAname <- factor(
+      nhsShelterCostRatio$CMAname, 
+      levels = unique(nhsShelterCostRatio$CMAname)[order(
+        nhsShelterCostRatio$more_than_50_percent, 
+        nhsShelterCostRatio$between_30_and_50_percent, 
+        nhsShelterCostRatio$between_15_and_30_percent, decreasing = FALSE
+      )]
+    )
+  
+    output$nhs_shelter_cost_ratio = renderPlotly(
+      plot_ly(nhsShelterCostRatio, x = ~more_than_50_percent, name = "More than 50%", y = ~CMAname, type = 'bar', orientation = 'h',
+             marker = list(color = colCommercial,
+                           line = list(color = 'rgb(248, 248, 249)', width = 1), hoverinfo="x+y+name")) %>%
+       add_trace(x = ~between_30_and_50_percent, name = "Between 30 and 50%", marker = list(color = colFarms)) %>%
+       add_trace(x = ~between_15_and_30_percent, name = "Between 15 and 30%", marker = list(color = colMultiFam)) %>%
+       add_trace(x = ~less_than_15_percent, name = "Less than 15%", marker = list(color = colSingleFam)) %>%
+       layout(xaxis = list(title = "",
+                           showgrid = FALSE,
+                           showline = FALSE,
+                           showticklabels = FALSE,
+                           zeroline = FALSE,
+                           domain = c(0.15, 1)),
+              yaxis = list(title = "",
+                           showgrid = FALSE,
+                           showline = FALSE,
+                           showticklabels = FALSE,
+                           zeroline = FALSE),
+              barmode = 'stack',
+              #paper_bgcolor = 'rgb(248, 248, 255)', plot_bgcolor = 'rgb(248, 248, 255)',
+              margin = list(l = 70, r = 10, t = 70, b = 30),
+              showlegend = FALSE) %>%
+       # labeling the y-axis
+       add_annotations(xref = 'paper', yref = 'y', x = 0.14, y = ~CMAname,
+                       xanchor = 'right',
+                       text = ~CMAname,
+                       font = list(family = 'Arial', size = 12,
+                                   color = 'rgb(67, 67, 67)'),
+                       showarrow = FALSE, align = 'right') %>%
+       # labeling the percentages of each bar (x_axis)
+       add_annotations(xref = 'x', yref = 'y',
+                       x = ~(more_than_50_percent / 2), y = ~CMAname,
+                       text = ~paste(more_than_50_percent, '%'),
+                       font = list(family = 'Arial', size = 12,
+                                   color = 'rgb(67, 67, 67)'),
+                       showarrow = FALSE) %>%
+       add_annotations(xref = 'x', yref = 'y',
+                       x = ~(more_than_50_percent + between_30_and_50_percent / 2), y = ~CMAname,
+                       text = ~paste(between_30_and_50_percent, '%'),
+                       font = list(family = 'Arial', size = 12,
+                                   color = 'rgb(67, 67, 67)'),
+                       showarrow = FALSE) %>%
+       add_annotations(xref = 'x', yref = 'y',
+                       x = ~(more_than_50_percent + between_30_and_50_percent + between_15_and_30_percent / 2), y = ~CMAname,
+                       text = ~paste(between_15_and_30_percent, '%'),
+                       font = list(family = 'Arial', size = 12,
+                                   color = 'rgb(67, 67, 67)'),
+                       showarrow = FALSE) %>%
+       add_annotations(xref = 'x', yref = 'y',
+                       x = ~(more_than_50_percent + between_30_and_50_percent + between_15_and_30_percent + less_than_15_percent / 2), y = ~CMAname,
+                       text = ~paste(less_than_15_percent, '%'),
+                       font = list(family = 'Arial', size = 12,
+                                   color = 'rgb(67, 67, 67)'),
+                       showarrow = FALSE) %>%
+       # labeling the first Likert scale (on the top)
+       add_annotations(xref = 'x', yref = 'paper',
+                       x = labelPositions,
+                       y = 1.05,
+                       text = topLabels,
+                       font = list(family = 'Arial', size = 12,
+                                   color = 'rgb(67, 67, 67)'),
+                       showarrow = FALSE) %>%
+       config(displayModeBar = F)
+      )
   }

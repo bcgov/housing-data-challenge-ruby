@@ -179,6 +179,21 @@ ui <- navbarPage(
     )
   ),
   tabPanel(
+    'NHS',
+    fluidPage(
+      titlePanel("National Household Survey 2011"),
+      fluidRow(
+        column(6, 
+          tags$h3("Shelter cost to income ratio by Census Metropolitan Area (CMA)"),
+          tags$p("Shelter-cost-to-income ratio refers to the proportion of average total income of household which is spent on shelter costs."),
+          tags$p("It is calculated by dividing the average monthly shelter costs by the average monthly total household income and multiplying the result by 100."),
+          plotlyOutput("nhs_shelter_cost_ratio", height = 1.5*chartHeight),
+          tags$p(tags$a(href="http://www23.statcan.gc.ca/imdb/p3Var.pl?Function=DEC&Id=103407", "StatCan Reference"))
+        )
+      )
+    )
+  ),
+  tabPanel(
     'Census Search',
     fluidPage(
       titlePanel("Census Search"),
