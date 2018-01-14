@@ -1,45 +1,10 @@
 server <- function(input, output, session) {
-  # observeEvent(input$map_shape_click, {
-  #     #create object for clicked polygon
-  #     click <- input$map_shape_click
-  #
-  #     #define leaflet proxy for second regional level map
-  #     proxy <- leafletProxy("map")
-  #
-  #     #subset regions shapefile by the clicked on polygons
-  #     selectedReg <-
-  #         bcCensusDivsMap[bcCensusDivsMap@data$OBJECTID == click$id, ]
-  #
-  #     output$text <- renderText({
-  #         paste0(" Selected CDNAME: ", selectedReg@data$CDNAME)
-  #     })
-  #
-  #     output$text2 <- renderText({
-  #         paste0(" Selected regional district: ",
-  #                selectedReg@data$RegionalDistrict)
-  #     })
-  #
-  #     #map clicked on polygons
-  #     proxy %>% addPolygons(
-  #         data = selectedReg,
-  #         fillColor = "red",
-  #         fillOpacity = 0.7,
-  #         weight = 1,
-  #         color = "black",
-  #         stroke = T,
-  #         group = "selected",
-  #         # layerId = "selected")
-  #         layerId = selectedReg@data$OBJECTID
-  #     )
-  #
-  #
-  #     #remove polygon group that are clicked twice
-  #     if (click$group == "selected") {
-  #         proxy %>%
-  #             clearGroup(group = "selected")
-  #     }
-  #
-  # })
+
+  censusSearchDataset <- reactive({
+    paste0('CA', substr(paste0(
+      input$c_search_data_year
+    ), 3, 4))
+  })
 
   # This observer is responsible for maintaining the circles and legend,
   # according to the variables the user has chosen to map to color and size.
@@ -53,30 +18,48 @@ server <- function(input, output, session) {
     c_metric <- input$c_metric
 
     # Census observer switch
+    censusMobility <- read_rds("./data/census2016-mobility-CMA.rds")
     switch(
       c_view,
       "cma" = {
         censusData <- readRDS("./data/census2016-CMA.rds")
         censusDataSpatial <-
           readRDS("./data/censusSpatial2016-CMA.rds")
+        censusMobility <- read_rds("./data/census2016-mobility-CMA.rds")
       },
       "csd" = {
         censusData <- readRDS("./data/census2016-CSD.rds")
         censusDataSpatial <-
           readRDS("./data/censusSpatial2016-CSD.rds")
+        censusMobility <- read_rds("./data/census2016-mobility-CSD.rds")
       },
       "cd" = {
         censusData <- readRDS("./data/census2016-CD.rds")
         censusDataSpatial <-
           readRDS("./data/censusSpatial2016-CD.rds")
+        censusMobility <- read_rds("./data/census2016-mobility-CD.rds")
       },
       "ct" = {
         censusData <- readRDS("./data/census2016-CT.rds")
         censusDataSpatial <-
           readRDS("./data/censusSpatial2016-CT.rds")
+        censusMobility <- read_rds("./data/census2016-mobility-CT.rds")
+      },
+      "cda" = {
+        censusData <- readRDS("./data/census2016-CT.rds")
+        censusDataSpatial <-
+          readRDS("./data/censusSpatial2016-CT.rds")
+        censusMobility <- read_rds("./data/census2016-mobility-DA.rds")
       }
     )
     censusCategories <- label_vectors(censusData)
+
+    censusMobility %<>%
+      mutate(`Region Name` = as.character(`Region Name`), Type = as.character(Type))
+    regionOptions <- censusMobility %>%
+      mutate(label = paste0(censusMobility$`Region Name`, " (", censusMobility$GeoUID, ")")) %>%
+      select(label, value = GeoUID)
+    updateSelectizeInput(session, 'c_location', choices = regionOptions, server = TRUE)
 
     output$mapCensus <- renderLeaflet({
       censusDataSpatial %>%
@@ -268,6 +251,46 @@ server <- function(input, output, session) {
     })
 
 
+    censusMobilityTM <- censusMobility %>%
+      gather(
+        "Non-movers", "Non-migrants",
+        "External migrants", "Intraprovincial migrants", "Interprovincial migrants",
+        key = "Migration", value = "count")
+
+
+    palLightRed <- "#fc95a4"# "#feb87e"# "#e85361"# "#e08176"
+    palLighterBlue <- colNonStrataRental
+    palLightBlue <- colMultiFam
+    palDarkBlue <- colSingleFam
+    palOther <- colUnknown
+
+    # Mobility
+    output$c16mobilityTree <- renderD3tree3({
+      d3tree3(
+        treemap(
+          censusMobilityTM,
+          index = c("Migration", "Region Name"),
+          vSize = "count",
+          type = "index",
+          vColor = "Migration",
+          palette = c(palOther, palLighterBlue, palLightBlue, palDarkBlue, palLightRed),
+          algorithm = "pivotSize",
+          sortID = "Migration",
+          fontsize.labels=c(15,12),                # size of labels. Give the size per level of aggregation: size for group, size for subgroup, sub-subgroups...
+          fontcolor.labels=c("white","orange"),    # Color of labels
+          fontface.labels=c(2,1),                  # Font of labels: 1,2,3,4 for normal, bold, italic, bold-italic...
+          bg.labels=c("transparent"),              # Background color of labels
+          align.labels=list(
+            c("center", "center"),
+            c("right", "bottom")
+          ),                                   # Where to place labels in the rectangle?
+          overlap.labels=0.5,                      # number between 0 and 1 that determines the tolerance of the overlap between labels. 0 means that labels of lower levels are not printed if higher level labels overlap, 1  means that labels are always printed. In-between values, for instance the default value .5, means that lower level labels are printed if other labels do not overlap with more than .5  times their area size.
+          inflate.labels=F
+        ),
+        rootname="Mobility"
+      )
+    })
+
 
     # PTT observer switch
     switch(pt_view,
@@ -429,7 +452,7 @@ server <- function(input, output, session) {
                 zoom = 5) %>%
         addTiles(group = "OpenStreetMap") %>%
         addProviderTiles("CartoDB.Positron") %>%
-    
+
         addPolygons(
           data = shapesDF,
           stroke = TRUE,
@@ -495,67 +518,6 @@ server <- function(input, output, session) {
         clearGroup(group = "selected")
     })
 
-    output$dt = DT::renderDataTable(
-      datatable(
-        propertyTaxPeriod,
-        #%>%
-        # select_(.dots = selectionMetricsDF$Metric),
-        options = list(
-          lengthChange = TRUE,
-          initComplete = JS(
-            "
-            function(settings, json) {
-            $(this.api().table().header()).css({
-            'background-color': 'rgba(0, 51, 102, 0.80)',
-            'border-bottom': '5px solid #fcba19',
-            'color': '#fff'
-            });
-            }"
-)
-          ),
-colnames = allMetrics,
-selection = list(target = 'row+column')
-          ) %>%
-  formatCurrency(
-    c(
-      "FMV Sum",
-      "FMV Average",
-      "FMV Median",
-      "PTT Paid",
-      "PTT Paid Median",
-      "FMV sum of Foreign Transactions",
-      "FMV Mean of Foreign Transactions",
-      "FMV Median of Foreign Transactions",
-      "Additional Tax Paid"
-    ),
-    currency = "$",
-    digits = 0
-  ) %>%
-  formatCurrency(
-    c(
-      "Total Market Transactions #",
-      "Res. Total #",
-      "Res. - Acreage #",
-      "Res. - Commerce #",
-      "Res. - Farm #",
-      "Res. - Multi-family #",
-      "Res. - Single-family Res. #",
-      "Res. - Strata Res. #",
-      "Res. - Strata Non- Res. or Rental #",
-      "Res. - Other #",
-      "Comm. Total #",
-      "Comm. - Comm. #",
-      "Comm. - Strata Non-Res. #",
-      "Comm. - Other #",
-      "Recr. Total #",
-      "Farm Total #",
-      "Other/Unknown Total #",
-      "Foreign Transactions #"
-    ),
-    currency = "",
-    digits = 0
-  )
-      )
 
     # Interactive based on user input
     output$interactive <- renderPlotly({
@@ -1037,14 +999,16 @@ selection = list(target = 'row+column')
         ))
     })
 
+  allVectors <- reactive({
+    list_census_vectors(censusSearchDataset(), use_cache = TRUE)
+  })
+
     # Search census data by vector
   observeEvent(input$c_search_data, {
     vectorsSearch <-
       search_census_vectors(
         input$c_search_vector,
-        paste0('CA', substr(paste0(
-          input$c_search_year
-        ), 3, 4)),
+        censusSearchDataset(),
         type = "Total",
         use_cache = TRUE
       )  %>%
@@ -1052,11 +1016,9 @@ selection = list(target = 'row+column')
 
     censusDataSearch <-
       get_census(
-        # paste0('CA', substr(paste0(
-        #   input$c_search_data_year
-        # ), 3, 4)),
-        level = "CD",
-        regions = regions,
+        censusSearchDataset(),
+        level = input$c_search_data_level,
+        regions = list(PR = "59"),
         vectors = input$c_search_vector,
         use_cache = TRUE,
         api_key = "CensusMapper_f17c13c7fc5e60de7cdd341d5d4db866",
@@ -1064,11 +1026,17 @@ selection = list(target = 'row+column')
         geo_format = NA
       )
 
+    output$c_search_vector_desc <- renderTable(allVectors() %>% filter(vector == input$c_search_vector))
     output$c_dt_data = DT::renderDataTable(datatable(
-      censusDataSearch,
+      censusDataSearch %>%
+        filter(Type == input$c_search_data_level),
       #%>%
       # select_(.dots = selectionMetricsDF$Metric),
+      filter = 'bottom',
+      extensions = 'Buttons',
       options = list(
+        pageLength = 25, autoWidth = TRUE, dom = 'Blfrtip',
+        buttons = c('copy', 'csv', 'excel', 'pdf', 'print'),
         lengthChange = TRUE,
         initComplete = JS(
           "
@@ -1083,4 +1051,176 @@ selection = list(target = 'row+column')
         )
         ))
     })
-  }
+
+  # POPULATION PYRAMID
+
+
+  # STIR
+  observe({
+    c_year <- input$c_year
+    c_view <- input$c_view
+
+    # Census observer switch
+    censusStir <- census2016CmaStir
+    switch(
+      c_view,
+      # "CMA" = {
+        # censusStir <- census2016CsdStir
+      # },
+      "CSD" = {
+        censusStir <- census2016CsdStir
+      },
+      "CD" = {
+        censusStir <- census2016CdStir
+      },
+      "CT" = {
+        censusStir <- census2016CtStir
+      },
+      "DA" = {
+        censusStir <- census2016DaStir
+      }
+    )
+
+    # censusStir %<>%
+    #   top_n(25, percent_more_than_30) %<>%
+    #   mutate(
+    #     # Region = ifelse(c_view %in% c("csd", "ct", "da"), paste(`Region Name`, str_sub(GeoUID, -2)), `Region Name`),
+    #     Region = factor(
+    #       paste(`Region Name`, str_sub(GeoUID, -2)),
+    #       levels = unique(Region)[order(percent_more_than_30, decreasing = FALSE)]
+    #     )
+    #   )
+
+    palStir <- colorNumeric(
+      palette = "YlGnBu",
+      domain = censusStir$percent_more_than_30)
+
+    # STIR Map
+    output$mapCensusStir <- renderLeaflet({
+      st_as_sf(censusStir) %>%
+      # censusStir %>%
+        leaflet() %>%
+        addProviderTiles(provider = "CartoDB.Positron") %>%
+        addPolygons(
+          label = ~ `Region`,
+          color = ~ pal(percent_more_than_30),
+          stroke = TRUE,
+          weight = 1,
+          fillOpacity = 0.5,
+          smoothFactor = 1,
+          # color = '#333',
+          # fillColor = ~ palViridis(censusStir$percent_more_than_30),
+          # fillColor = ~ pal(censusStir$percent_more_than_30),
+          popup = paste0(
+            "<strong>",
+            paste(censusStir$`Region Name`),
+            "</strong>",
+            "<table class=\"leaflet-popup-table\">
+            <tr><td>Census Year</td><td>", c_year, "</td></tr>",
+            "<tr><td>Population</td><td>",
+            format(censusStir$Population, big.mark = ","),
+            "</td></tr><tr><td>Dwellings</td><td>",
+            format(censusStir$Dwellings, big.mark = ","),
+            "</td></tr><tr><td>Households</td><td>",
+            format(censusStir$Households, big.mark = ","),
+            "</td></tr><tr><td>STIR < 30%</td><td>",
+            format(censusStir$percent_less_than_30, big.mark = ","),
+            "</td></tr><tr><td><strong>STIR > 30%</strong></td><td><strong>",
+            format(censusStir$percent_more_than_30, big.mark = ","),
+            "</strong></td></tr></table>"
+          ),
+          highlight = highlightOptions(
+            weight = 5,
+            color = "#696969",
+            dashArray = "",
+            fillOpacity = 0.5,
+            bringToFront = TRUE)
+        ) %>%
+        addLegend(
+          "bottomleft",
+          pal = palStir,
+          values = ~ percent_more_than_30,
+          title = "Percentage of families with STIR > 30%",
+          opacity = 0.5
+        )
+    })
+
+    # STIR Lollipop
+    censusStirgg2 <- ggplot(censusStir, aes(x = Region, y = percent_more_than_30)) +
+      geom_segment(aes(x = Region, xend = Region, y = 0, yend = percent_more_than_30), size = 1.5, color = colCommercial) +
+      geom_point(color = colCommercial, size = 4, alpha = 0.8, shape = 21, stroke = 4) +
+      theme_light() +
+      coord_flip() +
+      theme(
+        panel.grid.major.y = element_blank(),
+        panel.border = element_blank(),
+        axis.ticks.y = element_blank()
+      )
+    output$stirLollipop <- renderPlotly(
+      ggplotly(censusStirgg2) %>%
+        layout(
+          xaxis = list(title = "")
+        )
+    )
+
+    # STIR Stacked Bar
+    topLabels <- c('More than 30%', 'Less than 30%')
+    labelPositions <- c(
+      censusStir[1,"percent_more_than_30"]$percent_more_than_30 / 2,
+      censusStir[1,"percent_more_than_30"]$percent_more_than_30 +
+        censusStir[1,"percent_less_than_30"]$percent_less_than_30 / 2
+    )
+    output$stirStacked <- renderPlotly(
+      plot_ly(censusStir, x = ~percent_more_than_30, name = "More than 30%", y = ~`Region`, type = 'bar', orientation = 'h',
+              marker = list(color = colCommercial,
+                            line = list(color = 'rgb(248, 248, 249)', width = 1), hoverinfo="x+y+name")) %>%
+        # add_trace(x = ~between_30_and_50_percent, name = "Between 30 and 50%", marker = list(color = colFarms)) %>%
+        # add_trace(x = ~between_15_and_30_percent, name = "Between 15 and 30%", marker = list(color = colMultiFam)) %>%
+        add_trace(x = ~percent_less_than_30, name = "Less than 30%", marker = list(color = colMultiFam)) %>%
+        layout(xaxis = list(title = "",
+                            showgrid = FALSE,
+                            showline = FALSE,
+                            showticklabels = FALSE,
+                            zeroline = FALSE,
+                            domain = c(0.15, 1)),
+               yaxis = list(title = "",
+                            showgrid = FALSE,
+                            showline = FALSE,
+                            showticklabels = FALSE,
+                            zeroline = FALSE),
+               barmode = 'stack',
+               #paper_bgcolor = 'rgb(248, 248, 255)', plot_bgcolor = 'rgb(248, 248, 255)',
+               margin = list(l = 70, r = 10, t = 70, b = 30),
+               showlegend = FALSE) %>%
+        # labeling the y-axis
+        add_annotations(xref = 'paper', yref = 'y', x = 0.14, y = ~`Region`,
+                        xanchor = 'right',
+                        text = ~`Region`,
+                        font = list(family = 'Arial', size = 12,
+                                    color = 'rgb(67, 67, 67)'),
+                        showarrow = FALSE, align = 'right') %>%
+        # labeling the percentages of each bar (x_axis)
+        add_annotations(xref = 'x', yref = 'y',
+                        x = ~(percent_more_than_30 / 2), y = ~`Region`,
+                        text = ~paste(percent_more_than_30, '%'),
+                        font = list(family = 'Arial', size = 12,
+                                    color = 'rgb(67, 67, 67)'),
+                        showarrow = FALSE) %>%
+        add_annotations(xref = 'x', yref = 'y',
+                        x = ~(percent_more_than_30 + percent_less_than_30 / 2), y = ~Region,
+                        text = ~paste(percent_less_than_30, '%'),
+                        font = list(family = 'Arial', size = 12,
+                                    color = 'rgb(67, 67, 67)'),
+                        showarrow = FALSE) %>%
+        # labeling the first Likert scale (on the top)
+        add_annotations(xref = 'x', yref = 'paper',
+                        x = labelPositions,
+                        y = 1.05,
+                        text = topLabels,
+                        font = list(family = 'Arial', size = 12,
+                                    color = 'rgb(67, 67, 67)'),
+                        showarrow = FALSE) %>%
+        config(displayModeBar = F)
+    )
+  })
+}

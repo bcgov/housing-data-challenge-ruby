@@ -1,7 +1,11 @@
 library(shiny)
 library(rgdal)
+library(sf)
 library(leaflet)
 library(maps)
+library(readr)
+library(stringr)
+library(magrittr)
 library(dplyr)
 library(htmlwidgets)
 library(DT)
@@ -10,6 +14,12 @@ library(tidyr)
 library(crosstalk)
 library(plotly)
 library(cancensus)
+library(sankeyD3)
+library(sunburstR)
+library(treemap)
+library(data.tree)
+library(d3treeR)
+library(RColorBrewer)
 
 # source files
 source("modules/controls.R")
@@ -108,33 +118,33 @@ ptProvMth <- ptProvMth %>%
 
 allMetrics <- c("Total Market Transactions #" = "no_mkt_trans",
                 "Res. Total #" = "no_resid_trans",
-                "Res. - Acreage #" = "no_resid_acreage_trans",
-                "Res. - Commerce #" = "resid_comm_count",
-                "Res. - Farm #" = "no_resid_farm",
+                # "Res. - Acreage #" = "no_resid_acreage_trans",
+                # "Res. - Commerce #" = "resid_comm_count",
+                # "Res. - Farm #" = "no_resid_farm",
                 "Res. - Multi-family #" = "no_resid_fam",
                 "Res. - Single-family Res. #" = "no_res_1fam",
                 "Res. - Strata Res. #" = "no_resid_strata",
-                "Res. - Strata Non- Res. or Rental #" = "no_resid_non_strata",
-                "Res. - Other #" = "no_resid_other",
+                # "Res. - Strata Non- Res. or Rental #" = "no_resid_non_strata",
+                # "Res. - Other #" = "no_resid_other",
                 "Comm. Total #" = "no_comm_tot",
-                "Comm. - Comm. #" = "no_comm_comm",
-                "Comm. - Strata Non-Res. #" = "no_comm_strata_nores",
-                "Comm. - Other #" = "no_comm_other",
-                "Recr. Total #" = "no_recr_tot",
-                "Farm Total #" = "no_farm_tot",
-                "Other/Unknown Total #" = "no_unkn_tot",
+                # "Comm. - Comm. #" = "no_comm_comm",
+                # "Comm. - Strata Non-Res. #" = "no_comm_strata_nores",
+                # "Comm. - Other #" = "no_comm_other",
+                # "Recr. Total #" = "no_recr_tot",
+                # "Farm Total #" = "no_farm_tot",
+                # "Other/Unknown Total #" = "no_unkn_tot",
                 "FMV Sum" = "sum_FMV",
                 "FMV Average" = "mn_FMV",
-                "FMV Median" = "md_FMV",
+                # "FMV Median" = "md_FMV",
                 "PTT Paid" = "sum_PPT_paid",
-                "PTT Paid Median" = "md_PPT",
+                # "PTT Paid Median" = "md_PPT",
                 "Foreign Transactions #" = "no_foreign",
                 # "Foreign Involvement transactions - Res. #" = "no_foreign_res",
                 # "Foreign Involvement transactions - Comm. #" = "no_foreign_comm",
                 # "Foreign Involvement transactions - Other #" = "no_foreign_comm",
                 "FMV sum of Foreign Transactions" = "sum_FMV_foreign",
                 "FMV Mean of Foreign Transactions" = "mn_FMV_foreign",
-                "FMV Median of Foreign Transactions" = "md_FMV_foreign",
+                # "FMV Median of Foreign Transactions" = "md_FMV_foreign",
                 # "Under $1 million (count, foreign involvement transactions)" = "no_lt1M_foreign",
                 # "$1 million - $3 million (count, foreign involvement transactions)" = "no_gt1M_foreign",
                 # "Over $3 million (count, foreign involvement transactions)" = "no_gt3M_foreign",
@@ -168,6 +178,14 @@ mapHeight <- 600
 pt_view <- 'devreg'
 pt_trans_period <- '2016-12-01'
 pt_metric <- 'no_mkt_trans'
+
+geoLevels <- c(
+  "Census Metropolitan Area" = "CMA",
+  "Census Division" = "CD",
+  "Census Subdivision" = "CSD",
+  "Census Tract" = "CT",
+  "Census Dissimination Area" = "DA"
+)
 
 propertyTaxPeriod <- ptRegDisMth %>%
   filter(trans_period %in% maxTransPeriod)
@@ -309,3 +327,11 @@ plotmy <-
 
     plotme
   }
+
+census2016CmaStir <- read_rds(here::here("data", "census2016Spatial-stir-CMA.rds"))
+census2016CdStir <- read_rds(here::here("data", "census2016Spatial-stir-CD.rds"))
+census2016CsdStir <- read_rds(here::here("data", "census2016Spatial-stir-CSD.rds"))
+census2016CtStir <- read_rds(here::here("data", "census2016Spatial-stir-CT.rds"))
+census2016DaStir <- read_rds(here::here("data", "census2016Spatial-stir-DA.rds"))
+
+class(census2016CmaStir)

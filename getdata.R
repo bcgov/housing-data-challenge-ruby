@@ -1,7 +1,7 @@
 library(data.table)
 
-# /** 
-#  * PROPERTY TAX 
+# /**
+#  * PROPERTY TAX
 #  */
 
 # /**
@@ -11,14 +11,14 @@ geoConcordance <-
     read.csv("./data/geography-concordance.csv", header = TRUE)
 geoConcordance <- as.data.frame(sapply(geoConcordance, toupper))
 
-placeNamesTranslations <- 
+placeNamesTranslations <-
     read.csv("./data/place_names_translations.csv", header = TRUE)
 
 # /**
-#  * Load property tax files, convert JOIN columns to uppercase, 
+#  * Load property tax files, convert JOIN columns to uppercase,
 #  * merge with geo-concordance and save object as rds
 #  *
-#  * @param ptFilePath  string  Path to property tax file  
+#  * @param ptFilePath  string  Path to property tax file
 #  * @param uCaseCols   vector  Column names to convert to uppercase
 #  * @param ptJoinCol   string  Property Tax column to use as join to Geo Concordance
 #  * @param gcJoinCol   string  Geo Concordance column to use as join to Property Tax
@@ -36,13 +36,13 @@ savePropertyTaxRds <- function(
         doMerge) {
     propertyTax <-
     read.csv(ptFilePath, header = TRUE)
-    
+
     # Convert to uppercase
     propertyTax <- data.frame(lapply(propertyTax, function(v) {
         if (is.factor(v)) return(toupper(v))
         else return(v)
     }))
-    
+
     # Merge Property Tax and Geo Concordance
     if (doMerge == TRUE) {
         # Get unique geo-concordance unit names
@@ -51,7 +51,7 @@ savePropertyTaxRds <- function(
             unqGeoConcordance[!duplicated(unqGeoConcordance[, c(gcJoinCol)]), ]
         # Convert to uppercase
         unqGeoConcordance <- as.data.frame((sapply(unqGeoConcordance, toupper)))
-        
+
         # Merge
         propertyTax <-
             merge(propertyTax,
@@ -59,7 +59,7 @@ savePropertyTaxRds <- function(
                   by.x = ptJoinCol,
                   by.y = gcJoinCol)
     }
-    
+
     saveRDS(propertyTax, rdsFilePath)
 }
 
@@ -265,7 +265,7 @@ saveRDS(csv, "./data/census2016-province.rds")
 # /**
 #  * Load boundaries files, filter out non-BC data and save object as rds
 #  *
-#  * @param shapeFilePath  string  Path to boundaries shapefile  
+#  * @param shapeFilePath  string  Path to boundaries shapefile
 #  * @param layerName      string  Name of the layer in shapefile
 #  * @param rdsFilePath    string  Path to rds file to be save object to
 #  */
@@ -276,23 +276,23 @@ saveBcShapesRds <- function(shapeFilePath, layerName, rdsFilePath) {
             layer = layerName,
             verbose = FALSE
         )
-    
+
     # subset censusDivs to filter out provinces other than BC
     bcShapes <-
         bcShapes[bcShapes$PRNAME == "British Columbia / Colombie-Britannique",]
-    
+
     # # Simplify shapefile to speed up map rendering
     # bcShapesSimplified <-
     #     gSimplify(bcShapes, tol = 0.01, topologyPreserve = TRUE)
-    # 
+    #
     # # Bring the data back
     # bcShapes <-
     #     SpatialPolygonsDataFrame(bcShapesSimplified, bcShapes@data)
-    
-    # Add OBJECTID column to use as unique ID 
+
+    # Add OBJECTID column to use as unique ID
     # and to keep the correct row ordering
     bcShapes@data$OBJECTID <- 1:nrow(bcShapes@data)
-    
+
     # Save serialized object as rds
     saveRDS(bcShapes, rdsFilePath)
 }
@@ -316,7 +316,7 @@ saveBcShapesRds(
 )
 
 
-# /** 
+# /**
 #  * CENSUS CONSOLIDATED SUBDIVISIONS
 #  */
 saveBcShapesRds(
@@ -326,8 +326,8 @@ saveBcShapesRds(
 )
 
 
-# /** 
-#  * CENSUS SUBDIVISIONS 
+# /**
+#  * CENSUS SUBDIVISIONS
 #  */
 saveBcShapesRds(
     "./data/boundaries/2011-census-subdivisions/gcsd000a11a_e.shp",
@@ -336,8 +336,8 @@ saveBcShapesRds(
 )
 
 
-# /** 
-#  * CENSUS TRACTS 
+# /**
+#  * CENSUS TRACTS
 #  */
 saveBcShapesRds(
     "./data/boundaries/2011-census-tracts/gct_000a11a_e.shp",
@@ -346,8 +346,8 @@ saveBcShapesRds(
 )
 
 
-# /** 
-#  * CENSUS DISSEMINATION AREAS 
+# /**
+#  * CENSUS DISSEMINATION AREAS
 #  */
 saveBcShapesRds(
     "./data/boundaries/2011-census-dissemination-areas/gda_000a11a_e.shp",
@@ -356,9 +356,9 @@ saveBcShapesRds(
 )
 
 
-# /** 
-#  * CENSUS METROPOLITAN AREAS 
-#  */ 
+# /**
+#  * CENSUS METROPOLITAN AREAS
+#  */
 saveBcShapesRds(
     "./data/boundaries/2011-census-metropolitan-areas/gcma000a11a_e.shp",
     layerName = "gcma000a11a_e",
@@ -367,7 +367,7 @@ saveBcShapesRds(
 
 
 # /**
-#  * CENSUS POPULATION CENTRES 
+#  * CENSUS POPULATION CENTRES
 #  */
 saveBcShapesRds(
     "./data/boundaries/2011-census-population-centres/gpc_000a11a_e.shp",
