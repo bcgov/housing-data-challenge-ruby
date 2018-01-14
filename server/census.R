@@ -35,16 +35,34 @@ censusPp2016 <- reactive({
   )
 })
 
+# Dropdown options for location based on selected geo-level
+regionOptions <- reactive({
+    regionOptions <- censusMobility() %>%
+      mutate(label = paste0(censusMobility()$`Region Name`, " (", censusMobility()$GeoUID, ")")) %>%
+      select(label, value = GeoUID)
+})
+
+# Population pyramid 2016 for selected location
 censusPp2016Location <- reactive({
     censusPp2016 %>% filter(GeoUID == input$c_location)
 })
 
+# Population pyramid 2011 for selected location
 censusPp2011Location <- reactive({
     censusPp2011 %>% filter(GeoUID == input$c_location)
 })
 
+# Population pyramid 2006 for selected location
 censusPp2006Location <- reactive({
     censusPp2006 %>% filter(GeoUID == input$c_location)
+})
+
+locationLabel <- reactive({
+  if (is.null(input$c_location)) {
+    return ("Please select a location")
+  } else {
+    regionOptions() %>% filter(value == input$c_location) %>% select(label)
+  }
 })
 
 censusPp2011 <- reactive({
@@ -95,13 +113,13 @@ censusDataSpatial <- reactive({
 observe({
   censusCategories <- label_vectors(censusData())
 
-  isolate({
-    regionOptions <- censusMobility() %>%
-      mutate(label = paste0(censusMobility()$`Region Name`, " (", censusMobility()$GeoUID, ")")) %>%
-      select(label, value = GeoUID)
-  })
+  # isolate({
+  #   regionOptions <- censusMobility() %>%
+  #     mutate(label = paste0(censusMobility()$`Region Name`, " (", censusMobility()$GeoUID, ")")) %>%
+  #     select(label, value = GeoUID)
+  # })
 
-  updateSelectizeInput(session, 'c_location', choices = regionOptions, server = TRUE)
+  updateSelectizeInput(session, 'c_location', choices = regionOptions(), server = TRUE)
 
   output$mapCensus <- renderLeaflet({
     censusDataSpatial() %>%
@@ -228,13 +246,13 @@ observe({
       "External migrants", "Intraprovincial migrants", "Interprovincial migrants",
       key = "Migration", value = "count")
 
+  # Mobility palette
   palLightRed <- "#fc95a4"# "#feb87e"# "#e85361"# "#e08176"
   palLighterBlue <- colNonStrataRental
   palLightBlue <- colMultiFam
   palDarkBlue <- colSingleFam
   palOther <- colUnknown
 
-  # Mobility
   output$c16mobilityTree <- renderD3tree3({
     d3tree3(
       treemap(
@@ -263,15 +281,49 @@ observe({
 
   # Population Pyramid
   output$popPyr <- renderPlotly(
-    plot_ly(censusPp2016() %>% filter(GeoUID == input$c_location), x = ~percentage, y = ~age, color = ~sex, type = 'bar', orientation = 'h',
+    plot_ly(censusPp2016() %>% arrange(age) %>% filter(GeoUID == input$c_location),
+            x = ~percentage, y = ~age, color = ~sex, type = 'bar', orientation = 'h',
             hoverinfo = 'y+text+name', text = ~percentage, colors = c('salmon', 'lightblue')) %>%
-      layout(bargap = 0.1, barmode = 'overlay',
+      layout(bargap = 0.2, barmode = 'overlay',
              margin = list(l = 250),
-             xaxis = list(tickmode = 'array',
-                          tickvals = c(-0.1, -0.075, -0.05, -0.025,  0, 0.025, 0.05, 0.075, 0.1),
-                          ticktext = c('10', '7.5', '5', '2.5', '0', '2.5', '5', '7.5', '10')
+             xaxis = list(
+               title = "Percentag of population by sex and age group",
+               tickmode = 'array',
+               tickvals = c(-10, -9, -8, -7, -6, -5, -4, -3, -2, -1, 0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10),
+               ticktext = c(
+                 '10%', '9%', '8%', '7%', '6%', '5%', '4%', '3%', '2%', '1%',
+                 '0', '1%', '2%', '3%', '4%', '5%', '6%', '7%', '8%', '9%', '10%'
+               )
              ),
-             title = 'Population Pyramid for Kelowna - Census 2016')
+             yaxis = list(
+               title = ""
+             ),
+             title = paste('Population Pyramid for', locationLabel(), '- Census year', input$c_year)) %>%
+      # labeling the percentages of each bar (x_axis)
+      add_annotations(xref = 'x', yref = 'y',
+                    x = ~(percentage / abs(percentage) / 2), y = ~age,
+                    # x = 1, y = ~age,
+                    text = ~paste(abs(percentage), '%'),
+                    font = list(family = 'Arial', size = 12,
+                                color = 'rgb(67, 67, 67)'),
+                    showarrow = FALSE) %>%
+      config(displayModeBar = F)
+  )
+
+  output$popPyrDT <- renderDataTable(
+    censusPp2016() %>% arrange(age) %>% filter(GeoUID == input$c_location),
+    options = list(
+      lengthChange = TRUE,
+      initComplete = JS(
+        "function(settings, json) {
+            $(this.api().table().header()).css({
+            'background-color': 'rgba(0, 51, 102, 0.80)',
+            'border-bottom': '5px solid #fcba19',
+            'color': '#fff'
+            });
+        }"
+      )
+    )
   )
 
   # censusStir() %<>%

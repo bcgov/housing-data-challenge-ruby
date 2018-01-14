@@ -35,8 +35,14 @@ tabPanel(
     #   )
     # ),
     tabsetPanel(
-      tabPanel("Population Pyramid",
-               plotlyOutput("popPyr", height = chartHeight, width = "100%") %>% withSpinner(color="#0dc5c1")
+      tabPanel(
+        "Population Pyramid",
+        fluidRow(
+          column(10, plotlyOutput("popPyr", height = chartHeight, width = "100%") %>% withSpinner(color="#0dc5c1"), offset = 1)
+        ),
+        fluidRow(
+          column(12, dataTableOutput("popPyrDT") %>% withSpinner(color="#0dc5c1"))
+        )
       ),
       tabPanel(
         "Mobility",

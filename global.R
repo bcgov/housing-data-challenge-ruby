@@ -28,6 +28,8 @@ source("modules/controls.R")
 source("modules/chartFormat.R")
 source("get_geography.R")
 
+options(stringsAsFactors=F)
+
 # Read objects
 # Property transfer tax
 ptRegDisMth <- readRDS("./data/pt-regional-district-monthly.rds")
