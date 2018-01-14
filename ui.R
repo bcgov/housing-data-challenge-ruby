@@ -91,30 +91,8 @@ ui <- navbarPage(
         )
       )
     )),
-  tabPanel('BC Assessment',
-           fluidPage(
-             titlePanel("BC Assessment Data Visualization"),
-             tags$p(
-               "Current map is based on census division boundaries and BC Assessment data"
-             ),
-             tabsetPanel(tabPanel("Tab 1"),
-                         tabPanel("Tab 2"),
-                         tabPanel("Tab 3"))
-           )),
   tabPanel(
-    "Population by Age and Sex"
-  ),
-  tabPanel(
-    "Mobility"
-  ),
-  tabPanel(
-    "Housing Type"
-  ),
-  tabPanel(
-    "STIR"
-  ),
-  tabPanel(
-    'Census',
+    'Census Topics',
     fluidPage(
       titlePanel("Census Data Visualization"),
       tags$p(
@@ -263,5 +241,15 @@ ui <- navbarPage(
         )
       )
     )
-  )
+  ),
+  tabPanel('BC Assessment',
+           fluidPage(
+             titlePanel("BC Assessment Data Visualization"),
+             tags$p(
+               "Current map is based on census division boundaries and BC Assessment data"
+             ),
+             tabsetPanel(tabPanel("Tab 1"),
+                         tabPanel("Tab 2"),
+                         tabPanel("Tab 3"))
+           ))
 )
