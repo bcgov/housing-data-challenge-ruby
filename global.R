@@ -328,10 +328,32 @@ plotmy <-
     plotme
   }
 
+# Shelter-Cost-to-Income Ratio data
 census2016CmaStir <- read_rds(here::here("data", "census2016Spatial-stir-CMA.rds"))
 census2016CdStir <- read_rds(here::here("data", "census2016Spatial-stir-CD.rds"))
 census2016CsdStir <- read_rds(here::here("data", "census2016Spatial-stir-CSD.rds"))
 census2016CtStir <- read_rds(here::here("data", "census2016Spatial-stir-CT.rds"))
 census2016DaStir <- read_rds(here::here("data", "census2016Spatial-stir-DA.rds"))
 
-class(census2016CmaStir)
+# Population Pyramid data
+census2016ppPr <- read_rds(here::here("data", "population_pyramid", "census2016-pp-PR.rds"))
+census2016ppCma <- read_rds(here::here("data", "population_pyramid", "census2016-pp-CMA.rds"))
+census2016ppCd <- read_rds(here::here("data", "population_pyramid", "census2016-pp-CD.rds"))
+census2016ppCsd <- read_rds(here::here("data", "population_pyramid", "census2016-pp-CSD.rds"))
+census2016ppCt <- read_rds(here::here("data", "population_pyramid", "census2016-pp-CT.rds"))
+census2016ppDa <- read_rds(here::here("data", "population_pyramid", "census2016-pp-DA.rds"))
+
+census2011ppPr <- read_rds(here::here("data", "population_pyramid", "census2011-pp-PR.rds"))
+census2011ppCma <- read_rds(here::here("data", "population_pyramid", "census2011-pp-CMA.rds"))
+census2011ppCd <- read_rds(here::here("data", "population_pyramid", "census2011-pp-CD.rds"))
+census2011ppCsd <- read_rds(here::here("data", "population_pyramid", "census2011-pp-CSD.rds"))
+census2011ppCt <- read_rds(here::here("data", "population_pyramid", "census2011-pp-CT.rds"))
+census2011ppDa <- read_rds(here::here("data", "population_pyramid", "census2011-pp-DA.rds"))
+
+census2006ppPr <- read_rds(here::here("data", "population_pyramid", "census2006-pp-PR.rds"))
+census2006ppCma <- read_rds(here::here("data", "population_pyramid", "census2006-pp-CMA.rds"))
+census2006ppCd <- read_rds(here::here("data", "population_pyramid", "census2006-pp-CD.rds"))
+census2006ppCsd <- read_rds(here::here("data", "population_pyramid", "census2006-pp-CSD.rds"))
+census2006ppCt <- read_rds(here::here("data", "population_pyramid", "census2006-pp-CT.rds"))
+census2006ppDa <- read_rds(here::here("data", "population_pyramid", "census2006-pp-DA.rds"))
+

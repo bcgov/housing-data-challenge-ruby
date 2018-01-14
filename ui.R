@@ -188,11 +188,7 @@ ui <- navbarPage(
           )
         ),
         tabPanel("Population Pyramid",
-                 fluidRow(
-                   column(6, plotlyOutput("popPyr", height = chartHeight)),
-                   column(6, plotlyOutput("popPyrDist", height = chartHeight)
-                   )
-                 )
+                 plotlyOutput("popPyr", height = chartHeight, width = "100%")
         ),
         tabPanel("STIR",
                  fluidRow(

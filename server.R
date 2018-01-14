@@ -1053,32 +1053,98 @@ server <- function(input, output, session) {
     })
 
   # POPULATION PYRAMID
+  # ggplot(censusPP %>% filter(GeoUID == "59915"), aes(x = age, fill = sex)) +
+  #   geom_bar(aes(y = percentage), stat = "identity", position = "identity",
+  #            color = "gray10", size = 0.1,
+  #            data = filter(censusPP, sex == "male")) +
+  #   geom_bar(aes(y = -1 * percentage), stat = "identity", position = "identity",
+  #            color = "gray10", size = 0.1,
+  #            data = filter(censusPP, sex == "female")) +
+  #   geom_text(aes(label = `Region Name`), y = 0.06, x = 19.5, #family = "Calibri",
+  #             size = 3) +
+  #   # facet_grid(geo ~ `Region Name`, scales = "fixed") +
+  #   coord_flip() +
+  #   scale_fill_brewer(palette = "Pastel1") +
+  #   labs(x = NULL, y = NULL, title = NULL, fill = NULL) +
+  #   theme_bw()
+  #
+  # final.pop <- censusPP %>%
+  #   mutate(abspercentage = percentage) %>%
+  #   mutate(percentage = ifelse(sex == "male", percentage * -1, percentage))
+  #
+  # plot_ly(final.pop, x = ~percentage, y = ~age, color = ~sex, type = 'bar', orientation = 'h',
+  #         hoverinfo = 'y+text+name', text = ~percentage, colors = c('salmon', 'lightblue')) %>%
+  #   layout(bargap = 0.1, barmode = 'overlay',
+  #          margin(l = 250),
+  #          xaxis = list(tickmode = 'array'#,
+  #                       # tickvals = c(-10000, -5000, 0, 5000, 10000),
+  #                       # ticktext = c('10k', '5k', '0', '5k', '10k')
+  #          ),
+  #          title = 'Population Pyramid for Kelowna - Census 2016')
 
 
   # STIR
   observe({
     c_year <- input$c_year
     c_view <- input$c_view
+    c_location <- input$c_location
 
     # Census observer switch
     censusStir <- census2016CmaStir
+    censusPp2016 <- census2016ppPr
+    censusPp2011 <- census2011ppPr
+    censusPp2006 <- census2006ppPr
     switch(
       c_view,
-      # "CMA" = {
+      "CMA" = {
         # censusStir <- census2016CsdStir
-      # },
+        censusPp2016 <- census2016ppCma
+        censusPp2011 <- census2011ppCma
+        censusPp2006 <- census2006ppCma
+      },
       "CSD" = {
         censusStir <- census2016CsdStir
+        censusPp2016 <- census2016ppCsd
+        censusPp2011 <- census2011ppCsd
+        censusPp2006 <- census2006ppCsd
       },
       "CD" = {
         censusStir <- census2016CdStir
+        censusPp2016 <- census2016ppCd
+        censusPp2011 <- census2011ppCd
+        censusPp2006 <- census2006ppCd
       },
       "CT" = {
         censusStir <- census2016CtStir
+        censusPp2016 <- census2016ppCt
+        censusPp2011 <- census2011ppCt
+        censusPp2006 <- census2006ppCt
       },
       "DA" = {
         censusStir <- census2016DaStir
+        censusPp2016 <- census2016ppDa
+        censusPp2011 <- census2011ppDa
+        censusPp2006 <- census2006ppDa
       }
+    )
+
+    # Population Pyramid
+    censusPp2016 %<>%
+      filter(GeoUID == c_location)
+    censusPp2011 %<>%
+      filter(GeoUID == c_location)
+    censusPp2006 %<>%
+      filter(GeoUID == c_location)
+    output$popPyr <- renderPlotly(
+      plot_ly(censusPp2016, x = ~percentage, y = ~age, color = ~sex, type = 'bar', orientation = 'h',
+              hoverinfo = 'y+text+name', text = ~percentage, colors = c('salmon', 'lightblue')) %>%
+        layout(bargap = 0.1, barmode = 'overlay',
+               margin = list(l = 250),
+               xaxis = list(tickmode = 'array'#,
+                            # tickvals = c(-10000, -5000, 0, 5000, 10000),
+                            # ticktext = c('10k', '5k', '0', '5k', '10k')
+               ),
+               title = 'Population Pyramid for Kelowna - Census 2016')
     )
 
     # censusStir %<>%
