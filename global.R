@@ -1,3 +1,5 @@
+# devtools::install_github('andrewsali/shinycssloaders')
+
 library(shiny)
 library(rgdal)
 library(sf)
@@ -20,7 +22,7 @@ library(treemap)
 library(data.tree)
 library(d3treeR)
 library(RColorBrewer)
-
+library(shinycssloaders)
 # source files
 source("modules/controls.R")
 source("modules/chartFormat.R")
@@ -328,32 +330,50 @@ plotmy <-
     plotme
   }
 
-# Shelter-Cost-to-Income Ratio data
-census2016CmaStir <- read_rds(here::here("data", "census2016Spatial-stir-CMA.rds"))
-census2016CdStir <- read_rds(here::here("data", "census2016Spatial-stir-CD.rds"))
-census2016CsdStir <- read_rds(here::here("data", "census2016Spatial-stir-CSD.rds"))
-census2016CtStir <- read_rds(here::here("data", "census2016Spatial-stir-CT.rds"))
-census2016DaStir <- read_rds(here::here("data", "census2016Spatial-stir-DA.rds"))
-
 # Population Pyramid data
-census2016ppPr <- read_rds(here::here("data", "population_pyramid", "census2016-pp-PR.rds"))
-census2016ppCma <- read_rds(here::here("data", "population_pyramid", "census2016-pp-CMA.rds"))
-census2016ppCd <- read_rds(here::here("data", "population_pyramid", "census2016-pp-CD.rds"))
-census2016ppCsd <- read_rds(here::here("data", "population_pyramid", "census2016-pp-CSD.rds"))
-census2016ppCt <- read_rds(here::here("data", "population_pyramid", "census2016-pp-CT.rds"))
-census2016ppDa <- read_rds(here::here("data", "population_pyramid", "census2016-pp-DA.rds"))
+census2016ppPr <- read_rds(file.path("data", "population_pyramid", "census2016-pp-PR.rds"))
+census2016ppCma <- read_rds(file.path("data", "population_pyramid", "census2016-pp-CMA.rds"))
+census2016ppCd <- read_rds(file.path("data", "population_pyramid", "census2016-pp-CD.rds"))
+census2016ppCsd <- read_rds(file.path("data", "population_pyramid", "census2016-pp-CSD.rds"))
+census2016ppCt <- read_rds(file.path("data", "population_pyramid", "census2016-pp-CT.rds"))
+census2016ppDa <- read_rds(file.path("data", "population_pyramid", "census2016-pp-DA.rds"))
 
-census2011ppPr <- read_rds(here::here("data", "population_pyramid", "census2011-pp-PR.rds"))
-census2011ppCma <- read_rds(here::here("data", "population_pyramid", "census2011-pp-CMA.rds"))
-census2011ppCd <- read_rds(here::here("data", "population_pyramid", "census2011-pp-CD.rds"))
-census2011ppCsd <- read_rds(here::here("data", "population_pyramid", "census2011-pp-CSD.rds"))
-census2011ppCt <- read_rds(here::here("data", "population_pyramid", "census2011-pp-CT.rds"))
-census2011ppDa <- read_rds(here::here("data", "population_pyramid", "census2011-pp-DA.rds"))
+census2011ppPr <- read_rds(file.path("data", "population_pyramid", "census2011-pp-PR.rds"))
+census2011ppCma <- read_rds(file.path("data", "population_pyramid", "census2011-pp-CMA.rds"))
+census2011ppCd <- read_rds(file.path("data", "population_pyramid", "census2011-pp-CD.rds"))
+census2011ppCsd <- read_rds(file.path("data", "population_pyramid", "census2011-pp-CSD.rds"))
+census2011ppCt <- read_rds(file.path("data", "population_pyramid", "census2011-pp-CT.rds"))
+census2011ppDa <- read_rds(file.path("data", "population_pyramid", "census2011-pp-DA.rds"))
 
-census2006ppPr <- read_rds(here::here("data", "population_pyramid", "census2006-pp-PR.rds"))
-census2006ppCma <- read_rds(here::here("data", "population_pyramid", "census2006-pp-CMA.rds"))
-census2006ppCd <- read_rds(here::here("data", "population_pyramid", "census2006-pp-CD.rds"))
-census2006ppCsd <- read_rds(here::here("data", "population_pyramid", "census2006-pp-CSD.rds"))
-census2006ppCt <- read_rds(here::here("data", "population_pyramid", "census2006-pp-CT.rds"))
-census2006ppDa <- read_rds(here::here("data", "population_pyramid", "census2006-pp-DA.rds"))
+census2006ppPr <- read_rds(file.path("data", "population_pyramid", "census2006-pp-PR.rds"))
+census2006ppCma <- read_rds(file.path("data", "population_pyramid", "census2006-pp-CMA.rds"))
+census2006ppCd <- read_rds(file.path("data", "population_pyramid", "census2006-pp-CD.rds"))
+census2006ppCsd <- read_rds(file.path("data", "population_pyramid", "census2006-pp-CSD.rds"))
+census2006ppCt <- read_rds(file.path("data", "population_pyramid", "census2006-pp-CT.rds"))
+census2006ppDa <- read_rds(file.path("data", "population_pyramid", "census2006-pp-DA.rds"))
 
+# Mobility
+censusMobilityCma <- read_rds(file.path("data", "census2016-mobility-CMA.rds"))
+censusMobilityCd <- read_rds(file.path("data", "census2016-mobility-CD.rds"))
+censusMobilityCsd <- read_rds(file.path("data", "census2016-mobility-CSD.rds"))
+censusMobilityCt <- read_rds(file.path("data", "census2016-mobility-CT.rds"))
+censusMobilityDa <- read_rds(file.path("data", "census2016-mobility-DA.rds"))
+
+# Housing Type
+censusDataCma <- readRDS(file.path("data", "census2016-CMA.rds"))
+censusDataCd <- readRDS(file.path("data", "census2016-CD.rds"))
+censusDataCsd <- readRDS(file.path("data", "census2016-CSD.rds"))
+censusDataCt <- readRDS(file.path("data", "census2016-CT.rds"))
+# censusDataDa <- readRDS(file.path("data", "census2016-DA.rds"))
+censusDataSpatialCma <- readRDS(file.path("data", "censusSpatial2016-CMA.rds"))
+censusDataSpatialCd <- readRDS(file.path("data", "censusSpatial2016-CD.rds"))
+censusDataSpatialCsd <- readRDS(file.path("data", "censusSpatial2016-CSD.rds"))
+censusDataSpatialCt <- readRDS(file.path("data", "censusSpatial2016-CT.rds"))
+# censusDataSpatialDa <- readRDS(file.path("data", "censusSpatial2016-DA.rds"))
+
+# Shelter-Cost-to-Income Ratio data
+census2016CmaStir <- read_rds(file.path("data", "census2016Spatial-stir-CMA.rds"))
+census2016CdStir <- read_rds(file.path("data", "census2016Spatial-stir-CD.rds"))
+census2016CsdStir <- read_rds(file.path("data", "census2016Spatial-stir-CSD.rds"))
+census2016CtStir <- read_rds(file.path("data", "census2016Spatial-stir-CT.rds"))
+census2016DaStir <- read_rds(file.path("data", "census2016Spatial-stir-DA.rds"))
