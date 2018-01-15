@@ -120,20 +120,22 @@ for (censusLevel in c("CMA", "CD", "CSD", "CT", "DA")) {
       vectors = vectorsMobility %>% pull("vector"),
       use_cache = TRUE,
       labels = "short",
-      geo_format = NA
+      geo_format = "sf"
     )
   censusData %<>%
-  rename(
-    `Non-movers` = v_CA16_6695,
-    # Movers = v_CA16_6698,
-    `Non-migrants` = v_CA16_6701,
-    # Migrants = v_CA16_6704,
-    # `Internal migrants` = v_CA16_6707,
-    `External migrants` = v_CA16_6716,
-    `Intraprovincial migrants` = v_CA16_6710,
-    `Interprovincial migrants` = v_CA16_6713,
-  )
-  censusData %<>% filter(Type == censusLevel)
+    rename(
+      `Non-movers` = v_CA16_6695,
+      Movers = v_CA16_6698,
+      `Non-migrants` = v_CA16_6701,
+      Migrants = v_CA16_6704,
+      `Internal migrants` = v_CA16_6707,
+      `External migrants` = v_CA16_6716,
+      `Intraprovincial migrants` = v_CA16_6710,
+      `Interprovincial migrants` = v_CA16_6713,
+    ) %<>%
+    filter(Type == censusLevel) %<>%
+    mutate(`Movers Ratio` = round(Movers / (`Non-movers` + Movers) * 100, digits = 2))
+
   saveRDS(censusData, here::here("data", paste0("census2016-mobility-", censusLevel, ".rds")))
 }
 

@@ -2,6 +2,10 @@ c_year <- reactive({
   c_y <- input$c_year
 })
 
+c_loc <- reactive({
+  input$c_location
+})
+
 censusMobility <- reactive({
   censusMobility <- switch(
     input$c_view,
@@ -33,9 +37,9 @@ censusStir <- reactive({
     arrange(desc(percent_more_than_30))
 
   # Reorder data
-  censusStir$Region <- factor(
-    censusStir$Region,
-    levels = unique(censusStir$Region)[order(
+  censusStir$GeoUID <- factor(
+    censusStir$GeoUID,
+    levels = unique(censusStir$GeoUID)[order(
       censusStir$percent_more_than_30, decreasing = FALSE
     )]
   )
@@ -265,16 +269,59 @@ observe({
       key = "Migration", value = "count")
 
   # Mobility palette
+  palMobility <- colorBin(
+    palette = "viridis",
+    domain = censusMobility$`Movers Ratio`, n = 10
+  )
   palLightRed <- "#fc95a4"# "#feb87e"# "#e85361"# "#e08176"
   palLighterBlue <- colNonStrataRental
   palLightBlue <- colMultiFam
   palDarkBlue <- colSingleFam
   palOther <- colUnknown
 
+  # Mobility Map
+  output$mapCensusMobility <- renderLeaflet({
+    censusMobility %>%
+      leaflet() %>%
+      addProviderTiles(provider = "CartoDB.Positron") %>%
+      setView(lng = -123.12, lat = 53.28, zoom = 6) %>%
+      addPolygons(
+        label = ~ `Region Name`, color = '#333', fillColor = ~ palMobility(censusMobility$`Movers Ratio`),
+        stroke = TRUE, weight = 1, fillOpacity = 0.75, smoothFactor = 0.2,
+        # fillOpacity = 0.5,
+        # smoothFactor = 1,
+        popup = paste0(
+          "<strong>", paste0(censusMobility$`Region Name`, " (", censusMobility$GeoUID), ")</strong>",
+          "<table class=\"leaflet-popup-table\"><tr><td>Census Year</td><td>2016</td></tr>",
+          "<tr><td>Population</td><td>", format(censusMobility$Population, big.mark = ","),
+          "</td></tr><tr><td>Dwellings</td><td>", format(censusMobility$Dwellings, big.mark = ","),
+          "</td></tr><tr><td>Households</td><td>", format(censusMobility$Households, big.mark = ","),
+          "</td></tr><tr><td><strong>Movers Ratio</strong></td><td><strong>",
+          format(censusMobility$`Movers Ratio`, big.mark = ","), "</strong></td></tr></table>"
+        ),
+        highlight = highlightOptions(
+          weight = 5, color = "#696969", dashArray = "", fillOpacity = 0.5, bringToFront = TRUE)
+      ) %>%
+      addLegend(
+        "bottomleft", pal = palMobility, values = ~ `Movers Ratio`,
+        title = "", opacity = 0.5
+      )
+  })
+
+  # Have to drop geometry, i.e. convert sf to df to use in treemap
+  censusMobilityDf <- censusMobility
+  st_geometry(censusMobilityDf) <- NULL
+
+  # isolate({
+  #   if (!c_loc() == '') {
+  #     censusMobilityDf %<>% filter(GeoUID == c_loc())
+  #   }
+  # })
+  # if (!'' == input$c_location) {
   output$c16mobilityTree <- renderD3tree3({
     d3tree3(
       treemap(
-        censusMobility %>% filter(GeoUID == input$c_location),
+        censusMobilityDf %>% filter(GeoUID == input$c_location),
         index = c("Migration", "Region Name"),
         vSize = "count",
         type = "index",
@@ -296,6 +343,7 @@ observe({
       rootname="Mobility"
     )
   })
+  # }
 
   # Population Pyramid
   output$popPyr <- renderPlotly(
@@ -345,11 +393,11 @@ observe({
   )
 
   # SHELTER-COST-TO-INCOME RATIO
-  # STIR palette
   censusStir <- st_as_sf(
     censusStir() %>% select(everything())
   )
 
+  # STIR palette
   palStir <- colorBin(
     palette = "viridis",
     domain = censusStir$percent_more_than_30, n = 10
@@ -362,44 +410,24 @@ observe({
       addProviderTiles(provider = "CartoDB.Positron") %>%
       setView(lng = -123.12, lat = 53.28, zoom = 6) %>%
       addPolygons(
-        label = ~ `Region`,
-        color = '#333',
-        fillColor = ~ palStir(censusStir$percent_more_than_30),
-        stroke = TRUE,
-        weight = 1,
-        fillOpacity = 0.75,
-        smoothFactor = 0.2,
+        label = ~ `Region`, color = '#333', fillColor = ~ palStir(censusStir$percent_more_than_30),
+        stroke = TRUE, weight = 1, fillOpacity = 0.75, smoothFactor = 0.2,
         popup = paste0(
-          "<strong>",
-          paste(censusStir$`Region`),
-          "</strong>",
-          "<table class=\"leaflet-popup-table\">
-        <tr><td>Census Year</td><td>2016</td></tr>",
-          "<tr><td>Population</td><td>",
-          format(censusStir$Population, big.mark = ","),
-          "</td></tr><tr><td>Dwellings</td><td>",
-          format(censusStir$Dwellings, big.mark = ","),
-          "</td></tr><tr><td>Households</td><td>",
-          format(censusStir$Households, big.mark = ","),
-          "</td></tr><tr><td>STIR < 30%</td><td>",
-          format(censusStir$percent_less_than_30, big.mark = ","),
+          "<strong>", paste(censusStir$`Region`), "</strong>",
+          "<table class=\"leaflet-popup-table\"><tr><td>Census Year</td><td>2016</td></tr>",
+          "<tr><td>Population</td><td>", format(censusStir$Population, big.mark = ","),
+          "</td></tr><tr><td>Dwellings</td><td>", format(censusStir$Dwellings, big.mark = ","),
+          "</td></tr><tr><td>Households</td><td>", format(censusStir$Households, big.mark = ","),
+          "</td></tr><tr><td>STIR < 30%</td><td>", format(censusStir$percent_less_than_30, big.mark = ","),
           "</td></tr><tr><td><strong>STIR > 30%</strong></td><td><strong>",
-          format(censusStir$percent_more_than_30, big.mark = ","),
-          "</strong></td></tr></table>"
+          format(censusStir$percent_more_than_30, big.mark = ","), "</strong></td></tr></table>"
         ),
       highlight = highlightOptions(
-        weight = 5,
-        color = "#696969",
-        dashArray = "",
-        fillOpacity = 0.5,
-        bringToFront = TRUE)
+        weight = 5, color = "#696969", dashArray = "", fillOpacity = 0.5, bringToFront = TRUE)
       ) %>%
       addLegend(
-        "bottomleft",
-        pal = palStir,
-        values = ~ percent_more_than_30,
-        title = "",
-        opacity = 0.5
+        "bottomleft", pal = palStir, values = ~ percent_more_than_30,
+        title = "", opacity = 0.5
       )
   })
 
@@ -414,26 +442,64 @@ observe({
   #   )
 
   # STIR Lollipop
-  censusStirgg2 <- ggplot(censusStir() %>% top_n(25, percent_more_than_30), aes(x = Region, y = percent_more_than_30)) +
-    geom_segment(aes(x = Region, xend = Region, y = 0, yend = percent_more_than_30), size = 1.5, color = "lightsalmon") +
-    geom_point(color = "lightsalmon", size = 2.5, alpha = 1, shape = 21, stroke = 2.5) +
-    theme_light() +
-    coord_flip() +
-    theme(
-      panel.grid.major.y = element_blank(),
-      panel.border = element_blank(),
-      axis.ticks.y = element_blank(),
-      plot.margin = unit(c(20,20,20,150), "pt")
-    )
+  # censusStirgg2 <- ggplot(censusStir %>% top_n(25, ~percent_more_than_30), aes(x = Region, y = percent_more_than_30)) +
+  #   geom_segment(aes(x = Region, xend = Region, y = 0, yend = percent_more_than_30), size = 1.5, color = "lightsalmon") +
+  #   geom_point(color = "lightsalmon", size = 2.5, alpha = 1, shape = 21, stroke = 2.5) +
+  #   theme_light() +
+  #   coord_flip() +
+  #   theme(
+  #     panel.grid.major.y = element_blank(),
+  #     panel.border = element_blank(),
+  #     axis.ticks.y = element_blank(),
+  #     plot.margin = unit(c(20,20,20,150), "pt")
+  #   )
+  # output$stirLollipop <- renderPlotly(
+  #   ggplotly(censusStirgg2) %>%
+  #     layout(
+  #       xaxis = list(title = ""),
+  #       yaxis = list(title = "")
+  #     ) %>%
+  #     layout (
+  #       margin = list(l = 150)
+  #     )
+  # )
   output$stirLollipop <- renderPlotly(
-    ggplotly(censusStirgg2) %>%
-      layout(
-        xaxis = list(title = ""),
-        yaxis = list(title = "")
+    plot_ly(censusStir() %>% top_n(25, percent_more_than_30), x = ~percent_more_than_30,
+            name = "More than 30%", y = ~`GeoUID`, type = 'bar', orientation = 'h',
+            marker = list(
+              color = ~percent_more_than_30, # color = "lightsalmon",
+              line = list(width = 0.1),
+              hoverinfo="x+y+name"
+            )
       ) %>%
-      layout (
-        margin = list(l = 150)
-      )
+      add_trace(x = ~percent_more_than_30, name = "Less than 30%",
+                type="scatter",
+                marker = list(size = 15,
+                              color = ~percent_more_than_30, #color = 'lightsalmon',
+                              line = list(color = 'lightsalmon',
+                                          width = 4))
+      ) %>%
+      layout(
+        title = "Percentage of households having Shelter-Cost-to-Income Ratio > 30%",
+        bargap = 0.85,
+        xaxis = list(
+          title = "", showgrid = FALSE, showline = FALSE, zerolinecolor = "#e6e6e6",
+          showticklabels = TRUE, zeroline = TRUE, domain = c(0.15, 1)
+        ),
+        yaxis = list(
+          title = "", showgrid = FALSE, showline = FALSE, zerolinecolor = "#cccccc",
+          showticklabels = FALSE, zeroline = TRUE),
+        margin = list(l = 150, r = 10, t = 70, b = 30),
+        showlegend = FALSE) %>%
+    # labeling the y-axis
+    add_annotations(xref = 'paper', yref = 'y', x = 0.14, y = ~`GeoUID`,
+                    xanchor = 'right',
+                    text = ~paste0(`Region`, ' (', `GeoUID`, ')'),
+                    font = list(family = 'Arial', size = 12,
+                                color = 'rgb(67, 67, 67)'),
+                    showarrow = FALSE, align = 'right') %>%
+      config(displayModeBar = F)
+
   )
 
   # STIR Stacked Bar
@@ -444,11 +510,10 @@ observe({
       censusStir()[1,"percent_less_than_30"]$percent_less_than_30 / 2
   )
   output$stirStacked <- renderPlotly(
-    plot_ly(censusStir() %>% top_n(25, percent_more_than_30), x = ~percent_more_than_30, name = "More than 30%", y = ~`Region`, type = 'bar', orientation = 'h',
+    plot_ly(censusStir() %>% top_n(25, percent_more_than_30), x = ~percent_more_than_30, name = "More than 30%",
+            y = ~`GeoUID`, type = 'bar', orientation = 'h',
             marker = list(color = "lightsalmon",
                           line = list(color = 'rgb(248, 248, 249)', width = 1), hoverinfo="x+y+name")) %>%
-      # add_trace(x = ~between_30_and_50_percent, name = "Between 30 and 50%", marker = list(color = colFarms)) %>%
-      # add_trace(x = ~between_15_and_30_percent, name = "Between 15 and 30%", marker = list(color = colMultiFam)) %>%
       add_trace(x = ~percent_less_than_30, name = "Less than 30%", marker = list(color = colMultiFam)) %>%
       layout(xaxis = list(title = "",
                           showgrid = FALSE,
@@ -462,11 +527,10 @@ observe({
                           showticklabels = FALSE,
                           zeroline = FALSE),
              barmode = 'stack',
-             #paper_bgcolor = 'rgb(248, 248, 255)', plot_bgcolor = 'rgb(248, 248, 255)',
-             margin = list(l = 63, r = 10, t = 70, b = 30),
+             margin = list(l = 150, r = 10, t = 70, b = 30),
              showlegend = FALSE) %>%
       # labeling the y-axis
-      add_annotations(xref = 'paper', yref = 'y', x = 0.14, y = ~`Region`,
+      add_annotations(xref = 'paper', yref = 'y', x = 0.14, y = ~`GeoUID`,
                       xanchor = 'right',
                       text = ~`Region`,
                       font = list(family = 'Arial', size = 12,
@@ -474,13 +538,13 @@ observe({
                       showarrow = FALSE, align = 'right') %>%
       # labeling the percentages of each bar (x_axis)
       add_annotations(xref = 'x', yref = 'y',
-                      x = ~(percent_more_than_30 / 2), y = ~`Region`,
+                      x = ~(percent_more_than_30 / 2), y = ~`GeoUID`,
                       text = ~paste(percent_more_than_30, '%'),
                       font = list(family = 'Arial', size = 12,
                                   color = 'rgb(67, 67, 67)'),
                       showarrow = FALSE) %>%
       add_annotations(xref = 'x', yref = 'y',
-                      x = ~(percent_more_than_30 + percent_less_than_30 / 2), y = ~Region,
+                      x = ~(percent_more_than_30 + percent_less_than_30 / 2), y = ~GeoUID,
                       text = ~paste(percent_less_than_30, '%'),
                       font = list(family = 'Arial', size = 12,
                                   color = 'rgb(67, 67, 67)'),
