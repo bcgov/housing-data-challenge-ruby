@@ -22,20 +22,6 @@ tabPanel(
         column(6, offset = 3, tags$small("Location is required for Population Pyramid and Mobility topics."))
       )
     ),
-    # sidebarLayout(
-    #   sidebarPanel(
-    #     width = 2,
-    #   ),
-    #   mainPanel(
-    #     width = 10,
-    # column(
-    #   7, leafletOutput("mapCensus", height = mapHeight)
-    # ),
-    # column(
-    #   5, plotlyOutput("pyramid", height = mapHeight)
-    # ),
-    #   )
-    # ),
     tabsetPanel(
       tabPanel(
         "Population Pyramid",
@@ -65,7 +51,15 @@ tabPanel(
                 which includes single detached house, semi-detached and row houses, and a variety of apartment categories."),
         tags$p("This report gives insights into diversity of the housing types in an area."),
         fluidRow(
-          column(4, leafletOutput("mapCensusHousingType", height = mapHeight) %>% withSpinner(color="#0dc5c1")),
+          column(
+            4,
+            fluidRow(
+              selectizeInput('c_housing_types', choices = housingTypesList, label = "Housing Type")
+            ),
+            fluidRow(
+              leafletOutput("mapCensusHousingType", height = mapHeight) %>% withSpinner(color="#0dc5c1")
+            )
+          ),
           column(8, d3tree3Output("housingTypeTreemap", height = chartHeight) %>% withSpinner(color="#0dc5c1"))
         ),
         fluidRow(

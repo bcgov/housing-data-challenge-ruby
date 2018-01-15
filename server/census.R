@@ -121,6 +121,11 @@ housingTypes <- reactive({
   )
 })
 
+housingTypeMapData <- reactive({
+  htMapData <- housingTypes() %>%
+    select(Region, GeoUID, typewatch = input$c_housing_types)
+})
+
 observe({
   # Update locations if geo-level selection changes
   updateSelectizeInput(session, 'c_location', choices = regionOptions(), server = TRUE)
@@ -189,7 +194,62 @@ observe({
   if (!is.null(housingTypes())) {
     housingTypes <- housingTypes()
   }
-  housingTypes %<>%
+  # Mobility palette
+  palHousingTypes <- colorBin(
+    palette = "viridis",
+    # domain = NULL
+    # TODO figure this out, has to be reactive
+    domain = housingTypes$`Single detached house`, n = 10
+  )
+
+  # Housing Types map
+  output$mapCensusHousingType <- renderLeaflet({
+    housingTypes %>%
+      leaflet() %>%
+      addProviderTiles(provider = "CartoDB.Positron") %>%
+      setView(lng = -123.12, lat = 53.28, zoom = 6) %>%
+      addPolygons(
+        label = ~ `Region`, color = '#333', fillColor = ~ palHousingTypes(housingTypes$`Single detached house`),
+        stroke = TRUE, weight = 1, fillOpacity = 0.75, smoothFactor = 0.2,
+        # fillOpacity = 0.5,
+        # smoothFactor = 1,
+        popup = paste0(
+          "<strong>", paste0(housingTypes$`Region`, " (", housingTypes$GeoUID), ")</strong>",
+          "<table class=\"leaflet-popup-table\"><tr><td>Census Year</td><td>2016</td></tr>",
+          "<tr><td><strong>Single family homes</strong></td><td><strong>",
+          format(housingTypes$`Single detached house`, big.mark = ","), "</strong></td></tr></table>"
+        ),
+        highlight = highlightOptions(
+          weight = 5, color = "#696969", dashArray = "", fillOpacity = 0.5, bringToFront = TRUE)
+      ) %>%
+      addLegend(
+        "bottomleft", pal = palMobility, values = ~ `Single detached house`,
+        title = "", opacity = 0.5
+      )
+  })
+
+  # Redraw polygons when housing type selection changes
+  leafletProxy("mapCensusHousingType", data = housingTypeMapData()) %>%
+    clearShapes() %>%
+    addPolygons(
+      label = ~ `Region`, color = '#333', fillColor = ~ palHousingTypes(housingTypeMapData()$typewatch),
+      stroke = TRUE, weight = 1, fillOpacity = 0.75, smoothFactor = 0.2,
+      popup = paste0(
+        "<strong>", paste0(housingTypeMapData()$`Region`, " (", housingTypeMapData()$GeoUID), ")</strong>",
+        "<table class=\"leaflet-popup-table\"><tr><td>Census Year</td><td>2016</td></tr>",
+        "<tr><td><strong>Single family homes</strong></td><td><strong>",
+        format(housingTypeMapData()$typewatch, big.mark = ","), "</strong></td></tr></table>"
+      ),
+      highlight = highlightOptions(
+        weight = 5, color = "#696969", dashArray = "", fillOpacity = 0.5, bringToFront = TRUE)
+    )
+
+  # Housing Types treemap
+  # Have to drop geometry, i.e. convert sf to df to use in treemap
+  housingTypesDf <- housingTypes
+  st_geometry(housingTypesDf) <- NULL
+
+  housingTypesDf %<>%
     gather(
       "Single detached house",
       "Appartment in tall building",
@@ -200,21 +260,6 @@ observe({
       "Other single attached house",
       "Movable dwelling",
       key = "HousingType", value = "count")
-
-  # Mobility palette
-  palHousingTypes <- colorBin(
-    palette = "viridis",
-    domain = NULL
-    # TODO figure this out, has to be reactive
-    # domain = housingTypes$`???`, n = 10
-  )
-
-  # Housing Types map
-
-  # Housing Types treemap
-  # Have to drop geometry, i.e. convert sf to df to use in treemap
-  housingTypesDf <- housingTypes
-  st_geometry(housingTypesDf) <- NULL
 
   # isolate({
   #   if (!c_loc() == '') {

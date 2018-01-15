@@ -185,6 +185,17 @@ geoLevels <- c(
   "Census Dissimination Area" = "DA"
 )
 
+housingTypesList <- c(
+  "Appartment in tall building",
+  "Semi detached house",
+  "Row house",
+  "Appartment in duplex",
+  "Appartment in small building",
+  "Other single attached house",
+  "Movable dwelling",
+  "Single detached house"
+)
+
 propertyTaxPeriod <- ptRegDisMth %>%
   filter(trans_period %in% maxTransPeriod)
 
