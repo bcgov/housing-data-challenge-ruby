@@ -27,6 +27,7 @@ censusStir <- reactive({
     "DA" = census2016DaStir
   )
   # Massage the data a little bit
+  # TODO: This needs to be moved to get_census_data.R to be done only once!!
   censusStir$Region <- as.character(censusStir$`Region Name`)
   censusStir %>% mutate(
     percent_less_than_30 =
@@ -109,14 +110,14 @@ censusPp2006 <- reactive({
   )
 })
 
-censusData <- reactive({
-  censusData <- switch(
+housingTypes <- reactive({
+  housingTypes <- switch(
     input$c_view,
-    "CMA" = censusDataCma,
-    "CD" = censusDataCd,
-    "CSD" = censusDataCsd,
-    "CT" = censusDataCt,
-    "DA" = censusDataDa
+    "CMA" = housingTypesCma,
+    "CD" = housingTypesCd,
+    "CSD" = housingTypesCsd,
+    "CT" = housingTypesCt,
+    "DA" = housingTypesDa
   )
 })
 
@@ -124,55 +125,55 @@ observe({
   # Update locations if geo-level selection changes
   updateSelectizeInput(session, 'c_location', choices = regionOptions(), server = TRUE)
 
-  # Dwelling type
+  # Housing type barchart
   traces = list(
     list(
-      x = censusData()$`Region`,
-      y = censusData()$v_CA16_410,
+      x = housingTypes()$`Region`,
+      y = housingTypes()$`Appartment in tall building`,
       color = colNonStrataRental,
       name = "Appartment in tall building"
     ),
     list(
-      x = censusData()$`Region`,
-      y = censusData()$v_CA16_412,
-      color = colCanadian,
+      x = housingTypes()$`Region`,
+      y = housingTypes()$`Semi detached house`,
+      color = colCommercial,
       name = "Semi-detached house"
     ),
     list(
-      x = censusData()$`Region`,
-      y = censusData()$v_CA16_413,
+      x = housingTypes()$`Region`,
+      y = housingTypes()$`Row house`,
       color = colResidential,
       name = "Row house"
     ),
     list(
-      x = censusData()$`Region`,
-      y = censusData()$v_CA16_414,
+      x = housingTypes()$`Region`,
+      y = housingTypes()$`Appartment in duplex`,
       color = colMultiFam,
       name = "Appartment in duplex"
     ),
     list(
-      x = censusData()$`Region`,
-      y = censusData()$v_CA16_415,
+      x = housingTypes()$`Region`,
+      y = housingTypes()$`Appartment in small building`,
       color = colStrata,
       name = "Appartment in small building"
     ),
     list(
-      x = censusData()$`Region`,
-      y = censusData()$v_CA16_416,
+      x = housingTypes()$`Region`,
+      y = housingTypes()$`Other single attached house`,
       color = colAcreage,
       name = "Other single-attached house"
     ),
     list(
-      x = censusData()$`Region`,
-      y = censusData()$v_CA16_417,
+      x = housingTypes()$`Region`,
+      y = housingTypes()$`Movable dwelling`,
       color = colForeign,
       name = "Movable dwelling"
     )
   )
   c16dwellTypePlot <- plotmy(
-    censusData(),
-    censusData()$`Region`,
-    censusData()$v_CA16_409,
+    housingTypes(),
+    housingTypes()$`Region`,
+    housingTypes()$`Single detached house`,
     "Single-detached house",
     "bar",
     colSingleFam,
@@ -181,6 +182,70 @@ observe({
   )
   output$c16dwellType <- renderPlotly({
     c16dwellTypePlot
+  })
+
+  # Defaults and shape the data
+  housingTypes <- housingTypesCma
+  if (!is.null(housingTypes())) {
+    housingTypes <- housingTypes()
+  }
+  housingTypes %<>%
+    gather(
+      "Single detached house",
+      "Appartment in tall building",
+      "Semi detached house",
+      "Row house",
+      "Appartment in duplex",
+      "Appartment in small building",
+      "Other single attached house",
+      "Movable dwelling",
+      key = "HousingType", value = "count")
+
+  # Mobility palette
+  palHousingTypes <- colorBin(
+    palette = "viridis",
+    domain = NULL
+    # TODO figure this out, has to be reactive
+    # domain = housingTypes$`???`, n = 10
+  )
+
+  # Housing Types map
+
+  # Housing Types treemap
+  # Have to drop geometry, i.e. convert sf to df to use in treemap
+  housingTypesDf <- housingTypes
+  st_geometry(housingTypesDf) <- NULL
+
+  # isolate({
+  #   if (!c_loc() == '') {
+  #     housingTypesDf %<>% filter(GeoUID == c_loc())
+  #   }
+  # })
+  # if (!'' == input$c_location) {
+  output$housingTypeTreemap <- renderD3tree3({
+    d3tree3(
+      treemap(
+        housingTypesDf %>% filter(GeoUID == input$c_location),
+        index = c("HousingType", "Region"),
+        vSize = "count",
+        type = "index",
+        vColor = "HousingType",
+        palette = c(colSingleFam, colNonStrataRental, colCommercial, colResidential, colMultiFam, colStrata, colAcreage, colForeign),
+        algorithm = "pivotSize",
+        sortID = "HousingType",
+        fontsize.labels=c(15,12),                # size of labels. Give the size per level of aggregation: size for group, size for subgroup, sub-subgroups...
+        fontcolor.labels=c("white","orange"),    # Color of labels
+        fontface.labels=c(2,1),                  # Font of labels: 1,2,3,4 for normal, bold, italic, bold-italic...
+        bg.labels=c("transparent"),              # Background color of labels
+        align.labels=list(
+          c("center", "center"),
+          c("right", "bottom")
+        ),                                   # Where to place labels in the rectangle?
+        overlap.labels=0.5,                      # number between 0 and 1 that determines the tolerance of the overlap between labels. 0 means that labels of lower levels are not printed if higher level labels overlap, 1  means that labels are always printed. In-between values, for instance the default value .5, means that lower level labels are printed if other labels do not overlap with more than .5  times their area size.
+        inflate.labels=F
+      ),
+      rootname="Housing Type"
+    )
   })
 
   # Mobility

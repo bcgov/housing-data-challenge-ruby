@@ -220,12 +220,12 @@ getPal <- function(pal, dom, bins) {
            bins = bins)
 }
 
-palViridis <-
-  getPal(
-    viridis::viridis(4),
-    censusData$v_CA16_2447,
-    c(0, 30000, 60000, 75000, 90000, 100000, 120000)
-  )
+# palViridis <-
+#   getPal(
+#     viridis::viridis(4),
+#     censusData$v_CA16_2447,
+#     c(0, 30000, 60000, 75000, 90000, 100000, 120000)
+#   )
 
 # Add a homepage Jumbotron
 jumbotron <- function(header, popPerc = 0, popInc = TRUE, dwellPerc = 0, dwellInc = TRUE,
@@ -356,11 +356,11 @@ censusMobilityCt <- read_rds(file.path("data", "census2016-mobility-CT.rds"))
 censusMobilityDa <- read_rds(file.path("data", "census2016-mobility-DA.rds"))
 
 # Housing Type
-censusDataCma <- readRDS(file.path("data", "housing", "census2016-housing-CMA.rds"))
-censusDataCsd <- readRDS(file.path("data", "housing", "census2016-housing-CSD.rds"))
-censusDataCd <- readRDS(file.path("data", "housing", "census2016-housing-CD.rds"))
-censusDataCt <- readRDS(file.path("data", "housing", "census2016-housing-CT.rds"))
-censusDataDa <- readRDS(file.path("data", "housing", "census2016-housing-DA.rds"))
+housingTypesCma <- readRDS(file.path("data", "housing", "census2016-housing-CMA.rds"))
+housingTypesCsd <- readRDS(file.path("data", "housing", "census2016-housing-CSD.rds"))
+housingTypesCd <- readRDS(file.path("data", "housing", "census2016-housing-CD.rds"))
+housingTypesCt <- readRDS(file.path("data", "housing", "census2016-housing-CT.rds"))
+housingTypesDa <- readRDS(file.path("data", "housing", "census2016-housing-DA.rds"))
 
 # Shelter-Cost-to-Income Ratio data
 census2016CmaStir <- read_rds(file.path("data", "census2016Spatial-stir-CMA.rds"))

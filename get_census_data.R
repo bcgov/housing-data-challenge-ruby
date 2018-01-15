@@ -18,7 +18,7 @@ getRegions <- function() {
 regions <- getRegions()
 
 # General census data
-censusForYear <- function(year, censusLevel = "CMA", regions) {
+getHousingTypesData <- function(year, censusLevel = "CMA", regions) {
   censusYear <- paste0('CA', substr(paste0(year), 3, 4))
 
   # Housing Types
@@ -55,16 +55,31 @@ censusForYear <- function(year, censusLevel = "CMA", regions) {
     )
   censusHousing %<>%
     filter(Type == censusLevel) %<>%
-    mutate(`Region Name` = as.character(`Region Name`)) %<>%
-    select(GeoUID, Region = `Region Name`, Type, starts_with("v_"))
+    mutate(
+      `Region Name` = as.character(`Region Name`),
+      Type = as.character(Type)
+    ) %<>%
+    select(GeoUID, Region = `Region Name`, Type, starts_with("v_")) %<>%
+    # TODO: cater to vectors of other years too
+    rename(
+      "Appartment in tall building" = v_CA16_410,
+      "Semi detached house" = v_CA16_412,
+      "Row house" = v_CA16_413,
+      "Appartment in duplex" = v_CA16_414,
+      "Appartment in small building" = v_CA16_415,
+      "Other single attached house" = v_CA16_416,
+      "Movable dwelling" = v_CA16_417,
+      "Single detached house" = v_CA16_409
+    )
 
   saveRDS(censusHousing, here::here("data", "housing", paste0("census",  year, "-housing-", censusLevel, ".rds")))
 }
 
 # Loop through year and geographical levels and save housing types-related data
-for (censusYear in c("2006", "2011", "2016")) {
+# for (censusYear in c("2006", "2011", "2016")) {
+for (censusYear in c("2016")) {
   for (censusLevel in c("CMA", "CD", "CSD", "CT", "DA")) {
-    censusForYear(censusYear, censusLevel, regions)
+    getHousingTypesData(censusYear, censusLevel, regions)
   }
 }
 
