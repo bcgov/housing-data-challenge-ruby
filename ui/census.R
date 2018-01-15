@@ -58,18 +58,18 @@ tabPanel(
           column(8, plotlyOutput("c16dwellType", height = chartHeight) %>% withSpinner(color="#0dc5c1"))
         )
       ),
-      tabPanel("Shelter-to-Income Ratio",
-               fluidRow(
-                 column(6, leafletOutput("mapCensusStir", height = mapHeight) %>% withSpinner(color="#0dc5c1")),
-                 column(6,
-                        fluidRow(
-                          plotlyOutput("stirLollipop", height = chartHeight) %>% withSpinner(color="#0dc5c1")
-                        ),
-                        fluidRow(
-                          plotlyOutput("stirStacked", height = chartHeight) %>% withSpinner(color="#0dc5c1")
-                        )
-                 )
-               )
+      tabPanel(
+        "Shelter-to-Income Ratio",
+        fluidRow(
+          column(6, leafletOutput("mapCensusStir", height = mapHeight * 1.5) %>% withSpinner(color="#0dc5c1")),
+          column(6, fluidRow(
+            plotlyOutput("stirLollipop", height = chartHeight) %>% withSpinner(color="#0dc5c1")
+            ),
+            fluidRow(
+              plotlyOutput("stirStacked", height = chartHeight) %>% withSpinner(color="#0dc5c1")
+            )
+          )
+        )
       )
     )
     )

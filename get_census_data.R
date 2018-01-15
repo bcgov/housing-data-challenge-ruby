@@ -2,6 +2,7 @@
 library(cancensus)
 library(dplyr)
 library(magrittr)
+library(stringr)
 library(tidyr)
 library(here)
 
@@ -139,6 +140,7 @@ for (censusLevel in c("CMA", "CD", "CSD", "CT", "DA")) {
 # Shelter-Cost-to-Income Ratio
 vectorsStir <- c("v_CA16_4886", "v_CA16_4887", "v_CA16_4888")
 for (censusLevel in c("CMA", "CD", "CSD", "CT", "DA")) {
+  censusLevel = "CMA"
   censusStirData <-
     get_census(
       "CA16",
@@ -168,18 +170,19 @@ for (censusLevel in c("CMA", "CD", "CSD", "CT", "DA")) {
   # sf format
   censusStirData %<>%
     filter(Type == censusLevel) %<>%
-    rename(
-      `total_households_with_income` = v_CA16_4886,
-      `stir_less_than_30` = v_CA16_4887,
-      `stir_more_than_30` = v_CA16_4888
+    select(
+      Region = as.character(ifelse(censusStirData$Type %in% c("CSD", "CT", "DA"),
+                                   paste(censusStirData$`Region Name`, str_sub(censusStirData$GeoUID, -2)), censusStirData$`Region Name`)),
+      GeoUID, Type, geometry,
+      total_households_with_income = v_CA16_4886,
+      stir_less_than_30 = v_CA16_4887,
+      stir_more_than_30 = v_CA16_4888
     ) %<>%
     mutate(
-      Region = ifelse(censusLevel %in% c("CSD", "CT", "DA"),
-                      paste(`Region Name`, str_sub(GeoUID, -2)), `Region Name`),
       percent_less_than_30 =
-        round(stir_less_than_30 / total_households_with_income * 100, digits = 2),
+        round(stir_less_than_30 / (stir_less_than_30 + stir_more_than_30) * 100, digits = 2),
       percent_more_than_30 =
-        round(stir_more_than_30 / total_households_with_income * 100, digits = 2)
+        round(stir_more_than_30 / (stir_less_than_30 + stir_more_than_30) * 100, digits = 2)
     ) %<>%
     arrange(desc(percent_more_than_30))
 
