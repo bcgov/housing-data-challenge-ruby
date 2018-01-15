@@ -115,128 +115,55 @@ censusData <- reactive({
     "CMA" = censusDataCma,
     "CD" = censusDataCd,
     "CSD" = censusDataCsd,
-    "CT" = censusDataCt#,
-    # "DA" = censusDataDa
+    "CT" = censusDataCt,
+    "DA" = censusDataDa
   )
 })
 
-censusDataSpatial <- reactive({
-  censusDataSpatial <- switch(
-    input$c_view,
-    "CMA" = censusDataSpatialCma,
-    "CD" = censusDataSpatialCd,
-    "CSD" = censusDataSpatialCsd,
-    "CT" = censusDataSpatialCt#,
-    # "DA" = censusDataSpatialDa
-  )
-})
-
-# STIR
 observe({
-  censusCategories <- label_vectors(censusData())
-
-  # isolate({
-  #   regionOptions <- censusMobility() %>%
-  #     mutate(label = paste0(censusMobility()$`Region Name`, " (", censusMobility()$GeoUID, ")")) %>%
-  #     select(label, value = GeoUID)
-  # })
-
+  # Update locations if geo-level selection changes
   updateSelectizeInput(session, 'c_location', choices = regionOptions(), server = TRUE)
-
-  output$mapCensus <- renderLeaflet({
-    censusDataSpatial() %>%
-      leaflet() %>%
-      addProviderTiles(provider = "CartoDB.Positron") %>%
-      addPolygons(
-        label = ~ name,
-        # color = ~ pal(v_CA16_2447),
-        stroke = TRUE,
-        weight = 1,
-        fillOpacity = 0.5,
-        smoothFactor = 1,
-        color = '#333',
-        fillColor = ~ palViridis(censusDataSpatial()$v_CA16_2447),
-        popup = paste0(
-          "<strong>",
-          paste(censusDataSpatial()$`Region Name`),
-          "</strong>",
-          "<table class=\"leaflet-popup-table\">
-          <tr><td>Census Year</td><td>2016</td></tr>",
-          "<tr><td>Population</td><td>",
-          format(censusDataSpatial()$Population, big.mark = ","),
-          "</td></tr><tr><td>Dwellings</td><td>",
-          format(censusDataSpatial()$Dwellings, big.mark = ","),
-          "</td></tr><tr><td>Households</td><td>",
-          format(censusDataSpatial()$Households, big.mark = ","),
-          "</td></tr><tr><td>Median total income</td><td>",
-          paste("$", format(censusDataSpatial()$v_CA16_2447, big.mark = ","), sep =
-                  ""),
-          "</td></tr><tr><td>Average Age</td><td>",
-          censusDataSpatial()$v_CA16_379,
-          "</td></tr><tr><td>Provate dwellings occupied by usual residents</td><td>",
-          format(censusDataSpatial()$v_CA16_405, big.mark = ","),
-          "</td></tr><tr><td>Single detahed houses</td><td>",
-          format(censusDataSpatial()$v_CA16_412, big.mark = ","),
-          "</td></tr><tr><td>Average family size</td><td>",
-          format(censusDataSpatial()$v_CA16_2449, big.mark = ","),
-          "</td></tr></table>"
-        ),
-        highlight = highlightOptions(
-          weight = 5,
-          color = "#696969",
-          dashArray = "",
-          fillOpacity = 0.5,
-          bringToFront = TRUE)
-      ) %>%
-      addLegend(
-        "bottomleft",
-        pal = palViridis,
-        values = ~ v_CA16_2447,
-        title = "Median total income of <br> economic families in 2015",
-        opacity = 0.5
-      )
-  })
 
   # Dwelling type
   traces = list(
     list(
-      x = censusData()$`Region Name`,
+      x = censusData()$`Region`,
       y = censusData()$v_CA16_410,
       color = colNonStrataRental,
       name = "Appartment in tall building"
     ),
     list(
-      x = censusData()$`Region Name`,
+      x = censusData()$`Region`,
       y = censusData()$v_CA16_412,
       color = colCanadian,
       name = "Semi-detached house"
     ),
     list(
-      x = censusData()$`Region Name`,
+      x = censusData()$`Region`,
       y = censusData()$v_CA16_413,
       color = colResidential,
       name = "Row house"
     ),
     list(
-      x = censusData()$`Region Name`,
+      x = censusData()$`Region`,
       y = censusData()$v_CA16_414,
       color = colMultiFam,
       name = "Appartment in duplex"
     ),
     list(
-      x = censusData()$`Region Name`,
+      x = censusData()$`Region`,
       y = censusData()$v_CA16_415,
       color = colStrata,
       name = "Appartment in small building"
     ),
     list(
-      x = censusData()$`Region Name`,
+      x = censusData()$`Region`,
       y = censusData()$v_CA16_416,
       color = colAcreage,
       name = "Other single-attached house"
     ),
     list(
-      x = censusData()$`Region Name`,
+      x = censusData()$`Region`,
       y = censusData()$v_CA16_417,
       color = colForeign,
       name = "Movable dwelling"
@@ -244,7 +171,7 @@ observe({
   )
   c16dwellTypePlot <- plotmy(
     censusData(),
-    censusData()$`Region Name`,
+    censusData()$`Region`,
     censusData()$v_CA16_409,
     "Single-detached house",
     "bar",

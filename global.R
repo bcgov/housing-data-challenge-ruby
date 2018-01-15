@@ -23,7 +23,6 @@ library(data.tree)
 library(d3treeR)
 library(RColorBrewer)
 library(shinycssloaders)
-library(shinyBS)
 
 # source files
 source("modules/controls.R")
@@ -51,13 +50,6 @@ c16EconRegs <- readRDS("./data/census2016-economic-regions.rds")
 c16Tracts <- readRDS("./data/census2016-tracts.rds")
 c16MetroAreas <- readRDS("./data/census2016-metro-areas.rds")
 c16Prov <- readRDS("./data/census2016-province.rds")
-
-censusData <- readRDS("./data/census2016.rds")
-censusDataSpatial <- readRDS("./data/censusSpatial2016.rds")
-censusCategories <- label_vectors(censusData)
-# censusCategoriesList <- setNames(split(censusCategories, seq(nrow(censusCategories))), rownames(censusCategories))
-# censusCategoriesList <- as.list(censusCategories)
-censusCategoriesList <- setNames(censusCategories$Vector, censusCategories$Detail)
 
 # options(cancensus.api_key = "CensusMapper_f17c13c7fc5e60de7cdd341d5d4db866")
 # dir.create('./cache', showWarnings = TRUE, recursive = FALSE, mode = "0777")
@@ -364,16 +356,11 @@ censusMobilityCt <- read_rds(file.path("data", "census2016-mobility-CT.rds"))
 censusMobilityDa <- read_rds(file.path("data", "census2016-mobility-DA.rds"))
 
 # Housing Type
-censusDataCma <- readRDS(file.path("data", "census2016-CMA.rds"))
-censusDataCd <- readRDS(file.path("data", "census2016-CD.rds"))
-censusDataCsd <- readRDS(file.path("data", "census2016-CSD.rds"))
-censusDataCt <- readRDS(file.path("data", "census2016-CT.rds"))
-# censusDataDa <- readRDS(file.path("data", "census2016-DA.rds"))
-censusDataSpatialCma <- readRDS(file.path("data", "censusSpatial2016-CMA.rds"))
-censusDataSpatialCd <- readRDS(file.path("data", "censusSpatial2016-CD.rds"))
-censusDataSpatialCsd <- readRDS(file.path("data", "censusSpatial2016-CSD.rds"))
-censusDataSpatialCt <- readRDS(file.path("data", "censusSpatial2016-CT.rds"))
-# censusDataSpatialDa <- readRDS(file.path("data", "censusSpatial2016-DA.rds"))
+censusDataCma <- readRDS(file.path("data", "housing", "census2016-housing-CMA.rds"))
+censusDataCsd <- readRDS(file.path("data", "housing", "census2016-housing-CSD.rds"))
+censusDataCd <- readRDS(file.path("data", "housing", "census2016-housing-CD.rds"))
+censusDataCt <- readRDS(file.path("data", "housing", "census2016-housing-CT.rds"))
+censusDataDa <- readRDS(file.path("data", "housing", "census2016-housing-DA.rds"))
 
 # Shelter-Cost-to-Income Ratio data
 census2016CmaStir <- read_rds(file.path("data", "census2016Spatial-stir-CMA.rds"))

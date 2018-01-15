@@ -18,90 +18,53 @@ getRegions <- function() {
 regions <- getRegions()
 
 # General census data
-# @TODO: Remove vectors that will not be in use - BCHDV-38
-censusForYear <- function(year, level = "CMA") {
-  year <- 2016
+censusForYear <- function(year, censusLevel = "CMA", regions) {
   censusYear <- paste0('CA', substr(paste0(year), 3, 4))
 
-  regions <- list_census_regions(censusYear, use_cache = TRUE)
-  bc <- regions %>% filter(PR_UID == "59")
+  # Housing Types
+  switch(
+    year,
+    "2016" = {
+      vectors <- c(
+        "v_CA16_409", "v_CA16_410", "v_CA16_412", "v_CA16_413", "v_CA16_414",
+        "v_CA16_415", "v_CA16_416", "v_CA16_417"
+      )
+    },
+    "2011" = {
+      vectors <- c(
+        "v_CA11F_200", "v_CA11F_201", "v_CA11F_204", "v_CA11F_205", "v_CA11F_206",
+        "v_CA11F_207", "v_CA11F_208", "v_CA11F_202"
+      )
+    },
+    "2006" = {
+      vectors <- c(
+        "v_CA06_120", "v_CA06_124", "v_CA06_121", "v_CA06_122", "v_CA06_123",
+        "v_CA06_125", "v_CA06_126", "v_CA06_127"
+      )
+    }
+  )
 
-  cma <- bc %>% filter(level == "CMA")
-  cmaRegions <- as_census_region_list(cma)
-
-  cd <- bc %>% filter(level == "CD")
-  cdRegions <- as_census_region_list(cd)
-
-  csd <- bc %>% filter(level == "CSD")
-  csdRegions <- as_census_region_list(csd)
-
-  regions = as_census_region_list(rbind(cma, cd, csd))
-
-  allVectors <-
-    dplyr::na_if(list_census_vectors(censusYear, use_cache = TRUE), "")
-
-  parents <-
-    allVectors %>% filter(is.na(parent_vector) == TRUE, type == "Total")
-
-  # Income vectors
-  vectorsIncome <-
-    search_census_vectors(
-      # 'Household total income groups in 2015 for private households',
-      "Income statistics in 2015 for economic families",
+  censusHousing <- get_census(
       censusYear,
-      type = "Total",
-      use_cache = TRUE
-    )  %>%
-    child_census_vectors(leaves_only = FALSE) # %>% # pull("vector") %>%
-  # filter(grepl("family", label))
-
-  # Search age data
-  vectorsAge <-
-    search_census_vectors(' Age', censusYear, type = "Total", use_cache =  TRUE) %>%
-    # child_census_vectors(leaves_only = TRUE) %>%
-    filter(vector %in% c("v_CA16_379", "v_CA16_382"))
-
-  # Search dwelling data
-  vectorsDwelling <-
-    search_census_vectors('dwelling', censusYear, type = "Total") %>%
-    child_census_vectors(leaves_only = TRUE)
-
-  vectors = do.call(rbind, list(vectorsAge, vectorsDwelling, vectorsIncome))
-
-  censusDataSpatial <-
-    get_census(
-      censusYear,
-      level = level,
-      # regions = cdRegions,
+      level = censusLevel,
       regions = regions,
-      vectors = vectors %>% pull("vector"),
+      vectors = vectors,
       use_cache = TRUE,
       labels = "short",
-      geo_format = "sp"
+      geo_format = "sf"
     )
+  censusHousing %<>%
+    filter(Type == censusLevel) %<>%
+    mutate(`Region Name` = as.character(`Region Name`)) %<>%
+    select(GeoUID, Region = `Region Name`, Type, starts_with("v_"))
 
-  saveRDS(censusDataSpatial,
-          paste0("./data/censusSpatial",  year, "-", level, ".rds"))
-
-  # censusData <- as.data.frame(censusDataSpatial)
-  censusData <-
-    get_census(
-      censusYear,
-      level = level,
-      # regions = cdRegions,
-      regions = regions,
-      vectors = vectors %>% pull("vector"),
-      use_cache = TRUE,
-      labels = "short",
-      geo_format = NA
-    )
-  saveRDS(censusData, paste0("./data/census",  year, "-", level, ".rds"))
+  saveRDS(censusHousing, here::here("data", "housing", paste0("census",  year, "-housing-", censusLevel, ".rds")))
 }
 
-# Loop through year and geographical levels and save general census-related data
+# Loop through year and geographical levels and save housing types-related data
 for (censusYear in c("2006", "2011", "2016")) {
   for (censusLevel in c("CMA", "CD", "CSD", "CT", "DA")) {
-    censusForYear(censusYear, censusLevel)
+    censusForYear(censusYear, censusLevel, regions)
   }
 }
 
@@ -289,7 +252,7 @@ for (year in c("2006", "2011", "2016")) {
   switch(
     year,
     "2016" = {
-  print(paste("Setting vectors inside 2016 "))
+      print(paste("Setting vectors inside 2016 "))
       vectorsFemale <- c(
         "v_CA16_9", "v_CA16_27", "v_CA16_45", "v_CA16_66", "v_CA16_84", "v_CA16_102", "v_CA16_120",
         "v_CA16_138", "v_CA16_156", "v_CA16_174", "v_CA16_192", "v_CA16_210", "v_CA16_228", "v_CA16_249",
@@ -302,7 +265,7 @@ for (year in c("2006", "2011", "2016")) {
       )
     },
     "2011" = {
-  print(paste("Setting vectors inside 2011 "))
+      print(paste("Setting vectors inside 2011 "))
       vectorsFemale <- c(
         "v_CA11F_10", "v_CA11F_13", "v_CA11F_16", "v_CA11F_19", "v_CA11F_28", "v_CA11F_40", "v_CA11F_43",
         "v_CA11F_46", "v_CA11F_49", "v_CA11F_52", "v_CA11F_55", "v_CA11F_58", "v_CA11F_61", "v_CA11F_64",
@@ -315,7 +278,7 @@ for (year in c("2006", "2011", "2016")) {
       )
     },
     "2006" = {
-  print(paste("Setting vectors inside 2006 "))
+      print(paste("Setting vectors inside 2006 "))
       vectorsFemale <- c(
         "v_CA06_23", "v_CA06_24", "v_CA06_25", "v_CA06_26", "v_CA06_27", "v_CA06_28", "v_CA06_29",
         "v_CA06_30", "v_CA06_31", "v_CA06_32", "v_CA06_33", "v_CA06_34", "v_CA06_35", "v_CA06_36",
@@ -330,7 +293,7 @@ for (year in c("2006", "2011", "2016")) {
   )
 
   for (censusLevel in c("CMA", "CD", "CSD", "CT", "DA", "PR")) {
-  print(paste("Now getting geo-level ", censusLevel, " for ", censusYear))
+    print(paste("Now getting geo-level ", censusLevel, " for ", censusYear))
     # ppData <- getPopulationPyramidData(censusYear, censusLevel, ppVectorsFemale, ppVectorsMale, regions)
     censusYear <- paste0('CA', substr(paste0(year), 3, 4))
 
