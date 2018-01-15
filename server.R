@@ -1,3 +1,5 @@
+pdf(NULL)
+
 server <- function(input, output, session) {
   # Include the logic (server)
   source(file.path("server", "ptt.R"),  local = TRUE)$value
