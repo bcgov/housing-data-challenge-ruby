@@ -159,11 +159,9 @@ observe({
 
   output$map <- renderLeaflet({
     leaflet(shapesDF) %>%
-      setView(lng = -125,
-              lat = 53,
-              zoom = 5) %>%
-      addTiles(group = "OpenStreetMap") %>%
-      addProviderTiles("CartoDB.Positron") %>%
+      setView(lng = -123.12, lat = 52.28,
+              zoom = 6) %>%
+      addProviderTiles("CartoDB.Positron", options = providerTileOptions(minZoom = 6, maxZoom = 8)) %>%
 
       addPolygons(
         data = shapesDF,

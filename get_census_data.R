@@ -16,7 +16,7 @@ getRegions <- function() {
   return(as_census_region_list(regions %>% filter(PR_UID == "59")))
 }
 regions <- getRegions()
-year = "2016"
+
 # General census data
 getHousingTypesData <- function(year, censusLevel = "CMA", regions) {
   censusYear <- paste0('CA', substr(paste0(year), 3, 4))

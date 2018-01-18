@@ -138,8 +138,8 @@ palHousingTypes <- colorNumeric(
 # Housing Types map
 output$mapCensusHousingType <- renderLeaflet({
   leaflet(housingTypesCma) %>%
-    addProviderTiles(provider = "CartoDB.Positron") %>%
-    setView(lng = -123.12, lat = 53.28, zoom = 6) %>%
+    addProviderTiles(provider = "CartoDB.Positron", options = providerTileOptions(minZoom = 6, maxZoom = 10)) %>%
+    setView(lng = -123.12, lat = 52.28, zoom = 6) %>%
     addPolygons(
       label = ~ `Region`, color = '#333', fillColor = ~ palHousingTypes(housingTypesCma$`Single detached house ratio`),
       stroke = TRUE, weight = 1, fillOpacity = 0.5, smoothFactor = 0.2,
@@ -177,7 +177,7 @@ output$mapCensusHousingType <- renderLeaflet({
 
 observe({
   # Update locations if geo-level selection changes
-  updateSelectizeInput(session, 'c_location', choices = regionOptions(), server = TRUE)
+  # updateSelectizeInput(session, 'c_location', choices = regionOptions(), server = TRUE)
 
   # Housing type barchart
   traces = list(
@@ -388,8 +388,8 @@ observe({
   # Mobility Map
   output$mapCensusMobility <- renderLeaflet({
       leaflet(censusMobility) %>%
-      addProviderTiles(provider = "CartoDB.Positron") %>%
-      setView(lng = -123.12, lat = 53.28, zoom = 6) %>%
+      addProviderTiles(provider = "CartoDB.Positron", options = providerTileOptions(minZoom = 6, maxZoom = 10)) %>%
+      setView(lng = -123.12, lat = 52.28, zoom = 6) %>%
       addPolygons(
         label = ~ `Region`, color = '#333', fillColor = ~ palMobility(censusMobility$`Movers Ratio`),
         stroke = TRUE, weight = 1, fillOpacity = 0.5, smoothFactor = 0.2,
@@ -511,8 +511,8 @@ observe({
   # STIR Map
   output$mapCensusStir <- renderLeaflet({
       leaflet(censusStir) %>%
-      addProviderTiles(provider = "CartoDB.Positron") %>%
-      setView(lng = -123.12, lat = 53.28, zoom = 6) %>%
+      addProviderTiles(provider = "CartoDB.Positron", options = providerTileOptions(minZoom = 6, maxZoom = 10)) %>%
+      setView(lng = -123.12, lat = 52.28, zoom = 6) %>%
       addPolygons(
         label = ~ `Region`, color = '#333', fillColor = ~ palStir(censusStir$percent_more_than_30),
         stroke = TRUE, weight = 1, fillOpacity = 0.75, smoothFactor = 0.2,
