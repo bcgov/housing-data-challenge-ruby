@@ -63,7 +63,10 @@ tabPanel(
           column(8, d3tree3Output("housingTypeTreemap", height = chartHeight) %>% withSpinner(color="#0dc5c1"))
         ),
         fluidRow(
-          column(10, offset = 1, plotlyOutput("c16dwellType", height = chartHeight) %>% withSpinner(color="#0dc5c1"))
+          column(12, offset = 1, plotlyOutput("c16dwellType", height = chartHeight) %>% withSpinner(color="#0dc5c1"))
+        ),
+        fluidRow(
+          column(12, dataTableOutput("housingTypesDT") %>% withSpinner(color="#0dc5c1"))
         )
       ),
       tabPanel(

@@ -27,8 +27,8 @@ censusStir <- reactive({
     "DA" = census2016DaStir
   )
   # Massage the data a little bit
-  # TODO: This needs to be moved to get_census_data.R to be done only once!!
-  censusStir$Region <- as.character(censusStir$`Region Name`)
+  # TODO: This needs to be moved to get_census_data.R to be done only once on app loading
+  censusStir$Region <- as.character(censusStir$`Region`)
   censusStir %>% mutate(
     percent_less_than_30 =
       round(stir_less_than_30 / (stir_less_than_30 + stir_more_than_30) * 100, digits = 2),
@@ -61,7 +61,7 @@ censusPp2016 <- reactive({
 # Dropdown options for location based on selected geo-level
 regionOptions <- reactive({
     regionOptions <- censusMobility() %>%
-      mutate(label = paste0(censusMobility()$`Region Name`, " (", censusMobility()$GeoUID, ")")) %>%
+      mutate(label = paste0(censusMobility()$`Region`, " (", censusMobility()$GeoUID, ")")) %>%
       select(label, value = GeoUID)
 })
 
@@ -123,7 +123,56 @@ housingTypes <- reactive({
 
 housingTypeMapData <- reactive({
   htMapData <- housingTypes() %>%
-    select(Region, GeoUID, typewatch = input$c_housing_types)
+    # select(Region, GeoUID, typewatch = input$c_housing_types)
+    select(typewatch = input$c_housing_types, everything()) %>%
+    mutate(typewatch2 = as.numeric(input$c_housing_types))
+})
+
+# Mobility palette
+palHousingTypes <- colorNumeric(
+  palette = "viridis",
+  domain = housingTypesCma$`Single detached house ratio`,
+  na.color = "#e6e6e6"
+)
+
+# Housing Types map
+output$mapCensusHousingType <- renderLeaflet({
+  leaflet(housingTypesCma) %>%
+    addProviderTiles(provider = "CartoDB.Positron") %>%
+    setView(lng = -123.12, lat = 53.28, zoom = 6) %>%
+    addPolygons(
+      label = ~ `Region`, color = '#333', fillColor = ~ palHousingTypes(housingTypesCma$`Single detached house ratio`),
+      stroke = TRUE, weight = 1, fillOpacity = 0.5, smoothFactor = 0.2,
+      # fillOpacity = 0.5,
+      # smoothFactor = 1,
+      popup = paste0(
+        "<strong>", paste0(housingTypesCma$`Region`, " (", housingTypesCma$GeoUID), ")</strong>",
+        "<table class=\"leaflet-popup-table\"><tr><td>Census Year</td><td>2016</td></tr>",
+        "<tr><td>Single family homes ratio</td><td><strong>",
+        format(housingTypesCma$`Single detached house ratio`, big.mark = ","), "</strong></td></tr>",
+        "<tr><td>Semi detached house ratio</strong></td><td>",
+        format(housingTypesCma$`Semi detached house ratio`, big.mark = ","), "</strong></td></tr>",
+        "<tr><td>Appartment in duplex ratio</strong></td><td>",
+        format(housingTypesCma$`Appartment in duplex ratio`, big.mark = ","), "</strong></td></tr>",
+        "<tr><td>Row house ratio</strong></td><td>",
+        format(housingTypesCma$`Row house ratio`, big.mark = ","), "</strong></td></tr>",
+        "<tr><td>Appartment in small building ratio</strong></td><td>",
+        format(housingTypesCma$`Appartment in small building ratio`, big.mark = ","), "</strong></td></tr>",
+        "<tr><td>Appartment in tall building ratio</strong></td><td>",
+        format(housingTypesCma$`Appartment in tall building ratio`, big.mark = ","), "</strong></td></tr>",
+        "<tr><td>Other single attached house ratio</strong></td><td>",
+        format(housingTypesCma$`Other single attached house ratio`, big.mark = ","), "</strong></td></tr>",
+        "<tr><td>Movable dwelling ratio</strong></td><td>",
+        format(housingTypesCma$`Movable dwelling ratio`, big.mark = ","), "</strong></td></tr>",
+        "</table>"
+      ),
+      highlight = highlightOptions(
+        weight = 5, color = "#696969", dashArray = "", fillOpacity = 0.75, bringToFront = TRUE)
+    ) %>%
+    addLegend(
+      "bottomleft", pal = palHousingTypes, values = ~ `Single detached house ratio`,
+      title = "", opacity = 0.5
+    )
 })
 
 observe({
@@ -190,58 +239,53 @@ observe({
   })
 
   # Defaults and shape the data
-  housingTypes <- housingTypesCma
   if (!is.null(housingTypes())) {
     housingTypes <- housingTypes()
   }
+
   # Mobility palette
-  palHousingTypes <- colorBin(
+  # housingTypes <- housingTypesCma
+  palHousingTypes <- colorNumeric(
     palette = "viridis",
     # domain = NULL
     # TODO figure this out, has to be reactive
-    domain = housingTypes$`Single detached house`, n = 10
+    # domain = housingTypesCma$`Single detached house ratio`,
+    domain = housingTypeMapData()$typewatch,
+    # n = 10
+    na.color = "#e6e6e6"
   )
-
-  # Housing Types map
-  output$mapCensusHousingType <- renderLeaflet({
-    housingTypes %>%
-      leaflet() %>%
-      addProviderTiles(provider = "CartoDB.Positron") %>%
-      setView(lng = -123.12, lat = 53.28, zoom = 6) %>%
-      addPolygons(
-        label = ~ `Region`, color = '#333', fillColor = ~ palHousingTypes(housingTypes$`Single detached house`),
-        stroke = TRUE, weight = 1, fillOpacity = 0.75, smoothFactor = 0.2,
-        # fillOpacity = 0.5,
-        # smoothFactor = 1,
-        popup = paste0(
-          "<strong>", paste0(housingTypes$`Region`, " (", housingTypes$GeoUID), ")</strong>",
-          "<table class=\"leaflet-popup-table\"><tr><td>Census Year</td><td>2016</td></tr>",
-          "<tr><td><strong>Single family homes</strong></td><td><strong>",
-          format(housingTypes$`Single detached house`, big.mark = ","), "</strong></td></tr></table>"
-        ),
-        highlight = highlightOptions(
-          weight = 5, color = "#696969", dashArray = "", fillOpacity = 0.5, bringToFront = TRUE)
-      ) %>%
-      addLegend(
-        "bottomleft", pal = palMobility, values = ~ `Single detached house`,
-        title = "", opacity = 0.5
-      )
-  })
 
   # Redraw polygons when housing type selection changes
   leafletProxy("mapCensusHousingType", data = housingTypeMapData()) %>%
     clearShapes() %>%
     addPolygons(
-      label = ~ `Region`, color = '#333', fillColor = ~ palHousingTypes(housingTypeMapData()$typewatch),
-      stroke = TRUE, weight = 1, fillOpacity = 0.75, smoothFactor = 0.2,
+      label = ~ `Region`, color = '#333',
+      fillColor = ~ palHousingTypes(housingTypeMapData()$typewatch),
+      # fillColor = ~ pal(housingTypeMapData()$typewatch),
+      stroke = TRUE, weight = 1, fillOpacity = 0.5, smoothFactor = 0.2,
       popup = paste0(
         "<strong>", paste0(housingTypeMapData()$`Region`, " (", housingTypeMapData()$GeoUID), ")</strong>",
         "<table class=\"leaflet-popup-table\"><tr><td>Census Year</td><td>2016</td></tr>",
-        "<tr><td><strong>Single family homes</strong></td><td><strong>",
-        format(housingTypeMapData()$typewatch, big.mark = ","), "</strong></td></tr></table>"
+        "<tr><td>Single family homes ratio</td><td><strong>",
+        format(housingTypeMapData()$`Single detached house ratio`, big.mark = ","), "</strong></td></tr>",
+        "<tr><td>Semi detached house ratio</strong></td><td>",
+        format(housingTypeMapData()$`Semi detached house ratio`, big.mark = ","), "</strong></td></tr>",
+        "<tr><td>Appartment in duplex ratio</strong></td><td>",
+        format(housingTypeMapData()$`Appartment in duplex ratio`, big.mark = ","), "</strong></td></tr>",
+        "<tr><td>Row house ratio</strong></td><td>",
+        format(housingTypeMapData()$`Row house ratio`, big.mark = ","), "</strong></td></tr>",
+        "<tr><td>Appartment in small building ratio</strong></td><td>",
+        format(housingTypeMapData()$`Appartment in small building ratio`, big.mark = ","), "</strong></td></tr>",
+        "<tr><td>Appartment in tall building ratio</strong></td><td>",
+        format(housingTypeMapData()$`Appartment in tall building ratio`, big.mark = ","), "</strong></td></tr>",
+        "<tr><td>Other single attached house ratio</strong></td><td>",
+        format(housingTypeMapData()$`Other single attached house ratio`, big.mark = ","), "</strong></td></tr>",
+        "<tr><td>Movable dwelling ratio</strong></td><td>",
+        format(housingTypeMapData()$`Movable dwelling ratio`, big.mark = ","), "</strong></td></tr>",
+        "</table>"
       ),
       highlight = highlightOptions(
-        weight = 5, color = "#696969", dashArray = "", fillOpacity = 0.5, bringToFront = TRUE)
+        weight = 5, color = "#696969", dashArray = "", fillOpacity = 0.75, bringToFront = TRUE)
     )
 
   # Housing Types treemap
@@ -293,13 +337,38 @@ observe({
     )
   })
 
+
+  # Housing Types datatable
+  output$housingTypesDT = DT::renderDataTable(datatable(
+    housingTypeMapData() %>% select(Region, GeoUID, typewatch),
+    # housingTypesDf,# %>% select(Region, GeoUID, typewatch),
+      # filter(Type == input$c_search_data_level),
+    filter = 'bottom',
+    extensions = 'Buttons',
+    options = list(
+      pageLength = 25, autoWidth = TRUE, dom = 'Blfrtip',
+      buttons = c('copy', 'csv', 'excel', 'pdf', 'print'),
+      lengthChange = TRUE,
+      initComplete = JS(
+        "
+        function(settings, json) {
+        $(this.api().table().header()).css({
+        'background-color': 'rgba(0, 51, 102, 0.80)',
+        'border-bottom': '5px solid #fcba19',
+        'color': '#fff'
+        });
+        }"
+          )
+      )
+      ))
+
   # Mobility
   censusMobility <- censusMobilityCma
   if (!is.null(censusMobility())) {
     censusMobility <- censusMobility()
   }
   censusMobility %<>%
-    mutate(`Region Name` = as.character(`Region Name`), Type = as.character(Type)) %<>%
+    mutate(`Region` = as.character(`Region`), Type = as.character(Type)) %<>%
     gather(
       "Non-movers", "Non-migrants",
       "External migrants", "Intraprovincial migrants", "Interprovincial migrants",
@@ -318,17 +387,16 @@ observe({
 
   # Mobility Map
   output$mapCensusMobility <- renderLeaflet({
-    censusMobility %>%
-      leaflet() %>%
+      leaflet(censusMobility) %>%
       addProviderTiles(provider = "CartoDB.Positron") %>%
       setView(lng = -123.12, lat = 53.28, zoom = 6) %>%
       addPolygons(
-        label = ~ `Region Name`, color = '#333', fillColor = ~ palMobility(censusMobility$`Movers Ratio`),
-        stroke = TRUE, weight = 1, fillOpacity = 0.75, smoothFactor = 0.2,
+        label = ~ `Region`, color = '#333', fillColor = ~ palMobility(censusMobility$`Movers Ratio`),
+        stroke = TRUE, weight = 1, fillOpacity = 0.5, smoothFactor = 0.2,
         # fillOpacity = 0.5,
         # smoothFactor = 1,
         popup = paste0(
-          "<strong>", paste0(censusMobility$`Region Name`, " (", censusMobility$GeoUID), ")</strong>",
+          "<strong>", paste0(censusMobility$`Region`, " (", censusMobility$GeoUID), ")</strong>",
           "<table class=\"leaflet-popup-table\"><tr><td>Census Year</td><td>2016</td></tr>",
           "<tr><td>Population</td><td>", format(censusMobility$Population, big.mark = ","),
           "</td></tr><tr><td>Dwellings</td><td>", format(censusMobility$Dwellings, big.mark = ","),
@@ -337,7 +405,7 @@ observe({
           format(censusMobility$`Movers Ratio`, big.mark = ","), "</strong></td></tr></table>"
         ),
         highlight = highlightOptions(
-          weight = 5, color = "#696969", dashArray = "", fillOpacity = 0.5, bringToFront = TRUE)
+          weight = 5, color = "#696969", dashArray = "", fillOpacity = 0.75, bringToFront = TRUE)
       ) %>%
       addLegend(
         "bottomleft", pal = palMobility, values = ~ `Movers Ratio`,
@@ -359,7 +427,7 @@ observe({
     d3tree3(
       treemap(
         censusMobilityDf %>% filter(GeoUID == input$c_location),
-        index = c("Migration", "Region Name"),
+        index = c("Migration", "Region"),
         vSize = "count",
         type = "index",
         vColor = "Migration",
@@ -442,8 +510,7 @@ observe({
 
   # STIR Map
   output$mapCensusStir <- renderLeaflet({
-    censusStir %>%
-      leaflet() %>%
+      leaflet(censusStir) %>%
       addProviderTiles(provider = "CartoDB.Positron") %>%
       setView(lng = -123.12, lat = 53.28, zoom = 6) %>%
       addPolygons(

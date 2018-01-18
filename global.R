@@ -2,16 +2,17 @@
 library(here)
 library(shiny)
 library(rgdal)
-library(sf)
-library(leaflet)
+library(rgeos)
 library(maps)
+library(sf)
+library(rmapshaper)
+library(leaflet)
 library(readr)
 library(stringr)
 library(magrittr)
 library(dplyr)
 library(htmlwidgets)
 library(DT)
-library(rgeos)
 library(tidyr)
 library(crosstalk)
 library(plotly)
@@ -186,14 +187,14 @@ geoLevels <- c(
 )
 
 housingTypesList <- c(
-  "Appartment in tall building",
-  "Semi detached house",
-  "Row house",
-  "Appartment in duplex",
-  "Appartment in small building",
-  "Other single attached house",
-  "Movable dwelling",
-  "Single detached house"
+  "Single detached house ratio",
+  "Semi detached house ratio",
+  "Appartment in duplex ratio",
+  "Row house ratio",
+  "Appartment in small building ratio",
+  "Appartment in tall building ratio",
+  "Other single attached house ratio",
+  "Movable dwelling ratio"
 )
 
 propertyTaxPeriod <- ptRegDisMth %>%

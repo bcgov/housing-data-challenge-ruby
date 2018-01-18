@@ -16,28 +16,28 @@ getRegions <- function() {
   return(as_census_region_list(regions %>% filter(PR_UID == "59")))
 }
 regions <- getRegions()
-
+year = "2016"
 # General census data
 getHousingTypesData <- function(year, censusLevel = "CMA", regions) {
   censusYear <- paste0('CA', substr(paste0(year), 3, 4))
 
   # Housing Types
-  switch(
+  vectors <- switch(
     year,
     "2016" = {
-      vectors <- c(
+      c(
         "v_CA16_409", "v_CA16_410", "v_CA16_412", "v_CA16_413", "v_CA16_414",
         "v_CA16_415", "v_CA16_416", "v_CA16_417"
       )
     },
     "2011" = {
-      vectors <- c(
+      c(
         "v_CA11F_200", "v_CA11F_201", "v_CA11F_204", "v_CA11F_205", "v_CA11F_206",
         "v_CA11F_207", "v_CA11F_208", "v_CA11F_202"
       )
     },
     "2006" = {
-      vectors <- c(
+      c(
         "v_CA06_120", "v_CA06_124", "v_CA06_121", "v_CA06_122", "v_CA06_123",
         "v_CA06_125", "v_CA06_126", "v_CA06_127"
       )
@@ -60,6 +60,7 @@ getHousingTypesData <- function(year, censusLevel = "CMA", regions) {
       Type = as.character(Type)
     ) %<>%
     select(GeoUID, Region = `Region Name`, Type, starts_with("v_")) %<>%
+    ms_simplify(keep = 0.05, keep_shapes = TRUE) %<>%
     # TODO: cater to vectors of other years too
     rename(
       "Appartment in tall building" = v_CA16_410,
@@ -70,6 +71,96 @@ getHousingTypesData <- function(year, censusLevel = "CMA", regions) {
       "Other single attached house" = v_CA16_416,
       "Movable dwelling" = v_CA16_417,
       "Single detached house" = v_CA16_409
+    ) %<>%
+    replace_na(`Single detached house` = 0,
+               `Appartment in tall building` = 0,
+               `Semi detached house` = 0,
+               `Row house` = 0,
+               `Appartment in duplex` = 0,
+               `Appartment in small building` = 0,
+               `Other single attached house` = 0,
+               `Movable dwelling` = 0) %<>%
+    mutate(
+      "Single detached house ratio" = round(`Single detached house` * 100 / (
+        `Single detached house` +
+          `Appartment in tall building` +
+          `Semi detached house` +
+          `Row house` +
+          `Appartment in duplex` +
+          `Appartment in small building` +
+          `Other single attached house` +
+          `Movable dwelling`
+      ), digits = 2),
+      "Appartment in tall building ratio" = round(`Appartment in tall building` * 100 / (
+        `Single detached house` +
+          `Appartment in tall building` +
+          `Semi detached house` +
+          `Row house` +
+          `Appartment in duplex` +
+          `Appartment in small building` +
+          `Other single attached house` +
+          `Movable dwelling`
+      ), digits = 2),
+      "Semi detached house ratio" = round(`Semi detached house` * 100 / (
+        `Single detached house` +
+          `Appartment in tall building` +
+          `Semi detached house` +
+          `Row house` +
+          `Appartment in duplex` +
+          `Appartment in small building` +
+          `Other single attached house` +
+          `Movable dwelling`
+      ), digits = 2),
+      "Row house ratio" = round(`Row house` * 100 / (
+        `Single detached house` +
+          `Appartment in tall building` +
+          `Semi detached house` +
+          `Row house` +
+          `Appartment in duplex` +
+          `Appartment in small building` +
+          `Other single attached house` +
+          `Movable dwelling`
+      ), digits = 2),
+      "Appartment in duplex ratio" = round(`Appartment in duplex` * 100 / (
+        `Single detached house` +
+          `Appartment in tall building` +
+          `Semi detached house` +
+          `Row house` +
+          `Appartment in duplex` +
+          `Appartment in small building` +
+          `Other single attached house` +
+          `Movable dwelling`
+      ), digits = 2),
+      "Appartment in small building ratio" = round(`Appartment in small building` * 100 / (
+        `Single detached house` +
+          `Appartment in tall building` +
+          `Semi detached house` +
+          `Row house` +
+          `Appartment in duplex` +
+          `Appartment in small building` +
+          `Other single attached house` +
+          `Movable dwelling`
+      ), digits = 2),
+      "Other single attached house ratio" = round(`Other single attached house` * 100 / (
+        `Single detached house` +
+          `Appartment in tall building` +
+          `Semi detached house` +
+          `Row house` +
+          `Appartment in duplex` +
+          `Appartment in small building` +
+          `Other single attached house` +
+          `Movable dwelling`
+      ), digits = 2),
+      "Movable dwelling ratio" = round(`Movable dwelling` * 100 / (
+        `Single detached house` +
+          `Appartment in tall building` +
+          `Semi detached house` +
+          `Row house` +
+          `Appartment in duplex` +
+          `Appartment in small building` +
+          `Other single attached house` +
+          `Movable dwelling`
+      ), digits = 2)
     )
 
   saveRDS(censusHousing, here::here("data", "housing", paste0("census",  year, "-housing-", censusLevel, ".rds")))
@@ -101,7 +192,9 @@ for (censusLevel in c("CMA", "CD", "CSD", "CT", "DA")) {
       geo_format = "sf"
     )
   censusData %<>%
+    ms_simplify(keep = 0.1, keep_shapes = TRUE) %<>%
     rename(
+      Region = Region.Name,
       `Non-movers` = v_CA16_6695,
       Movers = v_CA16_6698,
       `Non-migrants` = v_CA16_6701,
@@ -120,7 +213,6 @@ for (censusLevel in c("CMA", "CD", "CSD", "CT", "DA")) {
 # Shelter-Cost-to-Income Ratio
 vectorsStir <- c("v_CA16_4886", "v_CA16_4887", "v_CA16_4888")
 for (censusLevel in c("CMA", "CD", "CSD", "CT", "DA")) {
-  censusLevel = "CMA"
   censusStirData <-
     get_census(
       "CA16",
@@ -150,13 +242,14 @@ for (censusLevel in c("CMA", "CD", "CSD", "CT", "DA")) {
   # sf format
   censusStirData %<>%
     filter(Type == censusLevel) %<>%
+    ms_simplify(keep = 0.1, keep_shapes = TRUE) %<>%
     select(
-      Region = as.character(ifelse(censusStirData$Type %in% c("CSD", "CT", "DA"),
-                                   paste(censusStirData$`Region Name`, str_sub(censusStirData$GeoUID, -2)), censusStirData$`Region Name`)),
-      GeoUID, Type, geometry,
-      total_households_with_income = v_CA16_4886,
-      stir_less_than_30 = v_CA16_4887,
-      stir_more_than_30 = v_CA16_4888
+      "Region" = as.character(ifelse("Type" %in% c("CSD", "CT", "DA"),
+                                   paste("Region.Name", str_sub("GeoUID", -2)), "Region.Name")),
+      "GeoUID", "Type", "geometry",
+      "total_households_with_income" = "v_CA16_4886",
+      "stir_less_than_30" = "v_CA16_4887",
+      "stir_more_than_30" = "v_CA16_4888"
     ) %<>%
     mutate(
       percent_less_than_30 =
