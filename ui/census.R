@@ -29,8 +29,12 @@ tabPanel(
         tags$p("An abundance of children suggests a need for family housing, while a greater proportion of seniors
                may indicate a need for “downsized” housing."),
         # bsAlert("popPyrAlert"),
-        fluidRow(
-          column(10, plotlyOutput("popPyr", height = chartHeight, width = "100%") %>% withSpinner(color="#0dc5c1"), offset = 1)
+        # Only show this panel if the plot type is a histogram
+        conditionalPanel(
+          condition = "input.c_location != ''",
+          fluidRow(
+            column(10, plotlyOutput("popPyr", height = chartHeight, width = "100%") %>% withSpinner(color="#0dc5c1"), offset = 1)
+          )
         ),
         fluidRow(
           column(12, dataTableOutput("popPyrDT") %>% withSpinner(color="#0dc5c1"))
@@ -42,7 +46,10 @@ tabPanel(
         # bsAlert("mobilityAlert"),
         fluidRow(
           column(4, leafletOutput("mapCensusMobility", height = mapHeight) %>% withSpinner(color="#0dc5c1")),
-          column(8, d3tree3Output("c16mobilityTree", height = chartHeight) %>% withSpinner(color="#0dc5c1"))
+          conditionalPanel(
+            condition = "input.c_location != ''",
+            column(8, d3tree3Output("c16mobilityTree", height = chartHeight) %>% withSpinner(color="#0dc5c1"))
+          )
         )
       ),
       tabPanel(
@@ -60,7 +67,10 @@ tabPanel(
               leafletOutput("mapCensusHousingType", height = mapHeight) %>% withSpinner(color="#0dc5c1")
             )
           ),
-          column(8, d3tree3Output("housingTypeTreemap", height = chartHeight) %>% withSpinner(color="#0dc5c1"))
+          conditionalPanel(
+            condition = "input.c_location != ''",
+            column(8, d3tree3Output("housingTypeTreemap", height = chartHeight) %>% withSpinner(color="#0dc5c1"))
+          )
         ),
         fluidRow(
           column(12, offset = 1, plotlyOutput("c16dwellType", height = chartHeight) %>% withSpinner(color="#0dc5c1"))
