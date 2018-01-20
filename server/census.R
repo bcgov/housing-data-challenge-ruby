@@ -58,57 +58,71 @@ censusPp2016 <- reactive({
   )
 })
 
+#
 # Dropdown options for location based on selected geo-level
-regionOptions <- reactive({
-    regionOptions <- censusMobility() %>%
-      mutate(label = paste0(censusMobility()$`Region`, " (", censusMobility()$GeoUID, ")")) %>%
-      select(label, value = GeoUID)
-})
+#
+# regionOptions <- reactive({
+#     regionOptions <- censusMobility() %>%
+#       mutate(label = paste0(censusMobility()$`Region`, " (", censusMobility()$GeoUID, ")")) %>%
+#       select(label, value = GeoUID)
+# })
 
+#
 # Population pyramid 2016 for selected location
+#
 censusPp2016Location <- reactive({
     censusPp2016 %>% filter(GeoUID == input$c_location)
 })
 
+#
 # Population pyramid 2011 for selected location
-censusPp2011Location <- reactive({
-    censusPp2011 %>% filter(GeoUID == input$c_location)
-})
+#
+# censusPp2011Location <- reactive({
+#     censusPp2011 %>% filter(GeoUID == input$c_location)
+# })
 
+#
 # Population pyramid 2006 for selected location
-censusPp2006Location <- reactive({
-    censusPp2006 %>% filter(GeoUID == input$c_location)
-})
+#
+# censusPp2006Location <- reactive({
+#     censusPp2006 %>% filter(GeoUID == input$c_location)
+# })
 
 locationLabel <- reactive({
-  if (is.null(input$c_location)) {
-    return ("Please select a location")
-  } else {
-    regionOptions() %>% filter(value == input$c_location) %>% select(label)
-  }
+  # if (is.null(input$c_location)) {
+  #   return ("Please select a location")
+  # } else {
+  #   regionOptions() %>% filter(value == input$c_location) %>% select(label)
+  # }
+  locationLabel <- censusMobility() %>%
+    filter(GeoUID == input$c_location) %>%
+    mutate(label = paste0(Region, " (", GeoUID, ")")) %>%
+    select(label)
+  st_geometry(locationLabel) <- NULL
+  return(locationLabel)
 })
 
-censusPp2011 <- reactive({
-  censusStir <- switch(
-    input$c_view,
-    "CMA" = census2011ppCma,
-    "CSD" = census2011ppCsd,
-    "CD" = census2011ppCd,
-    "CT" = census2011ppCt,
-    "DA" = census2011ppDa
-  )
-})
-
-censusPp2006 <- reactive({
-  censusStir <- switch(
-    input$c_view,
-    "CMA" = census2006ppCma,
-    "CSD" = census2006ppCsd,
-    "CD" = census2006ppCd,
-    "CT" = census2006ppCt,
-    "DA" = census2006ppDa
-  )
-})
+# censusPp2011 <- reactive({
+#   censusStir <- switch(
+#     input$c_view,
+#     "CMA" = census2011ppCma,
+#     "CSD" = census2011ppCsd,
+#     "CD" = census2011ppCd,
+#     "CT" = census2011ppCt,
+#     "DA" = census2011ppDa
+#   )
+# })
+#
+# censusPp2006 <- reactive({
+#   censusStir <- switch(
+#     input$c_view,
+#     "CMA" = census2006ppCma,
+#     "CSD" = census2006ppCsd,
+#     "CD" = census2006ppCd,
+#     "CT" = census2006ppCt,
+#     "DA" = census2006ppDa
+#   )
+# })
 
 housingTypes <- reactive({
   housingTypes <- switch(
@@ -128,21 +142,26 @@ housingTypeMapData <- reactive({
     mutate(typewatch2 = as.numeric(input$c_housing_types))
 })
 
+#
 # Mobility palette
+#
 palHousingTypes <- colorNumeric(
   palette = "viridis",
   domain = housingTypesCma$`Single detached house ratio`,
   na.color = "#e6e6e6"
 )
 
+#
 # Housing Types map
+#
 output$mapCensusHousingType <- renderLeaflet({
   leaflet(housingTypesCma) %>%
     addProviderTiles(provider = "CartoDB.Positron", options = providerTileOptions(minZoom = 6, maxZoom = 10)) %>%
-    setView(lng = -123.12, lat = 52.28, zoom = 6) %>%
+    setView(lng = -122.12, lat = 51.78, zoom = 6) %>%
     addPolygons(
       label = ~ `Region`, color = '#333', fillColor = ~ palHousingTypes(housingTypesCma$`Single detached house ratio`),
       stroke = TRUE, weight = 1, fillOpacity = 0.5, smoothFactor = 0.2,
+      layerId = ~ GeoUID,
       # fillOpacity = 0.5,
       # smoothFactor = 1,
       popup = paste0(
@@ -175,6 +194,9 @@ output$mapCensusHousingType <- renderLeaflet({
     )
 })
 
+#
+# Housing Types observer
+#
 observe({
   # Update locations if geo-level selection changes
   # updateSelectizeInput(session, 'c_location', choices = regionOptions(), server = TRUE)
@@ -243,15 +265,10 @@ observe({
     housingTypes <- housingTypes()
   }
 
-  # Mobility palette
-  # housingTypes <- housingTypesCma
+  # Housing Types palette
   palHousingTypes <- colorNumeric(
     palette = "viridis",
-    # domain = NULL
-    # TODO figure this out, has to be reactive
-    # domain = housingTypesCma$`Single detached house ratio`,
     domain = housingTypeMapData()$typewatch,
-    # n = 10
     na.color = "#e6e6e6"
   )
 
@@ -263,6 +280,7 @@ observe({
       fillColor = ~ palHousingTypes(housingTypeMapData()$typewatch),
       # fillColor = ~ pal(housingTypeMapData()$typewatch),
       stroke = TRUE, weight = 1, fillOpacity = 0.5, smoothFactor = 0.2,
+      layerId = ~ GeoUID,
       popup = paste0(
         "<strong>", paste0(housingTypeMapData()$`Region`, " (", housingTypeMapData()$GeoUID), ")</strong>",
         "<table class=\"leaflet-popup-table\"><tr><td>Census Year</td><td>2016</td></tr>",
@@ -315,13 +333,13 @@ observe({
     d3tree3(
       treemap(
         housingTypesDf %>% filter(GeoUID == input$c_location),
-        index = c("HousingType", "Region"),
+        index = c("HousingType"),
         vSize = "count",
         type = "index",
         vColor = "HousingType",
         palette = c(colSingleFam, colNonStrataRental, colCommercial, colResidential, colMultiFam, colStrata, colAcreage, colForeign),
         algorithm = "pivotSize",
-        sortID = "HousingType",
+        # sortID = "HousingType",
         fontsize.labels=c(15,12),                # size of labels. Give the size per level of aggregation: size for group, size for subgroup, sub-subgroups...
         fontcolor.labels=c("white","orange"),    # Color of labels
         fontface.labels=c(2,1),                  # Font of labels: 1,2,3,4 for normal, bold, italic, bold-italic...
@@ -362,7 +380,9 @@ observe({
       )
       ))
 
-  # Mobility
+  #
+  # Mobility observer
+  #
   censusMobility <- censusMobilityCma
   if (!is.null(censusMobility())) {
     censusMobility <- censusMobility()
@@ -389,10 +409,11 @@ observe({
   output$mapCensusMobility <- renderLeaflet({
       leaflet(censusMobility) %>%
       addProviderTiles(provider = "CartoDB.Positron", options = providerTileOptions(minZoom = 6, maxZoom = 10)) %>%
-      setView(lng = -123.12, lat = 52.28, zoom = 6) %>%
+      setView(lng = -122.12, lat = 51.78, zoom = 6) %>%
       addPolygons(
         label = ~ `Region`, color = '#333', fillColor = ~ palMobility(censusMobility$`Movers Ratio`),
         stroke = TRUE, weight = 1, fillOpacity = 0.5, smoothFactor = 0.2,
+        layerId = ~ GeoUID,
         # fillOpacity = 0.5,
         # smoothFactor = 1,
         popup = paste0(
@@ -450,7 +471,9 @@ observe({
   })
   # }
 
-  # Population Pyramid
+  #
+  # Population Pyramid observer
+  #
   output$popPyr <- renderPlotly(
     plot_ly(censusPp2016() %>% arrange(age) %>% filter(GeoUID == input$c_location),
             x = ~percentage, y = ~age, color = ~sex, type = 'bar', orientation = 'h',
@@ -496,7 +519,12 @@ observe({
       )
     )
   )
+})
 
+#
+# STIR observer
+#
+observe({
   # SHELTER-COST-TO-INCOME RATIO
   censusStir <- st_as_sf(
     censusStir() %>% select(everything())
@@ -512,10 +540,11 @@ observe({
   output$mapCensusStir <- renderLeaflet({
       leaflet(censusStir) %>%
       addProviderTiles(provider = "CartoDB.Positron", options = providerTileOptions(minZoom = 6, maxZoom = 10)) %>%
-      setView(lng = -123.12, lat = 52.28, zoom = 6) %>%
+      setView(lng = -122.12, lat = 51.78, zoom = 6) %>%
       addPolygons(
         label = ~ `Region`, color = '#333', fillColor = ~ palStir(censusStir$percent_more_than_30),
         stroke = TRUE, weight = 1, fillOpacity = 0.75, smoothFactor = 0.2,
+        layerId = ~ GeoUID,
         popup = paste0(
           "<strong>", paste(censusStir$`Region`), "</strong>",
           "<table class=\"leaflet-popup-table\"><tr><td>Census Year</td><td>2016</td></tr>",
@@ -535,38 +564,9 @@ observe({
       )
   })
 
-  # censusStir() %<>%
-  #   top_n(25, percent_more_than_30) %<>%
-  #   mutate(
-  #     # Region = ifelse(c_view %in% c("csd", "ct", "da"), paste(`Region Name`, str_sub(GeoUID, -2)), `Region Name`),
-  #     Region = factor(
-  #       paste(`Region Name`, str_sub(GeoUID, -2)),
-  #       levels = unique(Region)[order(percent_more_than_30, decreasing = FALSE)]
-  #     )
-  #   )
-
+  #
   # STIR Lollipop
-  # censusStirgg2 <- ggplot(censusStir %>% top_n(25, ~percent_more_than_30), aes(x = Region, y = percent_more_than_30)) +
-  #   geom_segment(aes(x = Region, xend = Region, y = 0, yend = percent_more_than_30), size = 1.5, color = "lightsalmon") +
-  #   geom_point(color = "lightsalmon", size = 2.5, alpha = 1, shape = 21, stroke = 2.5) +
-  #   theme_light() +
-  #   coord_flip() +
-  #   theme(
-  #     panel.grid.major.y = element_blank(),
-  #     panel.border = element_blank(),
-  #     axis.ticks.y = element_blank(),
-  #     plot.margin = unit(c(20,20,20,150), "pt")
-  #   )
-  # output$stirLollipop <- renderPlotly(
-  #   ggplotly(censusStirgg2) %>%
-  #     layout(
-  #       xaxis = list(title = ""),
-  #       yaxis = list(title = "")
-  #     ) %>%
-  #     layout (
-  #       margin = list(l = 150)
-  #     )
-  # )
+  #
   output$stirLollipop <- renderPlotly(
     plot_ly(censusStir() %>% top_n(25, percent_more_than_30), x = ~percent_more_than_30,
             name = "More than 30%", y = ~`GeoUID`, type = 'bar', orientation = 'h',
@@ -664,3 +664,49 @@ observe({
       config(displayModeBar = F)
   )
 })
+
+# Mobility map click observer
+observeEvent(input$mapCensusMobility_shape_click, {
+  m <- input$mapCensusMobility_shape_click
+  if(!is.null(m$id)){
+    # updateSelectInput(session, "c_location", selected = p$id)
+    updateTextInput(session, "c_location", value = m$id)
+    locationLabel <- censusMobility() %>%
+      filter(GeoUID == m$id) %>%
+      mutate(label = paste0(Region, " (", GeoUID, ")")) %>%
+      select(label)
+    st_geometry(locationLabel) <- NULL
+    updateTextInput(session, "c_location_name", value = locationLabel$label)
+  }
+})
+
+# Housing Type map click observer
+observeEvent(input$mapCensusHousingType_shape_click, {
+  h <- input$mapCensusHousingType_shape_click
+  if(!is.null(h$id)){
+    # updateSelectInput(session, "c_location", selected = p$id)
+    updateTextInput(session, "c_location", value = h$id)
+    locationLabel <- censusMobility() %>%
+      filter(GeoUID == h$id) %>%
+      mutate(label = paste0(Region, " (", GeoUID, ")")) %>%
+      select(label)
+    st_geometry(locationLabel) <- NULL
+    updateTextInput(session, "c_location_name", value = locationLabel$label)
+  }
+})
+
+# HousingSTIR map click observer
+observeEvent(input$mapCensusStir_shape_click, {
+  s <- input$mapCensusStir_shape_click
+  if(!is.null(s$id)){
+    # updateSelectInput(session, "c_location", selected = p$id)
+    updateTextInput(session, "c_location", value = s$id)
+    locationLabel <- censusMobility() %>%
+      filter(GeoUID == s$id) %>%
+      mutate(label = paste0(Region, " (", GeoUID, ")")) %>%
+      select(label)
+    st_geometry(locationLabel) <- NULL
+    updateTextInput(session, "c_location_name", value = locationLabel$label)
+  }
+})
+
