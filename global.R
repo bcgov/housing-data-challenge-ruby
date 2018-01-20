@@ -1,6 +1,7 @@
 # devtools::install_github('andrewsali/shinycssloaders')
 library(here)
 library(shiny)
+library(shinyjs)
 library(rgdal)
 library(rgeos)
 library(maps)
