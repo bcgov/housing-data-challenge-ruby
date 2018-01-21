@@ -281,6 +281,33 @@ for (censusLevel in c("CMA", "CD", "CSD", "CT", "DA")) {
   saveRDS(censusStirData, here::here("data", paste0("census2016Spatial-stir-", censusLevel, ".rds")))
 }
 
+# Age and Sex - Average Age
+for (censusLevel in c("CMA", "CD", "CSD", "CT", "DA")) {
+  censusData <-
+    get_census(
+      "CA16",
+      level = censusLevel,
+      regions = regions,
+      vectors = c("v_CA16_379"),
+      use_cache = TRUE,
+      labels = "short",
+      geo_format = "sf"
+    )
+
+  censusData %<>%
+    select(
+      -one_of(c("Shape Area", "name", "Adjusted Population (previous Census)",
+                "ruid", "C_UID", "PR_UID", "Area (sq km)"))
+    ) %<>%
+    filter(Type == censusLevel) %<>%
+    ms_simplify(keep = 0.1, keep_shapes = TRUE) %<>%
+    rename("Average Age" = "v_CA16_379") %<>%
+    replace_na("Average Age" = 0)
+
+  saveRDS(censusData, here::here("data", paste0("census2016-avg-age-", censusLevel, ".rds")))
+}
+
+
 # Age and Sex - Population pyramid
 # StatCan
 # CMA, CT

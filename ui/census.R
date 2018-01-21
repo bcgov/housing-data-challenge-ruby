@@ -42,10 +42,11 @@ tabPanel(
         tags$p("The age profile of an area has a significant impact on the type of housing that is required."),
         tags$p("An abundance of children suggests a need for family housing, while a greater proportion of seniors
                may indicate a need for “downsized” housing."),
-        conditionalPanel(
-          condition = "input.c_location != ''",
-          fluidRow(
-            column(10, plotlyOutput("popPyr", height = chartHeight, width = "100%") %>% withSpinner(color="#0dc5c1"), offset = 1)
+        fluidRow(
+          column(6, leafletOutput("mapCensusAvgAge", height = mapHeight) %>% withSpinner(color="#0dc5c1")),
+          conditionalPanel(
+            condition = "input.c_location != ''",
+            column(6, plotlyOutput("popPyr", height = chartHeight, width = "100%") %>% withSpinner(color="#0dc5c1"))
           )
         ),
         fluidRow(

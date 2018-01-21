@@ -339,6 +339,13 @@ plotmy <-
     plotme
   }
 
+# Average Age
+census2016aaCma <- read_rds(file.path("data", "census2016-avg-age-CMA.rds"))
+census2016aaCd <- read_rds(file.path("data", "census2016-avg-age-CD.rds"))
+census2016aaCsd <- read_rds(file.path("data", "census2016-avg-age-CSD.rds"))
+census2016aaCt <- read_rds(file.path("data", "census2016-avg-age-CT.rds"))
+census2016aaDa <- read_rds(file.path("data", "census2016-avg-age-DA.rds"))
+
 # Population Pyramid data
 census2016ppPr <- read_rds(file.path("data", "population_pyramid", "census2016-pp-PR.rds"))
 census2016ppCma <- read_rds(file.path("data", "population_pyramid", "census2016-pp-CMA.rds"))

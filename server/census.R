@@ -47,6 +47,17 @@ censusStir <- reactive({
   return(censusStir)
 })
 
+censusAvgAge <- reactive({
+  censusAvgAge <- switch(
+    input$c_view,
+    "CMA" = census2016aaCma,
+    "CSD" = census2016aaCsd,
+    "CD" = census2016aaCd,
+    "CT" = census2016aaCt,
+    "DA" = census2016aaDa
+  )
+})
+
 censusPp2016 <- reactive({
   censusStir <- switch(
     input$c_view,
@@ -387,9 +398,10 @@ observe({
       key = "Migration", value = "count")
 
   # Mobility palette
-  palMobility <- colorBin(
+  palMobility <- colorNumeric(
     palette = "viridis",
-    domain = censusMobility$`Movers Ratio`, n = 10
+    domain = censusMobility$`Movers Ratio`,
+    na.color = "#e6e6e6"
   )
   palLightRed <- "#fc95a4"# "#feb87e"# "#e85361"# "#e08176"
   palLighterBlue <- colNonStrataRental
@@ -460,6 +472,48 @@ observe({
   #
   # Population Pyramid observer
   #
+  # Average Age map
+  censusAvgAge <- census2016aaCma
+  if (!is.null(censusAvgAge())) {
+    censusAvgAge <- censusAvgAge()
+  }
+  censusAvgAge %<>%
+    mutate(`Region` = as.character(`Region.Name`), Type = as.character(Type))
+
+  # AvgAge palette
+  palAvgAge <- colorNumeric(
+    palette = "viridis",
+    domain = censusAvgAge$`Average Age`,
+    na.color = "#e6e6e6"
+  )
+
+  output$mapCensusAvgAge <- renderLeaflet({
+    leaflet(censusAvgAge) %>%
+      addProviderTiles(provider = "CartoDB.Positron", options = providerTileOptions(minZoom = 6, maxZoom = 10)) %>%
+      setView(lng = -122.12, lat = 51.78, zoom = 6) %>%
+      addPolygons(
+        label = ~ `Region`, color = '#333', fillColor = ~ palAvgAge(censusAvgAge$`Average Age`),
+        stroke = TRUE, weight = 1, fillOpacity = 0.5, smoothFactor = 0.2,
+        layerId = ~ GeoUID,
+        popup = paste0(
+          "<strong>", paste0(censusAvgAge$`Region`, " (", censusAvgAge$GeoUID), ")</strong>",
+          "<table class=\"leaflet-popup-table\"><tr><td>Census Year</td><td>2016</td></tr>",
+          "<tr><td>Population</td><td>", format(censusAvgAge$Population, big.mark = ","),
+          "</td></tr><tr><td>Dwellings</td><td>", format(censusAvgAge$Dwellings, big.mark = ","),
+          "</td></tr><tr><td>Households</td><td>", format(censusAvgAge$Households, big.mark = ","),
+          "</td></tr><tr><td><strong>Average Age</strong></td><td><strong>",
+          format(censusAvgAge$`Average Age`, big.mark = ","), "</strong></td></tr></table>"
+        ),
+        highlight = highlightOptions(
+          weight = 5, color = "#696969", dashArray = "", fillOpacity = 0.75, bringToFront = TRUE)
+      ) %>%
+      addLegend(
+        "bottomleft", pal = palAvgAge, values = ~ `Average Age`,
+        title = "", opacity = 0.5
+      )
+  })
+
+  # Population Pyramid
   output$popPyr <- renderPlotly(
     plot_ly(censusPp2016() %>% arrange(age) %>% filter(GeoUID == input$c_location),
             x = ~percentage, y = ~age, color = ~sex, type = 'bar', orientation = 'h',
@@ -649,6 +703,21 @@ observe({
                       showarrow = FALSE) %>%
       config(displayModeBar = F)
   )
+})
+
+# Avg age map click observer
+observeEvent(input$mapCensusAvgAge_shape_click, {
+  m <- input$mapCensusAvgAge_shape_click
+  if(!is.null(m$id)){
+    # updateSelectInput(session, "c_location", selected = p$id)
+    updateTextInput(session, "c_location", value = m$id)
+    locationLabel <- censusMobility() %>%
+      filter(GeoUID == m$id) %>%
+      mutate(label = paste0(Region, " (", GeoUID, ")")) %>%
+      select(label)
+    st_geometry(locationLabel) <- NULL
+    updateTextInput(session, "c_location_name", value = locationLabel$label)
+  }
 })
 
 # Mobility map click observer
