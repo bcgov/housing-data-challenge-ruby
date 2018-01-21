@@ -313,15 +313,15 @@ observe({
 
   housingTypesDf %<>%
     gather(
-      "Single detached house",
-      "Appartment in tall building",
-      "Semi detached house",
-      "Row house",
-      "Appartment in duplex",
-      "Appartment in small building",
-      "Other single attached house",
-      "Movable dwelling",
-      key = "HousingType", value = "count")
+      "Single detached house ratio",
+      "Appartment in tall building ratio",
+      "Semi detached house ratio",
+      "Row house ratio",
+      "Appartment in duplex ratio",
+      "Appartment in small building ratio",
+      "Other single attached house ratio",
+      "Movable dwelling ratio",
+      key = "HousingType", value = "ratio")
 
   # isolate({
   #   if (!c_loc() == '') {
@@ -329,30 +329,39 @@ observe({
   #   }
   # })
   # if (!'' == input$c_location) {
-  output$housingTypeTreemap <- renderD3tree3({
-    d3tree3(
+  output$housingTypeTreemap <- renderPlot({
+    # renderD3tree3({
+    # d3tree3(
+    par(mar=c(0,0,0,0), xaxs='i', yaxs='i')
+    plot(c(0,1), c(0,1),axes=F, col="white")
+
       treemap(
-        housingTypesDf %>% filter(GeoUID == input$c_location),
-        index = c("HousingType"),
-        vSize = "count",
+        title = paste("Housing Types Distribution at ", locationLabel()),
+        housingTypesDf %>% filter(GeoUID == input$c_location) %>% mutate(ratioFormat = paste0(gsub(" ratio", "", HousingType), " - ", ratio, "%")),
+        index = c("ratioFormat"),
+        vSize = "ratio",
         type = "index",
-        vColor = "HousingType",
-        palette = c(colSingleFam, colNonStrataRental, colCommercial, colResidential, colMultiFam, colStrata, colAcreage, colForeign),
+        vColor = "ratio",
+        palette = c(colForeign, colResidential, colStrata, colAcreage, colMultiFam, colCommercial, colNonStrataRental, colSingleFam),
         algorithm = "pivotSize",
         # sortID = "HousingType",
-        fontsize.labels=c(15,12),                # size of labels. Give the size per level of aggregation: size for group, size for subgroup, sub-subgroups...
-        fontcolor.labels=c("white","orange"),    # Color of labels
-        fontface.labels=c(2,1),                  # Font of labels: 1,2,3,4 for normal, bold, italic, bold-italic...
-        bg.labels=c("transparent"),              # Background color of labels
-        align.labels=list(
-          c("center", "center"),
-          c("right", "bottom")
+        fontsize.title = c(14),
+        fontsize.labels = c(12),                # size of labels. Give the size per level of aggregation: size for group, size for subgroup, sub-subgroups...
+        fontcolor.labels = c("#121212"),    # Color of labels
+        fontface.labels = c(1),                  # Font of labels: 1,2,3,4 for normal, bold, italic, bold-italic...
+        bg.labels = c("#CCCCCCDC"),              # Background color of labels
+        align.labels = list(
+          c("center", "center")
         ),                                   # Where to place labels in the rectangle?
-        overlap.labels=0.5,                      # number between 0 and 1 that determines the tolerance of the overlap between labels. 0 means that labels of lower levels are not printed if higher level labels overlap, 1  means that labels are always printed. In-between values, for instance the default value .5, means that lower level labels are printed if other labels do not overlap with more than .5  times their area size.
-        inflate.labels=F
-      ),
-      rootname="Housing Type"
-    )
+        overlap.labels = 0.5,                      # number between 0 and 1 that determines the tolerance of the overlap between labels. 0 means that labels of lower levels are not printed if higher level labels overlap, 1  means that labels are always printed. In-between values, for instance the default value .5, means that lower level labels are printed if other labels do not overlap with more than .5  times their area size.
+        border.col = "#696969",
+        border.lwds = c(1),
+        force.print.labels = TRUE,
+        inflate.labels = F
+
+      )#,
+    #   rootname = paste("Housing Types Distribution at ", locationLabel())
+    # )
   })
 
 

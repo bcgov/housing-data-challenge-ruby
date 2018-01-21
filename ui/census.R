@@ -87,7 +87,8 @@ tabPanel(
           ),
           conditionalPanel(
             condition = "input.c_location != ''",
-            column(6, d3tree3Output("housingTypeTreemap", height = chartHeight) %>% withSpinner(color="#0dc5c1"))
+            # column(6, d3tree3Output("housingTypeTreemap", height = chartHeight) %>% withSpinner(color="#0dc5c1"))
+            column(6, plotOutput("housingTypeTreemap", height = chartHeight) %>% withSpinner(color="#0dc5c1"))
           )
         ),
         fluidRow(
