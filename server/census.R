@@ -323,18 +323,11 @@ observe({
       "Movable dwelling ratio",
       key = "HousingType", value = "ratio")
 
-  # isolate({
-  #   if (!c_loc() == '') {
-  #     housingTypesDf %<>% filter(GeoUID == c_loc())
-  #   }
-  # })
-  # if (!'' == input$c_location) {
   output$housingTypeTreemap <- renderPlot({
     # renderD3tree3({
     # d3tree3(
     par(mar=c(0,0,0,0), xaxs='i', yaxs='i')
     plot(c(0,1), c(0,1),axes=F, col="white")
-
       treemap(
         title = paste("Housing Types Distribution at ", locationLabel()),
         housingTypesDf %>% filter(GeoUID == input$c_location) %>% mutate(ratioFormat = paste0(gsub(" ratio", "", HousingType), " - ", ratio, "%")),
@@ -342,28 +335,24 @@ observe({
         vSize = "ratio",
         type = "index",
         vColor = "ratio",
-        palette = c(colForeign, colResidential, colStrata, colAcreage, colMultiFam, colCommercial, colNonStrataRental, colSingleFam),
+        palette = c(colMultiFam, colStrata, colNonStrataRental, colForeign, colAcreage, colResidential, colCommercial, colSingleFam),
         algorithm = "pivotSize",
         # sortID = "HousingType",
         fontsize.title = c(14),
-        fontsize.labels = c(12),                # size of labels. Give the size per level of aggregation: size for group, size for subgroup, sub-subgroups...
-        fontcolor.labels = c("#121212"),    # Color of labels
-        fontface.labels = c(1),                  # Font of labels: 1,2,3,4 for normal, bold, italic, bold-italic...
-        bg.labels = c("#CCCCCCDC"),              # Background color of labels
-        align.labels = list(
-          c("center", "center")
-        ),                                   # Where to place labels in the rectangle?
-        overlap.labels = 0.5,                      # number between 0 and 1 that determines the tolerance of the overlap between labels. 0 means that labels of lower levels are not printed if higher level labels overlap, 1  means that labels are always printed. In-between values, for instance the default value .5, means that lower level labels are printed if other labels do not overlap with more than .5  times their area size.
+        fontsize.labels = c(12),
+        fontcolor.labels = c("#121212"),
+        fontface.labels = c(1),
+        bg.labels = c("#CCCCCCDC"),
+        align.labels = list(c("center", "center")),
+        overlap.labels = 0.5,
         border.col = "#696969",
         border.lwds = c(1),
         force.print.labels = TRUE,
         inflate.labels = F
-
       )#,
     #   rootname = paste("Housing Types Distribution at ", locationLabel())
     # )
   })
-
 
   # Housing Types datatable
   output$housingTypesDT = DT::renderDataTable(datatable(

@@ -73,17 +73,12 @@ tabPanel(
                 which includes single detached house, semi-detached and row houses, and a variety of apartment categories."),
         tags$p("This report gives insights into diversity of the housing types in an area."),
         fluidRow(
-          column(12, verbatimTextOutput("c_location_label"))
+          selectizeInput('c_housing_types', choices = housingTypesList, label = "Housing Type")
         ),
         fluidRow(
           column(
             6,
-            fluidRow(
-              selectizeInput('c_housing_types', choices = housingTypesList, label = "Housing Type")
-            ),
-            fluidRow(
-              leafletOutput("mapCensusHousingType", height = mapHeight) %>% withSpinner(color="#0dc5c1")
-            )
+            leafletOutput("mapCensusHousingType", height = mapHeight) %>% withSpinner(color="#0dc5c1")
           ),
           conditionalPanel(
             condition = "input.c_location != ''",

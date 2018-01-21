@@ -312,8 +312,8 @@ plotmy <-
       y = pmyAxis,
       name = pmName,
       type = pmType,
-      marker = list(color = pmMarker),
-      titlefont = list(size = 12)
+      marker = list(color = pmMarker)#,
+      # titlefont = list(size = 12)
     ) %>%
       layout(
         title = pmTitle,
