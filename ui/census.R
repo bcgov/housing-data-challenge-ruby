@@ -61,7 +61,7 @@ tabPanel(
           column(6, leafletOutput("mapCensusMobility", height = mapHeight) %>% withSpinner(color="#0dc5c1")),
           conditionalPanel(
             condition = "input.c_location != ''",
-            column(6, d3tree3Output("c16mobilityTree", height = chartHeight) %>% withSpinner(color="#0dc5c1"))
+            column(6, plotOutput("c16mobilityTree", height = chartHeight) %>% withSpinner(color="#0dc5c1"))
           )
         )
       ),

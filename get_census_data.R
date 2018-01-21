@@ -184,28 +184,47 @@ for (censusLevel in c("CMA", "CD", "CSD", "CT", "DA")) {
     get_census(
       "CA16",
       level = censusLevel,
-      # regions = cdRegions,
       regions = regions,
       vectors = vectorsMobility %>% pull("vector"),
       use_cache = TRUE,
       labels = "short",
       geo_format = "sf"
     )
+
   censusData %<>%
+    select(
+      -one_of(c("Shape Area", "name", "Adjusted Population (previous Census)",
+                "ruid", "C_UID", "PR_UID", "Area (sq km)"))
+    ) %<>%
+    filter(Type == censusLevel) %<>%
     ms_simplify(keep = 0.1, keep_shapes = TRUE) %<>%
     rename(
       Region = Region.Name,
-      `Non-movers` = v_CA16_6695,
+      "Non-movers" = v_CA16_6695,
       Movers = v_CA16_6698,
-      `Non-migrants` = v_CA16_6701,
+      "Non-migrants" = v_CA16_6701,
       Migrants = v_CA16_6704,
-      `Internal migrants` = v_CA16_6707,
-      `External migrants` = v_CA16_6716,
-      `Intraprovincial migrants` = v_CA16_6710,
-      `Interprovincial migrants` = v_CA16_6713,
+      "Internal migrants" = v_CA16_6707,
+      "External migrants" = v_CA16_6716,
+      "Intraprovincial migrants" = v_CA16_6710,
+      "Interprovincial migrants" = v_CA16_6713,
     ) %<>%
-    filter(Type == censusLevel) %<>%
-    mutate(`Movers Ratio` = round(Movers / (`Non-movers` + Movers) * 100, digits = 2))
+    replace_na(
+      Movers = 0,
+      `Non-movers` = 0,
+      `Non-Migrants` = 0,
+      `Intraprovincial Migrants` = 0,
+      `Interprovincial Migrants` = 0,
+      `External Migrants` = 0
+    ) %<>%
+    mutate(
+      `Movers Ratio` = round(`Movers` / (`Non-movers` + `Movers`) * 100, digits = 2),
+      `Non-Movers Ratio` = round(`Non-movers` / (`Non-movers` + `Movers`) * 100, digits = 2),
+      `Non-Migrants Ratio` = round(`Non-migrants` / (`Non-movers` + `Movers`) * 100, digits = 2),
+      `Intraprovincial Migrants Ratio` = round(`Intraprovincial migrants` / (`Non-movers` + `Movers`) * 100, digits = 2),
+      `Interprovincial Migrants Ratio` = round(`Interprovincial migrants` / (`Non-movers` + `Movers`) * 100, digits = 2),
+      `External Migrants Ratio` = round(`External migrants` / (`Non-movers` + `Movers`) * 100, digits = 2)
+    )
 
   saveRDS(censusData, here::here("data", paste0("census2016-mobility-", censusLevel, ".rds")))
 }
