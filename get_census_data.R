@@ -324,82 +324,6 @@ for (censusLevel in c("CMA", "CD", "CSD", "CT", "DA")) {
 ## Census 2016 has 5 year bands up to 100 years of age and over,
 ## while census 2011 and 2006 bands go up to 85 and over
 ## We will group 2016 data in the same bands for comparison purposes
-getPopulationPyramidData <- function(year = 2016, censusLevel = "CMA", vectorsFemale, vectorsMale, regions) {
-  censusYear <- paste0('CA', substr(paste0(year), 3, 4))
-
-  # Female population
-  censusPPFemale <-
-    get_census(
-      censusYear, level = censusLevel, regions = regions, vectors = vectorsFemale,
-      use_cache = TRUE, labels = "short", geo_format = NA
-    )
-  censusPPFemale %<>%
-    filter(Type == censusLevel) %<>%
-    mutate(sex = "female") %<>%
-    select(
-      GeoUID, Type, `Region Name`, sex,
-      "0 to 4 years" = vectorsFemale[1], "5 to 9 years" = vectorsFemale[2], "10 to 14 years" = vectorsFemale[3],
-      "15 to 19 years" = vectorsFemale[4], "20 to 24 years" = vectorsFemale[5], "25 to 29 years" = vectorsFemale[6],
-      "30 to 34 years" = vectorsFemale[7], "35 to 39 years" = vectorsFemale[8], "40 to 44 years" = vectorsFemale[9],
-      "45 to 49 years" = vectorsFemale[10], "50 to 54 years" = vectorsFemale[11], "55 to 59 years" = vectorsFemale[12],
-      "60 to 64 years" = vectorsFemale[13], "65 to 69 years" = vectorsFemale[14], "70 to 74 years" = vectorsFemale[15],
-      "75 to 79 years" = vectorsFemale[16], "80 to 84 years" = vectorsFemale[17],
-      "85 to 89 years" = contains(vectorsFemale[18]), "90 to 94 years" = contains(vectorsFemale[19]),
-      "95 to 99 years" = contains(vectorsFemale[20]), "100 years and over" = contains(vectorsFemale[21])
-    )
-  censusPPFemale %<>%
-    gather("age", "population", 5:(length(vectorsFemale) + 4))
-
-  # Male population
-  censusPPMale <-
-    get_census(
-      censusYear, level = censusLevel, regions = regions, vectors = vectorsMale,
-      use_cache = TRUE, labels = "short", geo_format = NA
-    )
-  censusPPMale <- censusPPMale %<>%
-    filter(Type == censusLevel) %<>%
-    mutate(sex = "male") %<>%
-    select(
-      GeoUID, Type, `Region Name`, sex,
-      "0 to 4 years" = vectorsMale[1], "5 to 9 years" = vectorsMale[2], "10 to 14 years" = vectorsMale[3],
-      "15 to 19 years" = vectorsMale[4], "20 to 24 years" = vectorsMale[5], "25 to 29 years" = vectorsMale[6],
-      "30 to 34 years" = vectorsMale[7], "35 to 39 years" = vectorsMale[8], "40 to 44 years" = vectorsMale[9],
-      "45 to 49 years" = vectorsMale[10], "50 to 54 years" = vectorsMale[11], "55 to 59 years" = vectorsMale[12],
-      "60 to 64 years" = vectorsMale[13], "65 to 69 years" = vectorsMale[14], "70 to 74 years" = vectorsMale[15],
-      "75 to 79 years" = vectorsMale[16], "80 to 84 years" = vectorsMale[17],
-      "85 to 89 years" = contains(vectorsMale[18]), "90 to 94 years" = contains(vectorsMale[19]),
-      "95 to 99 years" = contains(vectorsMale[20]), "100 years and over" = contains(vectorsMale[21])
-    )
-  censusPPMale %<>%
-    gather("age", "population", 5:(length(vectorsMale) + 4))
-
-  censusPP <- bind_rows(censusPPMale, censusPPFemale)
-  censusPP %<>%
-    mutate(
-      Type = as.character(Type),
-      `Region` = as.character(`Region Name`),
-      sex = as.character(sex),
-      age = as.character(age)
-    )
-
-  censusPP %<>%
-    mutate(
-      age = ifelse(
-        age %in% (c("85 to 89 years", "90 to 94 years", "95 to 99 years", "100 years and over")),
-        "85 years and over",
-        age
-      )
-    ) %<>%
-    group_by(GeoUID, Type, Region, sex, age) %<>%
-    summarise(
-      population = sum(population)
-    ) %<>%
-    mutate(percentage = population / sum(population) / 2) %<>%
-    mutate(percentage = ifelse(sex == "male", percentage * -1, percentage))
-
-  return(censusPP)
-}
-
 # Loop through year and geographical levels and save general census-related data
 for (year in c("2006", "2011", "2016")) {
   print(paste("Fetching data for ", censusYear))
@@ -547,10 +471,11 @@ for (year in c("2006", "2011", "2016")) {
       mutate(ageStartYear = parse_number(age))
 
     # Rearrange for proper sorting when plotting
-    censusPP$age <- factor(censusPP$age, levels = unique(censusPP$age)[order(censusPP$ageStartYear, decreasing = FALSE)])
+    # censusPP$age <- factor(censusPP$age, levels = unique(censusPP$age)[order(censusPP$ageStartYear, decreasing = FALSE)])
+    censusPP$ageStartYear <- factor(censusPP$ageStartYear, levels = unique(censusPP$ageStartYear)[order(censusPP$ageStartYear, decreasing = FALSE)])
 
     # Drop unnecessary columns
-    censusPP %<>% select(-one_of("Type", "population", "ageStartYear"))
+    censusPP %<>% select(-one_of("Type", "population"))
 
     saveRDS(censusPP, here::here("data", "population_pyramid", paste0("census", year, "-pp-", censusLevel, ".rds")))
   }

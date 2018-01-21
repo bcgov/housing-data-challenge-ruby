@@ -61,43 +61,54 @@ censusAvgAge <- reactive({
 censusPp2016 <- reactive({
   censusStir <- switch(
     input$c_view,
-    "CMA" = census2016ppCma,
-    "CSD" = census2016ppCsd,
-    "CD" = census2016ppCd,
-    "CT" = census2016ppCt,
-    "DA" = census2016ppDa
+    "CMA" = censusPpCma,
+    "CSD" = censusPpCsd,
+    "CD" = censusPpCd,
+    "CT" = censusPpCt,
+    "DA" = censusPpDa
   )
 })
 
 #
 # Dropdown options for location based on selected geo-level
 #
-# regionOptions <- reactive({
-#     regionOptions <- censusMobility() %>%
-#       mutate(label = paste0(censusMobility()$`Region`, " (", censusMobility()$GeoUID, ")")) %>%
-#       select(label, value = GeoUID)
-# })
+regionOptions <- reactive({
+    regionOptions <- censusMobility() %>%
+      mutate(label = paste0(censusMobility()$`Region`, " (", censusMobility()$GeoUID, ")")) %>%
+      select(label, value = GeoUID)
+})
 
 #
 # Population pyramid 2016 for selected location
 #
 censusPp2016Location <- reactive({
     censusPp2016 %>% filter(GeoUID == input$c_location)
+    # censusPp2016$age <- factor(censusPp2016$age, levels = unique(censusPp2016$age)[order(censusPp2016$ageStartYear, decreasing = FALSE)])
+    # return(censusPp2016)
+})
+
+#
+# Population pyramid 2016 to compare with selected location
+#
+censusPp2016LocationCompare <- reactive({
+    censusPp2016 %>% filter(GeoUID == input$c_location_pp_compare)
+    # censusPp2016$age <- factor(censusPp2016$age, levels = unique(censusPp2016$age)[order(censusPp2016$ageStartYear, decreasing = FALSE)])
+    # return(censusPp2016)
 })
 
 #
 # Population pyramid 2011 for selected location
 #
-censusPp2011Location <- reactive({
-    censusPp2011 %>% filter(GeoUID == input$c_location)
-})
+# censusPp2011Location <- reactive({
+#     censusPp2011 %>% filter(GeoUID == input$c_location)
+# })
 
 #
 # Population pyramid 2006 for selected location
 #
-censusPp2006Location <- reactive({
-    censusPp2006 %>% filter(GeoUID == input$c_location)
-})
+# censusPp2006Location <- reactive({
+#     censusPp2006 %>% filter(GeoUID == input$c_location)
+# })
 
 locationLabel <- reactive({
   locationLabel <- censusMobility() %>%
@@ -108,27 +119,27 @@ locationLabel <- reactive({
   return(locationLabel)
 })
 
-censusPp2011 <- reactive({
-  censusStir <- switch(
-    input$c_view,
-    "CMA" = census2011ppCma,
-    "CSD" = census2011ppCsd,
-    "CD" = census2011ppCd,
-    "CT" = census2011ppCt,
-    "DA" = census2011ppDa
-  )
-})
-
-censusPp2006 <- reactive({
-  censusStir <- switch(
-    input$c_view,
-    "CMA" = census2006ppCma,
-    "CSD" = census2006ppCsd,
-    "CD" = census2006ppCd,
-    "CT" = census2006ppCt,
-    "DA" = census2006ppDa
-  )
-})
+# censusPp2011 <- reactive({
+#   censusStir <- switch(
+#     input$c_view,
+#     "CMA" = census2011ppCma,
+#     "CSD" = census2011ppCsd,
+#     "CD" = census2011ppCd,
+#     "CT" = census2011ppCt,
+#     "DA" = census2011ppDa
+#   )
+# })
+#
+# censusPp2006 <- reactive({
+#   censusStir <- switch(
+#     input$c_view,
+#     "CMA" = census2006ppCma,
+#     "CSD" = census2006ppCsd,
+#     "CD" = census2006ppCd,
+#     "CT" = census2006ppCt,
+#     "DA" = census2006ppDa
+#   )
+# })
 
 housingTypes <- reactive({
   housingTypes <- switch(
@@ -162,7 +173,7 @@ palHousingTypes <- colorNumeric(
 #
 output$mapCensusHousingType <- renderLeaflet({
   leaflet(housingTypesCma) %>%
-    addProviderTiles(provider = "CartoDB.Positron", options = providerTileOptions(minZoom = 6, maxZoom = 10)) %>%
+    addProviderTiles(provider = "CartoDB.Positron", options = providerTileOptions(minZoom = 6, maxZoom = 12)) %>%
     setView(lng = -122.12, lat = 51.78, zoom = 6) %>%
     addPolygons(
       label = ~ `Region`, color = '#333', fillColor = ~ palHousingTypes(housingTypesCma$`Single detached house ratio`),
@@ -407,7 +418,7 @@ observe({
   # Mobility Map
   output$mapCensusMobility <- renderLeaflet({
       leaflet(censusMobility) %>%
-      addProviderTiles(provider = "CartoDB.Positron", options = providerTileOptions(minZoom = 6, maxZoom = 10)) %>%
+      addProviderTiles(provider = "CartoDB.Positron", options = providerTileOptions(minZoom = 6, maxZoom = 12)) %>%
       setView(lng = -122.12, lat = 51.78, zoom = 6) %>%
       addPolygons(
         label = ~ `Region`, color = '#333', fillColor = ~ palMobility(censusMobility$`Movers Ratio`),
@@ -484,7 +495,7 @@ observe({
 
   output$mapCensusAvgAge <- renderLeaflet({
     leaflet(censusAvgAge) %>%
-      addProviderTiles(provider = "CartoDB.Positron", options = providerTileOptions(minZoom = 6, maxZoom = 10)) %>%
+    addProviderTiles(provider = "CartoDB.Positron", options = providerTileOptions(minZoom = 6, maxZoom = 12)) %>%
       setView(lng = -122.12, lat = 51.78, zoom = 6) %>%
       addPolygons(
         label = ~ `Region`, color = '#333', fillColor = ~ palAvgAge(censusAvgAge$`Average Age`),
@@ -511,12 +522,12 @@ observe({
   # Population Pyramid
   output$popPyr <- renderPlotly(
     plot_ly(censusPp2016() %>% filter(GeoUID == input$c_location),
-            x = ~percentage, y = ~age, color = ~sex, type = 'bar', orientation = 'h',
-            hoverinfo = 'y+text+name', text = ~percentage, colors = c('lightsalmon', colMultiFam)) %>%
+            x = ~percentage_2016, y = ~age, color = ~sex, type = 'bar', orientation = 'h',
+            hoverinfo = 'y+text+name', text = ~percentage_2016, colors = c('lightsalmon', colMultiFam)) %>%
       layout(bargap = 0.2, barmode = 'overlay',
-             margin = list(l = 250),
+             margin = list(l = 150),
              xaxis = list(
-               title = "Percentag of population by sex and age group",
+               title = "",
                tickmode = 'array',
                tickvals = c(-10, -9, -8, -7, -6, -5, -4, -3, -2, -1, 0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10),
                ticktext = c(
@@ -528,11 +539,19 @@ observe({
                title = ""
              ),
              title = paste('Population Pyramid for', locationLabel(), '- Census year', input$c_year)) %>%
+      add_trace(x = ~percentage_2011, y = ~age, name = '2011', type = "scatter", mode = 'lines+markers', color = ~sex,
+                line = list(color = '#7BACC9', shape = "spline"),
+                hoverinfo = "x+y+text",
+                text = ~paste(percentage_2011, '%')) %>%
+      add_trace(x = ~percentage_2006, y = ~age, name = '2006', type = "scatter", mode = 'lines+markers',
+                line = list(color = 'lightslategrey', shape = "spline"),
+                hoverinfo = "x+y+text",
+                text = ~paste(percentage_2011, '%')) %>%
       # labeling the percentages of each bar (x_axis)
       add_annotations(xref = 'x', yref = 'y',
-                    x = ~(percentage / abs(percentage) / 2), y = ~age,
+                    x = ~(percentage_2016 / abs(percentage_2016) / 2), y = ~age,
                     # x = 1, y = ~age,
-                    text = ~paste(abs(percentage), '%'),
+                    text = ~paste(abs(percentage_2016), '%'),
                     font = list(family = 'Arial', size = 12,
                                 color = 'rgb(67, 67, 67)'),
                     showarrow = FALSE) %>%
@@ -574,7 +593,7 @@ observe({
   # STIR Map
   output$mapCensusStir <- renderLeaflet({
       leaflet(censusStir) %>%
-      addProviderTiles(provider = "CartoDB.Positron", options = providerTileOptions(minZoom = 6, maxZoom = 10)) %>%
+      addProviderTiles(provider = "CartoDB.Positron", options = providerTileOptions(minZoom = 6, maxZoom = 12)) %>%
       setView(lng = -122.12, lat = 51.78, zoom = 6) %>%
       addPolygons(
         label = ~ `Region`, color = '#333', fillColor = ~ palStir(censusStir$percent_more_than_30),
@@ -712,6 +731,8 @@ observeEvent(input$mapCensusAvgAge_shape_click, {
       select(label)
     st_geometry(locationLabel) <- NULL
     updateTextInput(session, "c_location_name", value = locationLabel$label)
+
+    updateSelectizeInput(session, 'c_location_pp_compare', choices = regionOptions(), server = TRUE)
   }
 })
 

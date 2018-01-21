@@ -38,15 +38,20 @@ tabPanel(
     # Population pyramid
     tabsetPanel(
       tabPanel(
-        "Population Pyramid",
+        "Population Age & Sex",
         tags$p("The age profile of an area has a significant impact on the type of housing that is required."),
         tags$p("An abundance of children suggests a need for family housing, while a greater proportion of seniors
                may indicate a need for “downsized” housing."),
         fluidRow(
-          column(6, leafletOutput("mapCensusAvgAge", height = mapHeight) %>% withSpinner(color="#0dc5c1")),
+          column(4, leafletOutput("mapCensusAvgAge", height = mapHeight) %>% withSpinner(color="#0dc5c1")),
           conditionalPanel(
             condition = "input.c_location != ''",
-            column(6, plotlyOutput("popPyr", height = chartHeight, width = "100%") %>% withSpinner(color="#0dc5c1"))
+            column(
+              8,
+              fluidRow(
+                selectizeInput("c_location_pp_compare", label = "Compare with", choices = NULL, options = list(placeholder = "Select a location")),
+                plotlyOutput("popPyr", height = chartHeight, width = "100%") %>% withSpinner(color="#0dc5c1"))
+             )
           )
         ),
         fluidRow(
