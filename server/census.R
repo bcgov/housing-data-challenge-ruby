@@ -88,23 +88,18 @@ censusPp2016Location <- reactive({
 #
 # Population pyramid 2011 for selected location
 #
-# censusPp2011Location <- reactive({
-#     censusPp2011 %>% filter(GeoUID == input$c_location)
-# })
+censusPp2011Location <- reactive({
+    censusPp2011 %>% filter(GeoUID == input$c_location)
+})
 
 #
 # Population pyramid 2006 for selected location
 #
-# censusPp2006Location <- reactive({
-#     censusPp2006 %>% filter(GeoUID == input$c_location)
-# })
+censusPp2006Location <- reactive({
+    censusPp2006 %>% filter(GeoUID == input$c_location)
+})
 
 locationLabel <- reactive({
-  # if (is.null(input$c_location)) {
-  #   return ("Please select a location")
-  # } else {
-  #   regionOptions() %>% filter(value == input$c_location) %>% select(label)
-  # }
   locationLabel <- censusMobility() %>%
     filter(GeoUID == input$c_location) %>%
     mutate(label = paste0(Region, " (", GeoUID, ")")) %>%
@@ -113,27 +108,27 @@ locationLabel <- reactive({
   return(locationLabel)
 })
 
-# censusPp2011 <- reactive({
-#   censusStir <- switch(
-#     input$c_view,
-#     "CMA" = census2011ppCma,
-#     "CSD" = census2011ppCsd,
-#     "CD" = census2011ppCd,
-#     "CT" = census2011ppCt,
-#     "DA" = census2011ppDa
-#   )
-# })
-#
-# censusPp2006 <- reactive({
-#   censusStir <- switch(
-#     input$c_view,
-#     "CMA" = census2006ppCma,
-#     "CSD" = census2006ppCsd,
-#     "CD" = census2006ppCd,
-#     "CT" = census2006ppCt,
-#     "DA" = census2006ppDa
-#   )
-# })
+censusPp2011 <- reactive({
+  censusStir <- switch(
+    input$c_view,
+    "CMA" = census2011ppCma,
+    "CSD" = census2011ppCsd,
+    "CD" = census2011ppCd,
+    "CT" = census2011ppCt,
+    "DA" = census2011ppDa
+  )
+})
+
+censusPp2006 <- reactive({
+  censusStir <- switch(
+    input$c_view,
+    "CMA" = census2006ppCma,
+    "CSD" = census2006ppCsd,
+    "CD" = census2006ppCd,
+    "CT" = census2006ppCt,
+    "DA" = census2006ppDa
+  )
+})
 
 housingTypes <- reactive({
   housingTypes <- switch(
@@ -515,7 +510,7 @@ observe({
 
   # Population Pyramid
   output$popPyr <- renderPlotly(
-    plot_ly(censusPp2016() %>% arrange(age) %>% filter(GeoUID == input$c_location),
+    plot_ly(censusPp2016() %>% filter(GeoUID == input$c_location),
             x = ~percentage, y = ~age, color = ~sex, type = 'bar', orientation = 'h',
             hoverinfo = 'y+text+name', text = ~percentage, colors = c('lightsalmon', colMultiFam)) %>%
       layout(bargap = 0.2, barmode = 'overlay',

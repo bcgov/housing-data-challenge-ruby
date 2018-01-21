@@ -543,7 +543,14 @@ for (year in c("2006", "2011", "2016")) {
         population = sum(population)
       ) %<>%
       mutate(percentage = round(population / sum(population) / 2 * 100, digits = 2)) %<>%
-      mutate(percentage = ifelse(sex == "male", percentage * -1, percentage))
+      mutate(percentage = ifelse(sex == "male", percentage * -1, percentage)) %<>%
+      mutate(ageStartYear = parse_number(age))
+
+    # Rearrange for proper sorting when plotting
+    censusPP$age <- factor(censusPP$age, levels = unique(censusPP$age)[order(censusPP$ageStartYear, decreasing = FALSE)])
+
+    # Drop unnecessary columns
+    censusPP %<>% select(-one_of("Type", "population", "ageStartYear"))
 
     saveRDS(censusPP, here::here("data", "population_pyramid", paste0("census", year, "-pp-", censusLevel, ".rds")))
   }
