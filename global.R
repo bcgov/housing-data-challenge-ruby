@@ -180,11 +180,11 @@ pt_trans_period <- '2016-12-01'
 pt_metric <- 'no_mkt_trans'
 
 geoLevels <- c(
-  "Census Metropolitan Area" = "CMA",
   "Census Division" = "CD",
   "Census Subdivision" = "CSD",
-  "Census Tract" = "CT",
-  "Census Dissimination Area" = "DA"
+  "Census Metropolitan Area" = "CMA",
+  "Census Tract" = "CT"#,
+  # "Census Dissimination Area" = "DA"
 )
 
 housingTypesList <- c(

@@ -8,6 +8,7 @@ library(leaflet)
 library(sf)
 library(sp)
 library(TSP)
+library(rmapshaper)
 
 # PROPERTY TRANSFER TAX DATA
 ptt2016dr <- read_csv(here::here("data", "propertytax", "2016", "development-region-monthly.csv"))
@@ -134,21 +135,14 @@ saveShapesRds <- function(shapeFilePath, layerName, rdsFilePath) {
       verbose = FALSE
     )
 
+  # convert to simple features
+  shapes <- st_as_sf(shapes)
+
   # subset censusDivs to filter out provinces other than BC
-  shapes <-
-    shapes[shapes$PRNAME == "British Columbia / Colombie-Britannique",]
-
-  # # Simplify shapefile to speed up map rendering
-  # bcShapesSimplified <-
-  #     gSimplify(bcShapes, tol = 0.01, topologyPreserve = TRUE)
-  #
-  # # Bring the data back
-  # bcShapes <-
-  #     SpatialPolygonsDataFrame(bcShapesSimplified, bcShapes@data)
-
-  # Add OBJECTID column to use as unique ID
-  # and to keep the correct row ordering
-  shapes@data$OBJECTID <- 1:nrow(shapes@data)
+  shapes %<>%
+    filter("PRNAME" == "British Columbia / Colombie-Britannique") %>%
+    ms_simplify(keep = 0.1) %>%
+    row_number()
 
   # Save serialized object as rds
   saveRDS(shapes, rdsFilePath)
@@ -196,7 +190,7 @@ saveShapesRds(
   here::here("data", "rds", "shapes", "bc2011MetropolitanAreas.rds")
 )
 
-gepCma <- st_read(
+geoCma <- st_read(
   here::here("data", "shapes", "2016", "lcma000a16a_e", "lcma000a16a_e.shp"),
   stringsAsFactors = FALSE
 )
@@ -219,6 +213,7 @@ geoEr %<>%
   group_by(PRUID, PRNAME, ERNAME) %>%
   summarise()
 str(geoEr)
+
 pttDr %<>%
   mutate(
     DevelopmentRegion = gsub(
@@ -243,19 +238,21 @@ pttDrP <- pttDr %>%
 pttGeoDr <- inner_join(geoEr, pttDrP, by = c("ERNAME" = "DevelopmentRegion"))# = "ERNAME"))
 pttGeoDr[is.na(pttGeoDr)] <- 0
 str(pttGeoDr)
+
 library(mapview)
 mapview(pttGeoDr, col.regions = sf.colors(8))
 
 # viridis
 getPal <- function(pal, dom, bins) {
-  colorBin(palette = pal,
-           domain = dom,
-           bins = bins)
+  colorNumeric(palette = pal,
+           domain = dom#,
+           # bins = bins
+           )
 }
 
 palViridis <-
   getPal(
-    viridis::viridis(3),
+    viridis::viridis(4),
     pttGeoDr$no_mkt_trans,
     c(0, 100, 250, 500, 1000, 2500, 5000, 10000, Inf)
   )
@@ -285,6 +282,96 @@ palViridis <-
     "bottomleft",
     pal = palViridis,
     values = ~ pttGeoDr$no_mkt_trans,
-    title = "Median total income of <br> economic families in 2015",
+    title = "Number of market transactions",
     opacity = 0.5
   )
+
+library(plotly)
+  plot_ly(
+
+    pttDr,
+    x = ~ no_mkt_trans,
+    y = ~ DevelopmentRegion,
+    type = "bar",
+    orientation = "h"
+  ) %>%
+    layout(
+      #"Number of market transactions",
+      # xaxis = axisFormat,
+      # yaxis = axisFormat,
+      # margin = marginFormatMonthly,
+      barmode = 'group'#,
+      # legend = legendFormat
+    ) %>%
+    config(displayModeBar = F)
+
+
+  plot_ly(
+    pttDr %>% group_by(trans_period, DevelopmentRegion)
+    # %>% summarise(
+    #   "no_mkt_trans"=sum("no_mkt_trans"),
+    #   "no_resid_trans"=sum("no_resid_trans"),
+    #   "no_resid_acreage_trans"=sum("no_resid_acreage_trans"),
+    #   "resid_comm_count"=sum("resid_comm_count"),
+    #   "no_resid_farm"=sum("no_resid_farm"),
+    #   "no_resid_fam"=sum("no_resid_fam"),
+    #   "no_res_1fam"=sum("no_res_1fam"),
+    #   "no_resid_strata"=sum("no_resid_strata"),
+    #   "no_resid_non_strata"=sum("no_resid_non_strata"),
+    #   "no_resid_other"=sum("no_resid_other"),
+    #   "no_comm_tot"=sum("no_comm_tot"),
+    #   "no_comm_comm"=sum("no_comm_comm"),
+    #   "no_comm_strata_nores"=sum("no_comm_strata_nores"),
+    #   "no_comm_other"=sum("no_comm_other"),
+    #   "no_recr_tot"=sum("no_recr_tot"),
+    #   "no_farm_tot"=sum("no_farm_tot"),
+    #   "no_unkn_tot"=sum("no_unkn_tot"),
+    #   "sum_FMV"=sum("sum_FMV"),
+    #   # "mn_FMV"=sum("mn_FMV"),
+    #   # "md_FMV"=sum("md_FMV"),
+    #   "sum_PPT_paid"=sum("sum_PPT_paid"),
+    #   # "md_PPT"=sum("md_PPT"),
+    #   "no_foreign"=sum("no_foreign"),
+    #   "sum_FMV_foreign"=sum("sum_FMV_foreign"),
+    #   # "mn_FMV_foreign"=sum("mn_FMV_foreign"),
+    #   # "md_FMV_foreign"=sum("md_FMV_foreign"),
+    #   "add_tax_paid"=sum("add_tax_paid")
+    # ) %>% ungroup()
+    ,
+    x = ~ trans_period,
+    y = ~ sum_FMV,
+    name = "Total FMV",
+    type = 'bar'
+    # mode = 'marker',
+    # line = list(shape = "spline", color = "#00003369")
+  # ) %>%
+  #   add_lines(
+  #     y = ~ sum_FMV_foreign,
+  #     name = "Total FMV Foreign",
+  #     line = list(shape = "spline", color = "#33000069")
+    # ) %>%
+    # add_lines(
+    #   y = ~ mn_FMV,
+    #   name = "Foreign %",
+    #   yaxis = "y2",
+    #   line = list(
+    #     shape = "spline",
+    #     color = "#33000069",
+    #     dash = 'dot'
+    #   )
+      )
+    # ) %>%
+    # layout(
+    #   title = "FMV (Fair Market Value)",
+    #   # xaxis = axisFormat,
+    #   # yaxis = axisFormat,
+    #   yaxis2 = list(
+    #     # tickfont = tickfontRd,
+    #     overlaying = "y",
+    #     side = "right",
+    #     title = "Foreign %"
+    #   )#,
+    #   # margin = marginFormat,
+    #   # legend = legendFormat
+    # )
+    #

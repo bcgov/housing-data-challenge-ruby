@@ -405,7 +405,7 @@ observe({
       overlap.labels = 0.5,
       border.col = "#696969",
       border.lwds = c(1),
-      force.print.labels = TRUE,
+      force.print.labels = FALSE,
       inflate.labels = F
     )
   })
@@ -439,7 +439,7 @@ observe({
       overlap.labels = 0.5,
       border.col = "#696969",
       border.lwds = c(1),
-      force.print.labels = TRUE,
+      force.print.labels = FALSE,
       inflate.labels = F
     )
   })

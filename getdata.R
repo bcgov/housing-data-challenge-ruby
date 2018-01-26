@@ -1,4 +1,5 @@
 library(data.table)
+library(stringr)
 
 # /**
 #  * PROPERTY TAX
@@ -34,14 +35,15 @@ savePropertyTaxRds <- function(
         sfJoinCol,
         rdsFilePath,
         doMerge) {
-    propertyTax <-
-    read.csv(ptFilePath, header = TRUE)
+
+    propertyTax <- read.csv(ptFilePath, header = TRUE)
 
     # Convert to uppercase
-    propertyTax <- data.frame(lapply(propertyTax, function(v) {
-        if (is.factor(v)) return(toupper(v))
-        else return(v)
-    }))
+    # propertyTax <- data.frame(lapply(propertyTax, function(v) {
+    #   if (is.factor(v)) return(toupper(v))
+    #   else return(v)
+    # }))
+    propertyTax[[ptJoinCol]] <- str_to_upper(propertyTax[[ptJoinCol]])
 
     # Merge Property Tax and Geo Concordance
     if (doMerge == TRUE) {
