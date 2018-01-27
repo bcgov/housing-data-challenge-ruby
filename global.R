@@ -349,12 +349,12 @@ census2016aaDa <- read_rds(file.path("data", "census2016-avg-age-DA.rds"))
 # Population Pyramid data
 getJoinedPp <- function(c16, c11, c06) {
   censusPp <-
-    dplyr::left_join(c16, c11, by = c("Type", "GeoUID", "Region", "sex", "age")) %>%
+    dplyr::left_join(c16, c11, by = c("GeoUID", "Region", "sex", "age")) %>%
     rename(
       "percentage_2016" = "percentage.x",
       "percentage_2011" = "percentage.y"
     ) %>%
-    left_join(c06, by = c("Type", "GeoUID", "Region", "sex", "age")) %>%
+    left_join(c06, by = c("GeoUID", "Region", "sex", "age")) %>%
     rename(
       "percentage_2006" = "percentage"
     )

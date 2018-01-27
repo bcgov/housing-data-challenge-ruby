@@ -1,6 +1,7 @@
 # devtools::install_github("mountainmath/cancensus")
 library(cancensus)
 library(dplyr)
+library(readr)
 library(magrittr)
 library(stringr)
 library(tidyr)
@@ -326,6 +327,7 @@ for (censusLevel in c("CMA", "CD", "CSD", "CT", "DA")) {
 ## We will group 2016 data in the same bands for comparison purposes
 # Loop through year and geographical levels and save general census-related data
 for (year in c("2006", "2011", "2016")) {
+  censusYear <- paste0('CA', substr(paste0(year), 3, 4))
   print(paste("Fetching data for ", censusYear))
   switch(
     year,
@@ -373,7 +375,6 @@ for (year in c("2006", "2011", "2016")) {
   for (censusLevel in c("CMA", "CD", "CSD", "CT", "DA", "PR")) {
     print(paste("Now getting geo-level ", censusLevel, " for ", censusYear))
     # ppData <- getPopulationPyramidData(censusYear, censusLevel, ppVectorsFemale, ppVectorsMale, regions)
-    censusYear <- paste0('CA', substr(paste0(year), 3, 4))
 
     # Female population
     censusPPFemale <-
@@ -461,18 +462,21 @@ for (year in c("2006", "2011", "2016")) {
           "85 years and over",
           age
         )
-      ) %<>%
-      group_by(GeoUID, Type, Region, sex, age) %<>%
+      ) %>%
+      group_by(GeoUID, Type, Region, sex, age) %>%
       summarise(
         population = sum(population)
-      ) %<>%
-      mutate(percentage = round(population / sum(population) / 2 * 100, digits = 2)) %<>%
-      mutate(percentage = ifelse(sex == "male", percentage * -1, percentage)) %<>%
-      mutate(ageStartYear = parse_number(age))
+      ) %>%
+      mutate(percentage = round(population / sum(population) / 2 * 100, digits = 2)) %>%
+      mutate(percentage = ifelse(sex == "male", percentage * -1, percentage)) %>%
+      mutate(ageStartYear = parse_number(age)) %>%
+      ungroup() %>%
+      arrange(GeoUID, sex, ageStartYear)
 
     # Rearrange for proper sorting when plotting
     # censusPP$age <- factor(censusPP$age, levels = unique(censusPP$age)[order(censusPP$ageStartYear, decreasing = FALSE)])
     censusPP$ageStartYear <- factor(censusPP$ageStartYear, levels = unique(censusPP$ageStartYear)[order(censusPP$ageStartYear, decreasing = FALSE)])
+    censusPP$age <- factor(censusPP$age, levels = unique(censusPP$age)[order(censusPP$ageStartYear, decreasing = FALSE)])
 
     # Drop unnecessary columns
     censusPP %<>% select(-one_of("Type", "population"))
