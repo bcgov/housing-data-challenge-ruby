@@ -56,7 +56,21 @@ tabPanel(
                 column(
                   12,
                   fluidRow(
-                    selectizeInput("c_location_pp_compare", label = "Compare with", choices = NULL, options = list(placeholder = "Select a location")),
+                    column(
+                      3,
+                      tags$div(
+                        align = 'left',
+                        class = 'multicol',
+                        checkboxInput("c_pp_compare_2011", label = "Census 2011", value = FALSE),
+                        checkboxInput("c_pp_compare_2006", label = "Census 2006", value = FALSE)
+                      )
+                    ),
+                    column(
+                      4,
+                      selectizeInput("c_location_pp_compare", label = "Compare with", choices = NULL, options = list(placeholder = "Select a location"))
+                    )
+                  ),
+                  fluidRow(
                     plotlyOutput("popPyr", height = chartHeight, width = "100%") %>% withSpinner(color="#0dc5c1")
                   )
                 )
