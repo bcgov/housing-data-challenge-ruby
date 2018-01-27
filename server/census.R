@@ -59,7 +59,7 @@ censusAvgAge <- reactive({
 })
 
 censusPp2016 <- reactive({
-  censusStir <- switch(
+  censusPp <- switch(
     input$c_view,
     "CMA" = censusPpCma,
     "CSD" = censusPpCsd,
@@ -67,6 +67,7 @@ censusPp2016 <- reactive({
     "CT" = censusPpCt,
     "DA" = censusPpDa
   )
+  return(censusPp)
 })
 
 #
@@ -82,18 +83,38 @@ regionOptions <- reactive({
 # Population pyramid 2016 for selected location
 #
 censusPp2016Location <- reactive({
-    censusPp2016 %>% filter(GeoUID == input$c_location)
-    # censusPp2016$age <- factor(censusPp2016$age, levels = unique(censusPp2016$age)[order(censusPp2016$ageStartYear, decreasing = FALSE)])
-    # return(censusPp2016)
+    censusPp2016() %>%
+      filter(GeoUID == input$c_location) %>%
+      mutate("percentage_compare" = 0)
+    # censusPp2016()$age <- factor(censusPp2016()$age, levels = unique(censusPp2016()$age)[order(censusPp2016()$ageStartYear, decreasing = FALSE)])
+    # return(censusPp2016())
 })
 
 #
 # Population pyramid 2016 to compare with selected location
 #
 censusPp2016LocationCompare <- reactive({
-    censusPp2016 %>% filter(GeoUID == input$c_location_pp_compare)
-    # censusPp2016$age <- factor(censusPp2016$age, levels = unique(censusPp2016$age)[order(censusPp2016$ageStartYear, decreasing = FALSE)])
-    # return(censusPp2016)
+  locationA <- input$c_location
+  locationB <- input$c_location_pp_compare
+
+  censusPp2016CompareA <- censusPp2016() %>%
+    filter(GeoUID == locationA)
+
+  if (locationB == "") {
+    locationB = locationA
+  }
+
+  censusPp2016CompareB <- censusPp2016() %>%
+    filter(GeoUID == locationB) %>%
+    ungroup() %>%
+    select(Region_compare = Region, age, sex, percentage_compare = percentage_2016)
+
+  censusPp2016Compare <- inner_join(
+    censusPp2016CompareA,
+    censusPp2016CompareB,
+    by = c("age", "sex") # $compare_loc <- censusPp2016Compare$percentage
+  )
+  return(censusPp2016Compare)
 })
 
 # Reactive location label
@@ -104,6 +125,16 @@ locationLabel <- reactive({
     select(label)
   st_geometry(locationLabel) <- NULL
   return(locationLabel)
+})
+
+# Reactive PP compare location label
+locationCompareLabel <- reactive({
+  locationCompareLabel <- censusMobility() %>%
+    filter(GeoUID == input$c_location_pp_compare) %>%
+    mutate(label = paste0(Region, " (", GeoUID, ")")) %>%
+    select(label)
+  st_geometry(locationCompareLabel) <- NULL
+  return(locationCompareLabel)
 })
 
 # Reactive housing types
@@ -447,12 +478,51 @@ observe({
   #
   # Population Pyramid
   #
-  output$popPyr <- renderPlotly(
-    plot_ly(censusPp2016() %>% filter(GeoUID == input$c_location),
-            x = ~percentage_2016, y = ~age, color = ~sex, type = 'bar', orientation = 'h',
-            hoverinfo = 'y+text+name', text = ~percentage_2016, colors = c('lightsalmon', colMultiFam)) %>%
+  output$popPyr <- renderPlotly({
+    # plot_ly(censusPp2016() %>% filter(GeoUID == input$c_location),
+    p <- plot_ly(censusPp2016LocationCompare(),
+            x = ~percentage_2016, y = ~age, name = ~paste(Region, '2016'), color = ~sex, type = 'bar', orientation = 'h',
+            hoverinfo = 'y+text+name', text = ~paste('Census 2016</br>', Region, abs(percentage_2016), '%'), colors = c('lightsalmon', colMultiFam)) %>%
+      add_trace(x = ~percentage_2011, y = ~age, name = ~paste(Region, '2011'), type = "scatter", mode = 'lines+markers',
+                line = list(color = '#2222cc99', shape = "spline"),
+                hoverinfo = "x+y+text",
+                text = ~paste('Census 2011</br>', Region, abs(percentage_2011), '%')
+                ) %>%
+      add_annotations(xref = 'x', yref = 'y',
+                      x = ~(percentage_2016 / abs(percentage_2016) / 2), y = ~age,
+                      # x = 1, y = ~age,
+                      text = ~paste(abs(percentage_2016), '%'),
+                      font = list(family = 'Arial', size = 12,
+                                  color = 'rgb(67, 67, 67)'),
+                      showarrow = FALSE) #%>%
+
+      # add_trace(x = ~percentage_2006, y = ~age, name = '2006', type = "scatter", mode = 'lines+markers',
+      #           line = list(color = 'lightslategrey', shape = "spline"),
+      #           hoverinfo = "x+y+text",
+      #           text = ~paste(percentage_2011, '%')) %>%
+      # add_trace(x = ~percentage_compare, y = ~age, name = 'compare', type = "scatter", mode = 'lines+markers',
+      #           line = list(color = 'red', shape = "spline"),
+      #           hoverinfo = "x+y+text",
+      #           text = ~paste(percentage_compare, '%')) %>%
+      # labeling the percentages of each bar (x_axis)
+
+
+    ppTitle <- paste('Population Pyramid for', locationLabel(), '- Census year', input$c_year)
+    if (input$c_location_pp_compare != "") {
+      p <- p %>% add_trace(x = ~percentage_compare, y = ~age, name = ~ paste(Region_compare, '2016'), type = "scatter", mode = 'lines+markers',
+                            line = list(color = '#cc222299', shape = "spline"),
+                            hoverinfo = "x+y+text",
+                            text = ~paste('Census 2016</br>', Region_compare, abs(percentage_compare), '%')) %>%
+        add_annotations(xref = 'paper', yref = 'paper',
+                        x = 0.5, y = 1.05,
+                        text = ~paste('compared to', locationCompareLabel()),
+                        font = list(size = 12, color = '#969696'),
+                        showarrow = FALSE)
+      # ppTitle <- paste(ppTitle, '<br />compared to', locationCompareLabel())
+    }
+    p %>%
       layout(bargap = 0.2, barmode = 'overlay',
-             margin = list(l = 150),
+             margin = list(l = 150, t = 75),
              xaxis = list(
                title = "",
                tickmode = 'array',
@@ -462,28 +532,12 @@ observe({
                  '0', '1%', '2%', '3%', '4%', '5%', '6%', '7%', '8%', '9%', '10%'
                )
              ),
-             yaxis = list(
-               title = ""
-             ),
-             title = paste('Population Pyramid for', locationLabel(), '- Census year', input$c_year)) %>%
-      add_trace(x = ~percentage_2011, y = ~age, name = '2011', type = "scatter", mode = 'lines+markers',
-                line = list(color = '#7BACC9', shape = "spline"),
-                hoverinfo = "x+y+text",
-                text = ~paste(percentage_2011, '%')) %>%
-      add_trace(x = ~percentage_2006, y = ~age, name = '2006', type = "scatter", mode = 'lines+markers',
-                line = list(color = 'lightslategrey', shape = "spline"),
-                hoverinfo = "x+y+text",
-                text = ~paste(percentage_2011, '%')) %>%
-      # labeling the percentages of each bar (x_axis)
-      add_annotations(xref = 'x', yref = 'y',
-                    x = ~(percentage_2016 / abs(percentage_2016) / 2), y = ~age,
-                    # x = 1, y = ~age,
-                    text = ~paste(abs(percentage_2016), '%'),
-                    font = list(family = 'Arial', size = 12,
-                                color = 'rgb(67, 67, 67)'),
-                    showarrow = FALSE) %>%
+             yaxis = list(title = ""),
+             title = ppTitle,
+             titleFont = list(size = 12, color = "#ff0000")) %>%
       config(displayModeBar = F)
-  )
+  })
+
 
   #
   # STIR Lollipop

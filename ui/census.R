@@ -57,7 +57,8 @@ tabPanel(
                   12,
                   fluidRow(
                     selectizeInput("c_location_pp_compare", label = "Compare with", choices = NULL, options = list(placeholder = "Select a location")),
-                    plotlyOutput("popPyr", height = chartHeight, width = "100%") %>% withSpinner(color="#0dc5c1"))
+                    plotlyOutput("popPyr", height = chartHeight, width = "100%") %>% withSpinner(color="#0dc5c1")
+                  )
                 )
               )
             )
