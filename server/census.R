@@ -459,7 +459,7 @@ observe({
     treemap(
       # housingTypesDf %>% filter(GeoUID == input$c_location) %>% mutate(ratioFormat = paste0(gsub(" ratio", "", HousingType), " - ", ratio, "%")),
       # title = paste("Distribution of Mobility Categories at ", locationLabel()),
-      title = "",
+      title = paste("Distribution of Mobility categories at ", locationLabel()),
       censusMobilityDf %>% filter(GeoUID == input$c_location) %>% mutate(ratioFormat = paste0(Migration, " - ", count, "%")),
       index = c("ratioFormat"),
       vSize = "count",
