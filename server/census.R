@@ -1,3 +1,10 @@
+createAlert(session, "c_location_alert_pp", alertId = "c_location_alert_pp_id", title = NULL, style = "alert", dismiss = FALSE, append = TRUE,
+            content = "Click location on the map to draw a population distribution by age and sex for that location.")
+createAlert(session, "c_location_alert_m", alertId = "c_location_alert_m_id", title = NULL, style = NULL, dismiss = FALSE, append = TRUE,
+            content = "Click location on the map to draw a chart showing ratios of different population mobility categories for that location.")
+createAlert(session, "c_location_alert_ht", alertId = "c_location_alert_ht_id", title = NULL, style = NULL, dismiss = FALSE, append = TRUE,
+            content = "Click location on the map to draw a chart showing ratio of different housing types for that location.")
+
 c_year <- reactive({
   c_y <- input$c_year
 })
@@ -533,7 +540,8 @@ observe({
              ),
              yaxis = list(title = ""),
              title = ppTitle,
-             titleFont = list(size = 12, color = "#ff0000")) %>%
+             titleFont = list(size = 12, color = "#ff0000"),
+             legend = list(orientation = 'h')) %>%
       config(displayModeBar = F)
   })
 

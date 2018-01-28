@@ -25,6 +25,7 @@ library(data.tree)
 library(d3treeR)
 library(RColorBrewer)
 library(shinycssloaders)
+library(shinyBS)
 
 # source files
 source("modules/controls.R")

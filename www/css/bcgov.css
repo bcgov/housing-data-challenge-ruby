@@ -41,7 +41,7 @@ body {
 }
 
 .tab-content p {
-  padding: 0 15px;
+  padding: 0 15px 0 0;
 }
 
 hr {
@@ -71,3 +71,17 @@ hr {
 
 }
 
+.alert {
+  background-color: #f5f5f5;
+  color: #393939;
+  border: 1px solid #e3e3e3;
+}
+
+.tooltip-inner {
+  text-align: left;
+  background-color: #393939;
+}
+
+.tooltip.right .tooltip-arrow {
+  border-right-color: #393939;
+}
