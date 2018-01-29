@@ -288,7 +288,8 @@ observe({
     censusAvgAge <- censusAvgAge()
   }
   censusAvgAge %<>%
-    mutate(`Region` = as.character(`Region.Name`), Type = as.character(Type))
+    mutate(`Region` = as.character(`Region.Name`), Type = as.character(Type)) %<>%
+    filter("Average Age" > 0)
 
   # AvgAge palette
   palAvgAge <- colorNumeric(
@@ -402,8 +403,51 @@ observe({
       # baseGroups = c("Population", "Housing", "Mobility", "STIR"),
       baseGroups = c("Population", "Housing", "Mobility", "STIR"),
       options = layersControlOptions(collapsed = FALSE)
+    # ) %>%
+    # addLegend(
+    #   "bottomleft", title = "Average Age", opacity = 0.8,
+    #   pal = palAvgAge, values = censusAvgAge$`Average Age`
+    #   # labFormat = labelFormat(prefix = "$"),
     )
+  })
+  outputOptions(output, "mapCensus", suspendWhenHidden=FALSE)
 
+  # Map layers click observer
+  observeEvent(input$mapCensus_groups, {
+    selectedGroup <- input$mapCensus_groups
+
+    mapCensus <- leafletProxy("mapCensus") %>% clearControls()
+
+    updateTabsetPanel(session, "censusTopicsTabs", selected = selectedGroup)
+
+    if (selectedGroup == 'Population') {
+      mapCensus %>%
+        addLegend(
+          "bottomleft", title = "Average Age", opacity = 0.5,
+          pal = palAvgAge, values = censusAvgAge$`Average Age`
+        )
+    } else if (selectedGroup == 'Housing') {
+      mapCensus %>%
+        addLegend(
+          title = paste(input$c_housing_types, "Ratio"), "bottomleft", opacity = 0.5,
+          pal = palHousingTypes, values = housingTypeMapData()$typewatch,
+          labFormat = labelFormat(suffix = "%")
+        )
+    } else if (selectedGroup == 'Mobility') {
+      mapCensus <- mapCensus %>%
+        addLegend(
+          "bottomleft", title = "Movers Ratio", opacity = 0.5,
+          pal = palMobility, values = censusMobility$`Movers Ratio`,
+          labFormat = labelFormat(suffix = "%")
+        )
+    } else if (selectedGroup == 'STIR') {
+      mapCensus <- mapCensus %>%
+        addLegend(
+          title="Percentage of<br>households with<br>STIR > 30%", "bottomleft", opacity = 0.5,
+          pal = palStir, values = censusStir$percent_more_than_30,
+          labFormat = labelFormat(suffix = "%")
+        )
+    }
   })
 
   # Housing Types treemap
@@ -444,6 +488,10 @@ observe({
       border.col = "#696969",
       border.lwds = c(1),
       force.print.labels = FALSE,
+      # title.legend = "Housing Types",
+      # position.legend = "right",
+      # fontsize.legend = 11,
+      # drop.unused.levels = TRUE,
       inflate.labels = F
     )
   })
@@ -458,7 +506,6 @@ observe({
   output$c16mobilityTree <- renderPlot({
     treemap(
       # housingTypesDf %>% filter(GeoUID == input$c_location) %>% mutate(ratioFormat = paste0(gsub(" ratio", "", HousingType), " - ", ratio, "%")),
-      # title = paste("Distribution of Mobility Categories at ", locationLabel()),
       title = paste("Distribution of Mobility categories at ", locationLabel()),
       censusMobilityDf %>% filter(GeoUID == input$c_location) %>% mutate(ratioFormat = paste0(Migration, " - ", count, "%")),
       index = c("ratioFormat"),
@@ -478,6 +525,10 @@ observe({
       border.col = "#696969",
       border.lwds = c(1),
       force.print.labels = FALSE,
+      # title.legend = "Mobility categories",
+      # position.legend = "bottom",
+      # fontsize.legend = 11,
+      # drop.unused.levels = TRUE,
       inflate.labels = F
     )
   })
@@ -544,7 +595,6 @@ observe({
              legend = list(orientation = 'h')) %>%
       config(displayModeBar = F)
   })
-
 
   #
   # STIR Lollipop
@@ -647,7 +697,7 @@ observe({
   )
 })
 
-# Map click observer
+# Map region click observer
 observeEvent(input$mapCensus_shape_click, {
   m <- input$mapCensus_shape_click
   if(!is.null(m$id)){

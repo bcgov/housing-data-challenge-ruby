@@ -64,8 +64,10 @@ tabPanel(
         7,
         # Population pyramid
         tabsetPanel(
+          id = "censusTopicsTabs",
           tabPanel(
             "Population Age & Sex",
+            value = "Population",
             icon = icon("venus-mars"),
             tags$p("The age profile of an area has a significant impact on the type of housing that is required.
                    An abundance of children suggests a need for family housing, while a greater proportion of seniors
@@ -107,6 +109,7 @@ tabPanel(
           # Mobility
           tabPanel(
             "Mobility",
+            value = "Mobility",
             icon = icon("truck"),
             tags$p("This report shows number of people who had moved to the current location in the previous year."),
             fluidRow(
@@ -125,6 +128,7 @@ tabPanel(
           # Housing Type
           tabPanel(
             "Housing Type",
+            value = "Housing",
             icon = icon("home"),
             tags$p("For the purpose of the Census, housing type is defined by \"structural type\",
                    which includes single detached house, semi-detached and row houses, and a variety of apartment categories."),
@@ -152,6 +156,7 @@ tabPanel(
           # Shelter-to-Income Ratio
           tabPanel(
             "Shelter-to-Income Ratio",
+            value = "STIR",
             icon = icon("money"),
             tags$p("Housing is considered affordable when spending on all shelter costs is below 30% of pre-tax income
                    and measured through the Shelter-cost-To-Income Ratio (STIR)."),
