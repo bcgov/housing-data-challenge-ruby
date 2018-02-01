@@ -382,7 +382,7 @@ jumbotron <- function(header, popPerc = 0, popInc = TRUE, dwellPerc = 0, dwellIn
                        mSummary$`Movers Ratio`, "%</strong>.")
   boxStir <- paste0("In ", stirSummary$Region, ", <strong>", stirSummary$percent_more_than_30, "%</strong> of households
                     spend more than 30% of their income on shelter cost.")
-  boxPp <- paste0("Census subdivision with highest average age (<strong>", ageSummary$`Average Age`,"</strong>) is ",
+  boxPp <- paste0("Census subdivision with the highest average age (<strong>", ageSummary$`Average Age`,"</strong>) is ",
                  ageSummary$Region, ".")
 
   HTML(paste0("<div class=\"jumbotron\">
@@ -391,21 +391,35 @@ jumbotron <- function(header, popPerc = 0, popInc = TRUE, dwellPerc = 0, dwellIn
               <div class=\"row\">
               <div class=\"col-sm-5 \">
               <div class=\"quick-fact\">
+              <div class=\"splash-icon\">
+              <i class=\"fa fa-users\"></i>
+              </div>
+              <div class=\"splash-text\">
               Between 2011 and 2016 census, BC&nbsp;population
               has ", popChange ," by <strong>", popPerc , "%</strong>.
               </div>
               </div>
+              </div>
               <div class=\"col-sm-5 col-sm-offset-2\">
               <div class=\"quick-fact\">
+              <div class=\"splash-icon\">
+              <i class=\"fa fa-building\"></i>
+              </div>
+              <div class=\"splash-text\">
               At the same time, number of private
               dwellings has ", dwellChange ," by <strong>", dwellPerc ,
               "%</strong>.
               </div>
               </div>
               </div>
+              </div>
               <div class=\"row\">
               <div class=\"col-sm-5\">
               <div class=\"quick-fact\">
+              <div class=\"splash-icon\">
+              <i class=\"fa fa-briefcase\"></i>
+              </div>
+              <div class=\"splash-text\">
               In ", paste(month(ymd(maxTransPeriod), label = TRUE, abbr = FALSE),
               year(maxTransPeriod)), ", there were <strong>",
               format(no_mkt_trans, big.mark=","),
@@ -414,37 +428,64 @@ jumbotron <- function(header, popPerc = 0, popInc = TRUE, dwellPerc = 0, dwellIn
               "%</strong> of which involved foreign citizens.
               </div>
               </div>
+              </div>
               <div class=\"col-sm-5 col-sm-offset-2\">
               <div class=\"quick-fact\">
+              <div class=\"splash-icon\">
+              <i class=\"fa fa-money\"></i>
+              </div>
+              <div class=\"splash-text\">
               The volume of these transactions was <strong>",
               paste("$", format(sum_FMV, big.mark=","), sep="") ,
               "</strong> (<strong>", sum_FMV_foreign_perc , "%</strong> foreign).
               </div>
               </div>
               </div>
+              </div>
 
               <div class=\"row\">
               <div class=\"col-sm-5\">
-              <div class=\"quick-fact\">", boxHousingType ,"
+              <div class=\"quick-fact\">
+              <div class=\"splash-icon\">
+              <i class=\"fa fa-home\"></i>
+              </div>
+              <div class=\"splash-text\">",
+              boxHousingType ,"
+              </div>
               </div>
               </div>
               <div class=\"col-sm-5 col-sm-offset-2\">
-              <div class=\"quick-fact\">",
+              <div class=\"quick-fact\">
+              <div class=\"splash-icon\">
+              <i class=\"fa fa-truck\"></i>
+              </div>
+              <div class=\"splash-text\">",
               boxMobility,
               "</div>
               </div>
               </div>
+              </div>
 
               <div class=\"row\">
               <div class=\"col-sm-5\">
-              <div class=\"quick-fact\">",
+              <div class=\"quick-fact\">
+              <div class=\"splash-icon\">
+              <i class=\"fa fa-street-view\"></i>
+              </div>
+              <div class=\"splash-text\">",
               boxPp,
               "</div>
               </div>
+              </div>
               <div class=\"col-sm-5 col-sm-offset-2\">
-              <div class=\"quick-fact\">",
+              <div class=\"quick-fact\">
+              <div class=\"splash-icon\">
+              <i class=\"fa fa-bullhorn\"></i>
+              </div>
+              <div class=\"splash-text\">",
               boxStir,
               "</div>
+              </div>
               </div>
               </div>
 
