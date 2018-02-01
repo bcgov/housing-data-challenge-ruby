@@ -30,7 +30,7 @@ library(shinyBS)
 # source files
 source("modules/controls.R")
 source("modules/chartFormat.R")
-source("get_geography.R")
+# source("get_geography.R")
 
 options(stringsAsFactors=F)
 
@@ -59,28 +59,14 @@ c16Prov <- readRDS("./data/census2016-province.rds")
 # Sys.chmod(list.dirs("."), "777")
 # options(cancensus.cache_path = "./cache/")
 
-# regions <- list_census_regions("CA16", use_cache = FALSE)
-# bc <- regions %>% filter(PR_UID == "59")
-#
-# cma <- bc %>% filter(level == "CMA")
-# cmaRegions <- as_census_region_list(cma)
-#
-# cd <- bc %>% filter(level == "CD")
-# cdRegions <- as_census_region_list(cd)
-#
-# csd <- bc %>% filter(level == "CSD")
-# csdRegions <- as_census_region_list(csd)
-#
-# regions = as_census_region_list(rbind(cma, cd, csd))
-
 #  Cleanup - @TODO Move this to getdata.R
-c16EconRegs$ERNAME <-
-  gsub("LOWER MAINLAND--SOUTHWEST", "MAINLAND/SOUTHWEST", c16EconRegs$ERNAME)
-c16EconRegs$ERNAME <-
-  gsub("THOMPSON--OKANAGAN", "THOMPSON/OKANAGAN", c16EconRegs$ERNAME)
-c16EconRegs$ERNAME <-
-  gsub("VANCOUVER ISLAND AND COAST", "VANCOUVER ISLAND/COAST", c16EconRegs$ERNAME)
-c16EconRegs$Total.Private.Dwellings.2011 <- 0
+# c16EconRegs$ERNAME <-
+#   gsub("LOWER MAINLAND--SOUTHWEST", "MAINLAND/SOUTHWEST", c16EconRegs$ERNAME)
+# c16EconRegs$ERNAME <-
+#   gsub("THOMPSON--OKANAGAN", "THOMPSON/OKANAGAN", c16EconRegs$ERNAME)
+# c16EconRegs$ERNAME <-
+#   gsub("VANCOUVER ISLAND AND COAST", "VANCOUVER ISLAND/COAST", c16EconRegs$ERNAME)
+# c16EconRegs$Total.Private.Dwellings.2011 <- 0
 
 ptDevRegMth$DevelopmentRegion <-
   gsub("MAINLAND/SOUTHWEST", "LOWER MAINLAND/SOUTHWEST", ptDevRegMth$DevelopmentRegion)
@@ -345,7 +331,7 @@ census2016aaCma <- read_rds(file.path("data", "census2016-avg-age-CMA.rds"))
 census2016aaCd <- read_rds(file.path("data", "census2016-avg-age-CD.rds"))
 census2016aaCsd <- read_rds(file.path("data", "census2016-avg-age-CSD.rds"))
 census2016aaCt <- read_rds(file.path("data", "census2016-avg-age-CT.rds"))
-census2016aaDa <- read_rds(file.path("data", "census2016-avg-age-DA.rds"))
+# census2016aaDa <- read_rds(file.path("data", "census2016-avg-age-DA.rds"))
 
 # Population Pyramid data
 getJoinedPp <- function(c16, c11, c06) {
@@ -362,10 +348,10 @@ getJoinedPp <- function(c16, c11, c06) {
   return(censusPp)
 }
 
-census2016ppPr <- read_rds(file.path("data", "population_pyramid", "census2016-pp-PR.rds"))
-census2011ppPr <- read_rds(file.path("data", "population_pyramid", "census2011-pp-PR.rds"))
-census2006ppPr <- read_rds(file.path("data", "population_pyramid", "census2006-pp-PR.rds"))
-censusPpPr <- getJoinedPp(census2016ppPr, census2011ppPr, census2006ppPr)
+# census2016ppPr <- read_rds(file.path("data", "population_pyramid", "census2016-pp-PR.rds"))
+# census2011ppPr <- read_rds(file.path("data", "population_pyramid", "census2011-pp-PR.rds"))
+# census2006ppPr <- read_rds(file.path("data", "population_pyramid", "census2006-pp-PR.rds"))
+# censusPpPr <- getJoinedPp(census2016ppPr, census2011ppPr, census2006ppPr)
 
 census2016ppCma <- read_rds(file.path("data", "population_pyramid", "census2016-pp-CMA.rds"))
 census2011ppCma <- read_rds(file.path("data", "population_pyramid", "census2011-pp-CMA.rds"))
@@ -387,28 +373,28 @@ census2011ppCt <- read_rds(file.path("data", "population_pyramid", "census2011-p
 census2006ppCt <- read_rds(file.path("data", "population_pyramid", "census2006-pp-CT.rds"))
 censusPpCt <- getJoinedPp(census2016ppCt, census2011ppCt, census2006ppCt)
 
-census2016ppDa <- read_rds(file.path("data", "population_pyramid", "census2016-pp-DA.rds"))
-census2006ppDa <- read_rds(file.path("data", "population_pyramid", "census2006-pp-DA.rds"))
-census2011ppDa <- read_rds(file.path("data", "population_pyramid", "census2011-pp-DA.rds"))
-censusPpDa <- getJoinedPp(census2016ppDa, census2011ppDa, census2006ppDa)
+# census2016ppDa <- read_rds(file.path("data", "population_pyramid", "census2016-pp-DA.rds"))
+# census2006ppDa <- read_rds(file.path("data", "population_pyramid", "census2006-pp-DA.rds"))
+# census2011ppDa <- read_rds(file.path("data", "population_pyramid", "census2011-pp-DA.rds"))
+# censusPpDa <- getJoinedPp(census2016ppDa, census2011ppDa, census2006ppDa)
 
 # Mobility
 censusMobilityCma <- read_rds(file.path("data", "census2016-mobility-CMA.rds"))
 censusMobilityCd <- read_rds(file.path("data", "census2016-mobility-CD.rds"))
 censusMobilityCsd <- read_rds(file.path("data", "census2016-mobility-CSD.rds"))
 censusMobilityCt <- read_rds(file.path("data", "census2016-mobility-CT.rds"))
-censusMobilityDa <- read_rds(file.path("data", "census2016-mobility-DA.rds"))
+# censusMobilityDa <- read_rds(file.path("data", "census2016-mobility-DA.rds"))
 
 # Housing Type
 housingTypesCma <- readRDS(file.path("data", "housing", "census2016-housing-CMA.rds"))
 housingTypesCsd <- readRDS(file.path("data", "housing", "census2016-housing-CSD.rds"))
 housingTypesCd <- readRDS(file.path("data", "housing", "census2016-housing-CD.rds"))
 housingTypesCt <- readRDS(file.path("data", "housing", "census2016-housing-CT.rds"))
-housingTypesDa <- readRDS(file.path("data", "housing", "census2016-housing-DA.rds"))
+# housingTypesDa <- readRDS(file.path("data", "housing", "census2016-housing-DA.rds"))
 
 # Shelter-Cost-to-Income Ratio data
 census2016CmaStir <- read_rds(file.path("data", "census2016Spatial-stir-CMA.rds"))
 census2016CdStir <- read_rds(file.path("data", "census2016Spatial-stir-CD.rds"))
 census2016CsdStir <- read_rds(file.path("data", "census2016Spatial-stir-CSD.rds"))
 census2016CtStir <- read_rds(file.path("data", "census2016Spatial-stir-CT.rds"))
-census2016DaStir <- read_rds(file.path("data", "census2016Spatial-stir-DA.rds"))
+# census2016DaStir <- read_rds(file.path("data", "census2016Spatial-stir-DA.rds"))

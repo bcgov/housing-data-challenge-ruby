@@ -19,9 +19,10 @@ censusMobility <- reactive({
     "CMA" = censusMobilityCma,
     "CSD" = censusMobilityCsd,
     "CD" = censusMobilityCd,
-    "CT" = censusMobilityCt,
-    "DA" = censusMobilityDa
+    "CT" = censusMobilityCt#,
+    # "DA" = censusMobilityDa
   )
+  return(censusMobility)
 })
 
 censusStir <- reactive({
@@ -30,26 +31,8 @@ censusStir <- reactive({
     "CMA" = census2016CmaStir,
     "CSD" = census2016CsdStir,
     "CD" = census2016CdStir,
-    "CT" = census2016CtStir,
-    "DA" = census2016DaStir
-  )
-  # Massage the data a little bit
-  # TODO: This needs to be moved to get_census_data.R to be done only once on app loading
-  censusStir$Region <- as.character(censusStir$`Region`)
-  censusStir %>% mutate(
-    percent_less_than_30 =
-      round(stir_less_than_30 / (stir_less_than_30 + stir_more_than_30) * 100, digits = 2),
-    percent_more_than_30 =
-      round(stir_more_than_30 / (stir_less_than_30 + stir_more_than_30) * 100, digits = 2)
-  ) %<>%
-    arrange(desc(percent_more_than_30))
-
-  # Reorder data
-  censusStir$GeoUID <- factor(
-    censusStir$GeoUID,
-    levels = unique(censusStir$GeoUID)[order(
-      censusStir$percent_more_than_30, decreasing = FALSE
-    )]
+    "CT" = census2016CtStir#,
+    # "DA" = census2016DaStir
   )
   return(censusStir)
 })
@@ -60,9 +43,10 @@ censusAvgAge <- reactive({
     "CMA" = census2016aaCma,
     "CSD" = census2016aaCsd,
     "CD" = census2016aaCd,
-    "CT" = census2016aaCt,
-    "DA" = census2016aaDa
+    "CT" = census2016aaCt#,
+    # "DA" = census2016aaDa
   )
+  return(censusAvgAge)
 })
 
 censusPp2016 <- reactive({
@@ -71,8 +55,8 @@ censusPp2016 <- reactive({
     "CMA" = censusPpCma,
     "CSD" = censusPpCsd,
     "CD" = censusPpCd,
-    "CT" = censusPpCt,
-    "DA" = censusPpDa
+    "CT" = censusPpCt#,
+    # "DA" = censusPpDa
   )
   return(censusPp)
 })
@@ -84,18 +68,21 @@ regionOptions <- reactive({
     regionOptions <- censusMobility() %>%
       mutate(label = paste0(censusMobility()$`Region`, " (", censusMobility()$GeoUID, ")")) %>%
       select(label, value = GeoUID)
+    st_geometry(regionOptions) <- NULL
+
+    return(regionOptions %>% distinct())
 })
 
 #
 # Population pyramid 2016 for selected location
 #
-censusPp2016Location <- reactive({
-    censusPp2016() %>%
-      filter(GeoUID == input$c_location) %>%
-      mutate("percentage_compare" = 0)
-    # censusPp2016()$age <- factor(censusPp2016()$age, levels = unique(censusPp2016()$age)[order(censusPp2016()$ageStartYear, decreasing = FALSE)])
-    # return(censusPp2016())
-})
+# censusPp2016Location <- reactive({
+#     censusPp2016() %>%
+#       filter(GeoUID == input$c_location) %>%
+#       mutate("percentage_compare" = 0)
+#     # censusPp2016()$age <- factor(censusPp2016()$age, levels = unique(censusPp2016()$age)[order(censusPp2016()$ageStartYear, decreasing = FALSE)])
+#     # return(censusPp2016())
+# })
 
 #
 # Population pyramid 2016 to compare with selected location
@@ -126,21 +113,22 @@ censusPp2016LocationCompare <- reactive({
 
 # Reactive location label
 locationLabel <- reactive({
-  locationLabel <- censusMobility() %>%
-    filter(GeoUID == input$c_location) %>%
-    mutate(label = paste0(Region, " (", GeoUID, ")")) %>%
-    select(label)
-  st_geometry(locationLabel) <- NULL
+  locationLabel <- as.data.frame(regionOptions()) %>%
+    filter(value == input$c_location) %>%
+    select(label) %>%
+    distinct()
+  # st_geometry(locationLabel) <- NULL
   return(locationLabel)
 })
 
 # Reactive PP compare location label
 locationCompareLabel <- reactive({
-  locationCompareLabel <- censusMobility() %>%
+  locationCompareLabel <- as.data.frame(censusMobility()) %>%
     filter(GeoUID == input$c_location_pp_compare) %>%
     mutate(label = paste0(Region, " (", GeoUID, ")")) %>%
-    select(label)
-  st_geometry(locationCompareLabel) <- NULL
+    select(label) %>%
+    distinct()
+  # st_geometry(locationCompareLabel) <- NULL
   return(locationCompareLabel)
 })
 
@@ -151,17 +139,18 @@ housingTypes <- reactive({
     "CMA" = housingTypesCma,
     "CD" = housingTypesCd,
     "CSD" = housingTypesCsd,
-    "CT" = housingTypesCt,
-    "DA" = housingTypesDa
+    "CT" = housingTypesCt#,
+    # "DA" = housingTypesDa
   )
+  return(housingTypes)
 })
 
 # Reactive housing types depending on selected type
 housingTypeMapData <- reactive({
   htMapData <- housingTypes() %>%
-    # select(Region, GeoUID, typewatch = input$c_housing_types)
     select(typewatch = input$c_housing_types, everything()) %>%
     mutate(typewatch2 = as.numeric(input$c_housing_types))
+  return(htMapData)
 })
 
 #
@@ -177,52 +166,35 @@ palHousingTypes <- colorNumeric(
 # Census observer
 #
 observe({
-  # Update locations if geo-level selection changes
-  # updateSelectizeInput(session, 'c_location', choices = regionOptions(), server = TRUE)
-
   # Housing type barchart
   traces = list(
     list(
-      x = housingTypes()$`Region`,
-      y = housingTypes()$`Appartment in tall building`,
-      color = colNonStrataRental,
-      name = "Appartment in tall building"
+      x = housingTypes()$`Region`, y = housingTypes()$`Appartment in tall building`,
+      color = colNonStrataRental, name = "Appartment in tall building"
     ),
     list(
-      x = housingTypes()$`Region`,
-      y = housingTypes()$`Semi detached house`,
-      color = colCommercial,
-      name = "Semi-detached house"
+      x = housingTypes()$`Region`, y = housingTypes()$`Semi detached house`,
+      color = colCommercial, name = "Semi-detached house"
     ),
     list(
-      x = housingTypes()$`Region`,
-      y = housingTypes()$`Row house`,
-      color = colResidential,
-      name = "Row house"
+      x = housingTypes()$`Region`, y = housingTypes()$`Row house`,
+      color = colResidential, name = "Row house"
     ),
     list(
-      x = housingTypes()$`Region`,
-      y = housingTypes()$`Appartment in duplex`,
-      color = colMultiFam,
-      name = "Appartment in duplex"
+      x = housingTypes()$`Region`, y = housingTypes()$`Appartment in duplex`,
+      color = colMultiFam, name = "Appartment in duplex"
     ),
     list(
-      x = housingTypes()$`Region`,
-      y = housingTypes()$`Appartment in small building`,
-      color = colStrata,
-      name = "Appartment in small building"
+      x = housingTypes()$`Region`, y = housingTypes()$`Appartment in small building`,
+      color = colStrata, name = "Appartment in small building"
     ),
     list(
-      x = housingTypes()$`Region`,
-      y = housingTypes()$`Other single attached house`,
-      color = colAcreage,
-      name = "Other single-attached house"
+      x = housingTypes()$`Region`, y = housingTypes()$`Other single attached house`,
+      color = colAcreage, name = "Other single-attached house"
     ),
     list(
-      x = housingTypes()$`Region`,
-      y = housingTypes()$`Movable dwelling`,
-      color = colForeign,
-      name = "Movable dwelling"
+      x = housingTypes()$`Region`, y = housingTypes()$`Movable dwelling`,
+      color = colForeign, name = "Movable dwelling"
     )
   )
   c16dwellTypePlot <- plotmy(
@@ -260,12 +232,6 @@ observe({
   if (!is.null(censusMobility())) {
     censusMobility <- censusMobility()
   }
-  censusMobility %<>%
-    mutate(`Region` = as.character(`Region`), Type = as.character(Type)) %<>%
-    gather(
-      "Non-Movers Ratio", "Non-Migrants Ratio", "External Migrants Ratio",
-      "Intraprovincial Migrants Ratio", "Interprovincial Migrants Ratio",
-      key = "Migration", value = "count")
 
   # Mobility palette
   palMobility <- colorNumeric(
@@ -287,9 +253,6 @@ observe({
   if (!is.null(censusAvgAge())) {
     censusAvgAge <- censusAvgAge()
   }
-  censusAvgAge %<>%
-    mutate(`Region` = as.character(`Region.Name`), Type = as.character(Type)) %<>%
-    filter("Average Age" > 0)
 
   # AvgAge palette
   palAvgAge <- colorNumeric(
@@ -399,15 +362,8 @@ observe({
       ) %>%
     # Layers control
     addLayersControl(
-      # overlayGroups = c("OSM (default)", "Toner", "Toner Lite"),
-      # baseGroups = c("Population", "Housing", "Mobility", "STIR"),
       baseGroups = c("Population", "Housing", "Mobility", "STIR"),
       options = layersControlOptions(collapsed = FALSE)
-    # ) %>%
-    # addLegend(
-    #   "bottomleft", title = "Average Age", opacity = 0.8,
-    #   pal = palAvgAge, values = censusAvgAge$`Average Age`
-    #   # labFormat = labelFormat(prefix = "$"),
     )
   })
   outputOptions(output, "mapCensus", suspendWhenHidden=FALSE)
@@ -429,7 +385,7 @@ observe({
     } else if (selectedGroup == 'Housing') {
       mapCensus %>%
         addLegend(
-          title = paste(input$c_housing_types, "Ratio"), "bottomleft", opacity = 0.5,
+          title = input$c_housing_types, "bottomleft", opacity = 0.5,
           pal = palHousingTypes, values = housingTypeMapData()$typewatch,
           labFormat = labelFormat(suffix = "%")
         )
@@ -707,11 +663,12 @@ observeEvent(input$mapCensus_shape_click, {
     # updateSelectInput(session, "c_location", selected = p$id)
     updateTextInput(session, "c_location", value = locationId)
 
-    locationLabel <- censusMobility() %>%
+    locationLabel <- as.data.frame(censusMobility()) %>%
       filter(GeoUID == locationId) %>%
       mutate(label = paste0(Region, " (", GeoUID, ")")) %>%
-      select(label)
-    st_geometry(locationLabel) <- NULL
+      select(label) %>%
+      distinct()
+    # st_geometry(locationLabel) <- NULL
     updateTextInput(session, "c_location_name", value = locationLabel$label)
 
     updateSelectizeInput(session, 'c_location_pp_compare', choices = regionOptions(), server = TRUE)

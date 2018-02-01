@@ -4,4 +4,8 @@
 .Ruserdata
 .Rapp.history
 /cache/
-/data/
+/source_data/
+/data/*DA.rds
+/data/housing/*2006*.rds
+/data/housing/*2011*.rds
+/data/housing/*DA.rds

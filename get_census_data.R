@@ -227,6 +227,13 @@ for (censusLevel in c("CMA", "CD", "CSD", "CT", "DA")) {
       `External Migrants Ratio` = round(`External migrants` / (`Non-movers` + `Movers`) * 100, digits = 2)
     )
 
+  censusData %<>%
+    mutate(`Region` = as.character(`Region`), Type = as.character(Type)) %<>%
+    gather(
+      "Non-Movers Ratio", "Non-Migrants Ratio", "External Migrants Ratio",
+      "Intraprovincial Migrants Ratio", "Interprovincial Migrants Ratio",
+      key = "Migration", value = "count")
+
   saveRDS(censusData, here::here("data", paste0("census2016-mobility-", censusLevel, ".rds")))
 }
 
@@ -243,21 +250,6 @@ for (censusLevel in c("CMA", "CD", "CSD", "CT", "DA")) {
       labels = "short",
       geo_format = "sf"
     )
-
-  # sp format
-  # censusStirData <- censusStirData[censusStirData$Type == censusLevel,]
-  # names(censusStirData)[names(censusStirData) == "v_CA16_4886"] <- "total_households_with_income"
-  # names(censusStirData)[names(censusStirData) == "v_CA16_4887"] <- "stir_less_than_30"
-  # names(censusStirData)[names(censusStirData) == "v_CA16_4888"] <- "stir_more_than_30"
-  # censusStirData$percent_less_than_30 = round(censusStirData$stir_less_than_30 / censusStirData$total_households_with_income * 100, digits = 2)
-  # censusStirData$percent_more_than_30 = round(censusStirData$stir_more_than_30 / censusStirData$total_households_with_income * 100, digits = 2)
-  # censusStirData$Region = paste(censusStirData$`Region Name`, str_sub(censusStirData$GeoUID, -2))
-  # censusStirData$Region = factor(
-  #       censusStirData$Region,
-  #       levels = unique(censusStirData$Region)[order(censusStirData$percent_more_than_30, decreasing = FALSE)]
-  #     )
-  #   # top_n(25, percent_more_than_30) %<>%
-  #   # )
 
   # sf format
   censusStirData %<>%
@@ -278,6 +270,16 @@ for (censusLevel in c("CMA", "CD", "CSD", "CT", "DA")) {
         round(stir_more_than_30 / (stir_less_than_30 + stir_more_than_30) * 100, digits = 2)
     ) %<>%
     arrange(desc(percent_more_than_30))
+
+  censusStirData$Region <- as.character(censusStirData$`Region`)
+
+  # Reorder data
+  censusStirData$GeoUID <- factor(
+    censusStirData$GeoUID,
+    levels = unique(censusStirData$GeoUID)[order(
+      censusStirData$percent_more_than_30, decreasing = FALSE
+    )]
+  )
 
   saveRDS(censusStirData, here::here("data", paste0("census2016Spatial-stir-", censusLevel, ".rds")))
 }
@@ -305,22 +307,15 @@ for (censusLevel in c("CMA", "CD", "CSD", "CT", "DA")) {
     rename("Average Age" = "v_CA16_379") %<>%
     replace_na("Average Age" = 0)
 
+  censusData %<>%
+    mutate(`Region` = as.character(`Region.Name`), Type = as.character(Type)) %<>%
+    filter("Average Age" > 0)
+
   saveRDS(censusData, here::here("data", paste0("census2016-avg-age-", censusLevel, ".rds")))
 }
 
 
 # Age and Sex - Population pyramid
-# StatCan
-# CMA, CT
-# unzip("98-400-X2016005_English_CSV_data.csv", zipfile = here::here("data", "98-400-X2016005_ENG_CSV.ZIP"))
-# agesexCmaCt <- read_csv(here::here("98-400-X2016005_English_CSV_data.csv"))
-# file.remove(here::here("98-400-X2016005_English_CSV_data.csv"))
-
-# CD, CSD, DA
-# unzip("98-400-X2016003_English_CSV_data.csv", zipfile = here::here("data", "98-400-X2016003_ENG_CSV.ZIP"))
-# agesexCdCsdDa <- read_csv(here::here("98-400-X2016003_English_CSV_data.csv"))
-# file.remove(here::here("98-400-X2016003_English_CSV_data.csv"))
-
 # cancensus
 ## Census 2016 has 5 year bands up to 100 years of age and over,
 ## while census 2011 and 2006 bands go up to 85 and over
