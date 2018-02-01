@@ -25,6 +25,18 @@ censusMobility <- reactive({
   return(censusMobility)
 })
 
+censusMobilityGathered <- reactive({
+  censusMobilityGathered <- switch(
+    input$c_view,
+    "CMA" = censusMobilityCmaGathered,
+    "CSD" = censusMobilityCsdGathered,
+    "CD" = censusMobilityCdGathered,
+    "CT" = censusMobilityCtGathered#,
+    # "DA" = censusMobilityDa
+  )
+  return(censusMobilityGathered)
+})
+
 censusStir <- reactive({
   censusStir <- switch(
     input$c_view,
@@ -72,17 +84,6 @@ regionOptions <- reactive({
 
     return(regionOptions %>% distinct())
 })
-
-#
-# Population pyramid 2016 for selected location
-#
-# censusPp2016Location <- reactive({
-#     censusPp2016() %>%
-#       filter(GeoUID == input$c_location) %>%
-#       mutate("percentage_compare" = 0)
-#     # censusPp2016()$age <- factor(censusPp2016()$age, levels = unique(censusPp2016()$age)[order(censusPp2016()$ageStartYear, decreasing = FALSE)])
-#     # return(censusPp2016())
-# })
 
 #
 # Population pyramid 2016 to compare with selected location
@@ -228,9 +229,13 @@ observe({
   #
   # Mobility observer
   #
-  censusMobility <- censusMobilityCma
+  censusMobility <- censusMobilityCd
+  censusMobilityGathered <- censusMobilityCdGathered
   if (!is.null(censusMobility())) {
     censusMobility <- censusMobility()
+  }
+  if (!is.null(censusMobilityGathered())) {
+    censusMobilityGathered <- censusMobilityGathered()
   }
 
   # Mobility palette
@@ -366,7 +371,7 @@ observe({
       options = layersControlOptions(collapsed = FALSE)
     )
   })
-  outputOptions(output, "mapCensus", suspendWhenHidden=FALSE)
+  outputOptions(output, "mapCensus", suspendWhenHidden = FALSE)
 
   # Map layers click observer
   observeEvent(input$mapCensus_groups, {
@@ -393,8 +398,8 @@ observe({
       mapCensus <- mapCensus %>%
         addLegend(
           "bottomleft", title = "Movers Ratio", opacity = 0.5,
-          pal = palMobility, values = censusMobility$`Movers Ratio`,
-          labFormat = labelFormat(suffix = "%")
+          pal = palMobility, values = censusMobility$`Movers Ratio`#,
+          # labFormat = labelFormat(suffix = "%")
         )
     } else if (selectedGroup == 'STIR') {
       mapCensus <- mapCensus %>%
@@ -456,7 +461,7 @@ observe({
   # Mobility treemap
   #
   # Have to drop geometry, i.e. convert sf to df to use in treemap
-  censusMobilityDf <- censusMobility
+  censusMobilityDf <- censusMobilityGathered
   st_geometry(censusMobilityDf) <- NULL
 
   output$c16mobilityTree <- renderPlot({

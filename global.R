@@ -11,6 +11,7 @@ library(leaflet)
 library(readr)
 library(stringr)
 library(magrittr)
+library(lubridate)
 library(dplyr)
 library(htmlwidgets)
 library(DT)
@@ -32,7 +33,8 @@ source("modules/controls.R")
 source("modules/chartFormat.R")
 # source("get_geography.R")
 
-options(stringsAsFactors=F)
+options(stringsAsFactors = F)
+Sys.setenv(TZ = "America/Vancouver")
 
 # Read objects
 # Property transfer tax
@@ -53,6 +55,84 @@ c16EconRegs <- readRDS("./data/census2016-economic-regions.rds")
 c16Tracts <- readRDS("./data/census2016-tracts.rds")
 c16MetroAreas <- readRDS("./data/census2016-metro-areas.rds")
 c16Prov <- readRDS("./data/census2016-province.rds")
+
+# Average Age
+census2016aaCma <- read_rds(file.path("data", "census2016-avg-age-CMA.rds"))
+census2016aaCd <- read_rds(file.path("data", "census2016-avg-age-CD.rds"))
+census2016aaCsd <- read_rds(file.path("data", "census2016-avg-age-CSD.rds"))
+census2016aaCt <- read_rds(file.path("data", "census2016-avg-age-CT.rds"))
+# census2016aaDa <- read_rds(file.path("data", "census2016-avg-age-DA.rds"))
+
+# Population Pyramid data
+getJoinedPp <- function(c16, c11, c06) {
+  censusPp <-
+    dplyr::left_join(c16, c11, by = c("GeoUID", "Region", "sex", "age")) %>%
+    rename(
+      "percentage_2016" = "percentage.x",
+      "percentage_2011" = "percentage.y"
+    ) %>%
+    left_join(c06, by = c("GeoUID", "Region", "sex", "age")) %>%
+    rename(
+      "percentage_2006" = "percentage"
+    )
+  return(censusPp)
+}
+
+# census2016ppPr <- read_rds(file.path("data", "population_pyramid", "census2016-pp-PR.rds"))
+# census2011ppPr <- read_rds(file.path("data", "population_pyramid", "census2011-pp-PR.rds"))
+# census2006ppPr <- read_rds(file.path("data", "population_pyramid", "census2006-pp-PR.rds"))
+# censusPpPr <- getJoinedPp(census2016ppPr, census2011ppPr, census2006ppPr)
+
+census2016ppCma <- read_rds(file.path("data", "population_pyramid", "census2016-pp-CMA.rds"))
+census2011ppCma <- read_rds(file.path("data", "population_pyramid", "census2011-pp-CMA.rds"))
+census2006ppCma <- read_rds(file.path("data", "population_pyramid", "census2006-pp-CMA.rds"))
+censusPpCma <- getJoinedPp(census2016ppCma, census2011ppCma, census2006ppCma)
+
+census2016ppCd <- read_rds(file.path("data", "population_pyramid", "census2016-pp-CD.rds"))
+census2011ppCd <- read_rds(file.path("data", "population_pyramid", "census2011-pp-CD.rds"))
+census2006ppCd <- read_rds(file.path("data", "population_pyramid", "census2006-pp-CD.rds"))
+censusPpCd <- getJoinedPp(census2016ppCd, census2011ppCd, census2006ppCd)
+
+census2016ppCsd <- read_rds(file.path("data", "population_pyramid", "census2016-pp-CSD.rds"))
+census2011ppCsd <- read_rds(file.path("data", "population_pyramid", "census2011-pp-CSD.rds"))
+census2006ppCsd <- read_rds(file.path("data", "population_pyramid", "census2006-pp-CSD.rds"))
+censusPpCsd <- getJoinedPp(census2016ppCsd, census2011ppCsd, census2006ppCsd)
+
+census2016ppCt <- read_rds(file.path("data", "population_pyramid", "census2016-pp-CT.rds"))
+census2011ppCt <- read_rds(file.path("data", "population_pyramid", "census2011-pp-CT.rds"))
+census2006ppCt <- read_rds(file.path("data", "population_pyramid", "census2006-pp-CT.rds"))
+censusPpCt <- getJoinedPp(census2016ppCt, census2011ppCt, census2006ppCt)
+
+# census2016ppDa <- read_rds(file.path("data", "population_pyramid", "census2016-pp-DA.rds"))
+# census2006ppDa <- read_rds(file.path("data", "population_pyramid", "census2006-pp-DA.rds"))
+# census2011ppDa <- read_rds(file.path("data", "population_pyramid", "census2011-pp-DA.rds"))
+# censusPpDa <- getJoinedPp(census2016ppDa, census2011ppDa, census2006ppDa)
+
+# Mobility
+censusMobilityCma <- read_rds(file.path("data", "census2016-mobility-CMA.rds"))
+censusMobilityCd <- read_rds(file.path("data", "census2016-mobility-CD.rds"))
+censusMobilityCsd <- read_rds(file.path("data", "census2016-mobility-CSD.rds"))
+censusMobilityCt <- read_rds(file.path("data", "census2016-mobility-CT.rds"))
+# censusMobilityDa <- read_rds(file.path("data", "census2016-mobility-DA.rds"))
+censusMobilityCmaGathered <- read_rds(file.path("data", "census2016-mobility-CMA-gathered.rds"))
+censusMobilityCdGathered <- read_rds(file.path("data", "census2016-mobility-CD-gathered.rds"))
+censusMobilityCsdGathered <- read_rds(file.path("data", "census2016-mobility-CSD-gathered.rds"))
+censusMobilityCtGathered <- read_rds(file.path("data", "census2016-mobility-CT-gathered.rds"))
+# censusMobilityDa <- read_rds(file.path("data", "census2016-mobility-DA.rds"))
+
+# Housing Type
+housingTypesCma <- readRDS(file.path("data", "housing", "census2016-housing-CMA.rds"))
+housingTypesCsd <- readRDS(file.path("data", "housing", "census2016-housing-CSD.rds"))
+housingTypesCd <- readRDS(file.path("data", "housing", "census2016-housing-CD.rds"))
+housingTypesCt <- readRDS(file.path("data", "housing", "census2016-housing-CT.rds"))
+# housingTypesDa <- readRDS(file.path("data", "housing", "census2016-housing-DA.rds"))
+
+# Shelter-Cost-to-Income Ratio data
+census2016CmaStir <- read_rds(file.path("data", "census2016Spatial-stir-CMA.rds"))
+census2016CdStir <- read_rds(file.path("data", "census2016Spatial-stir-CD.rds"))
+census2016CsdStir <- read_rds(file.path("data", "census2016Spatial-stir-CSD.rds"))
+census2016CtStir <- read_rds(file.path("data", "census2016Spatial-stir-CT.rds"))
+# census2016DaStir <- read_rds(file.path("data", "census2016Spatial-stir-DA.rds"))
 
 # options(cancensus.api_key = "CensusMapper_f17c13c7fc5e60de7cdd341d5d4db866")
 # dir.create('./cache', showWarnings = TRUE, recursive = FALSE, mode = "0777")
@@ -157,7 +237,7 @@ selectionMetricsDF <- data.frame(
       "FMV Sum of Foreign Transactions", "Additional Tax Paid")
 )
 
-maxTransPeriod <- max(levels(ptProvMth$trans_period))
+maxTransPeriod <- max(ptProvMth$trans_period)
 propertyTax <- ptRegDisMth
 chartHeight <- 600
 mapHeight <- 600
@@ -227,6 +307,60 @@ getPal <- function(pal, dom, bins) {
 #     c(0, 30000, 60000, 75000, 90000, 100000, 120000)
 #   )
 
+htSummary <- as_tibble(housingTypesCd) %>%
+  mutate("PRUID" = "59") %>%
+  group_by(`PRUID`) %>%
+  summarise(
+    "Single detached house" = sum(`Single detached house`),
+    "Appartment in tall building" = sum(`Appartment in tall building`),
+    "Semi detached house" = sum(`Semi detached house`),
+    "Row house" = sum(`Row house`),
+    "Appartment in duplex" = sum(`Appartment in duplex`),
+    "Appartment in small building" = sum(`Appartment in small building`),
+    "Other single attached house" = sum(`Other single attached house`),
+    "Movable dwelling" = sum(`Movable dwelling`)
+  ) %>%
+  mutate("Single detached house ratio" = round(`Single detached house` * 100 / (
+    `Single detached house` +
+      `Appartment in tall building` +
+      `Semi detached house` +
+      `Row house` +
+      `Appartment in duplex` +
+      `Appartment in small building` +
+      `Other single attached house` +
+      `Movable dwelling`
+  ), digits = 2)) %>%
+  select("Single detached house ratio")
+
+mSummary <- as_tibble(censusMobilityCsd) %>%
+  mutate("PRUID" = "59") %>%
+  group_by(`PRUID`, `Region`) %>%
+  summarise("Movers Ratio" = max(`Movers Ratio`)) %>%
+  ungroup() %>%
+  arrange(desc(`Movers Ratio`)) %>%
+  top_n(1) %>%
+  select(`Region`, `Movers Ratio`)
+
+ageSummary <- as_tibble(census2016aaCsd) %>%
+  mutate("PRUID" = "59") %>%
+  group_by(`PRUID`, `Region`) %>%
+  summarise("Average Age" = max(`Average Age`)) %>%
+  filter(!str_detect(`Region`, 'IRI')) %>%
+  ungroup() %>%
+  arrange(`Average Age`) %>%
+  top_n(1) %>%
+  select(`Region`, `Average Age`)
+
+stirSummary <- as_tibble(census2016CsdStir) %>%
+  mutate("PRUID" = "59") %>%
+  group_by(`PRUID`, `Region`) %>%
+  summarise("percent_more_than_30" = max(`percent_more_than_30`)) %>%
+  filter(!str_detect(`Region`, 'IRI')) %>%
+  ungroup() %>%
+  arrange(`percent_more_than_30`) %>%
+  top_n(1) %>%
+  select(`Region`, `percent_more_than_30`)
+
 # Add a homepage Jumbotron
 jumbotron <- function(header, popPerc = 0, popInc = TRUE, dwellPerc = 0, dwellInc = TRUE,
                       trans_period, no_mkt_trans = 0, no_foreign_perc = 0,
@@ -242,6 +376,15 @@ jumbotron <- function(header, popPerc = 0, popInc = TRUE, dwellPerc = 0, dwellIn
     dwellChange <- "decreased"
   }
 
+  boxHousingType <- paste0("At the province level, <strong>", htSummary$`Single detached house ratio`, "%</strong> of dwellings are
+                          <strong>single-family homes</strong>.")
+  boxMobility <- paste0(mSummary$Region, " census division has the highest ratio of movers in the last year - <strong>",
+                       mSummary$`Movers Ratio`, "%</strong>.")
+  boxStir <- paste0("In ", stirSummary$Region, ", <strong>", stirSummary$percent_more_than_30, "%</strong> of households
+                    spend more than 30% of their income on shelter cost.")
+  boxPp <- paste0("Census subdivision with highest average age (<strong>", ageSummary$`Average Age`,"</strong>) is ",
+                 ageSummary$Region, ".")
+
   HTML(paste0("<div class=\"jumbotron\">
               <h1> ", header, "</h1>
               <div class=\"container-fluid\">
@@ -254,7 +397,7 @@ jumbotron <- function(header, popPerc = 0, popInc = TRUE, dwellPerc = 0, dwellIn
               </div>
               <div class=\"col-sm-5 col-sm-offset-2\">
               <div class=\"quick-fact\">
-              At the same time, the number of private
+              At the same time, number of private
               dwellings has ", dwellChange ," by <strong>", dwellPerc ,
               "%</strong>.
               </div>
@@ -263,8 +406,9 @@ jumbotron <- function(header, popPerc = 0, popInc = TRUE, dwellPerc = 0, dwellIn
               <div class=\"row\">
               <div class=\"col-sm-5\">
               <div class=\"quick-fact\">
-              In ", format(strptime(trans_period, "%Y-%m-%d"), "%B %Y"), ",
-              there were <strong>", format(no_mkt_trans, big.mark=","),
+              In ", paste(month(ymd(maxTransPeriod), label = TRUE, abbr = FALSE),
+              year(maxTransPeriod)), ", there were <strong>",
+              format(no_mkt_trans, big.mark=","),
               "</strong> housing market transactions, <strong>",
               format(no_foreign_perc, big.mark=","),
               "%</strong> of which involved foreign citizens.
@@ -278,6 +422,32 @@ jumbotron <- function(header, popPerc = 0, popInc = TRUE, dwellPerc = 0, dwellIn
               </div>
               </div>
               </div>
+
+              <div class=\"row\">
+              <div class=\"col-sm-5\">
+              <div class=\"quick-fact\">", boxHousingType ,"
+              </div>
+              </div>
+              <div class=\"col-sm-5 col-sm-offset-2\">
+              <div class=\"quick-fact\">",
+              boxMobility,
+              "</div>
+              </div>
+              </div>
+
+              <div class=\"row\">
+              <div class=\"col-sm-5\">
+              <div class=\"quick-fact\">",
+              boxPp,
+              "</div>
+              </div>
+              <div class=\"col-sm-5 col-sm-offset-2\">
+              <div class=\"quick-fact\">",
+              boxStir,
+              "</div>
+              </div>
+              </div>
+
               </div>
               </div>") )
 }
@@ -325,76 +495,3 @@ plotmy <-
 
     plotme
   }
-
-# Average Age
-census2016aaCma <- read_rds(file.path("data", "census2016-avg-age-CMA.rds"))
-census2016aaCd <- read_rds(file.path("data", "census2016-avg-age-CD.rds"))
-census2016aaCsd <- read_rds(file.path("data", "census2016-avg-age-CSD.rds"))
-census2016aaCt <- read_rds(file.path("data", "census2016-avg-age-CT.rds"))
-# census2016aaDa <- read_rds(file.path("data", "census2016-avg-age-DA.rds"))
-
-# Population Pyramid data
-getJoinedPp <- function(c16, c11, c06) {
-  censusPp <-
-    dplyr::left_join(c16, c11, by = c("GeoUID", "Region", "sex", "age")) %>%
-    rename(
-      "percentage_2016" = "percentage.x",
-      "percentage_2011" = "percentage.y"
-    ) %>%
-    left_join(c06, by = c("GeoUID", "Region", "sex", "age")) %>%
-    rename(
-      "percentage_2006" = "percentage"
-    )
-  return(censusPp)
-}
-
-# census2016ppPr <- read_rds(file.path("data", "population_pyramid", "census2016-pp-PR.rds"))
-# census2011ppPr <- read_rds(file.path("data", "population_pyramid", "census2011-pp-PR.rds"))
-# census2006ppPr <- read_rds(file.path("data", "population_pyramid", "census2006-pp-PR.rds"))
-# censusPpPr <- getJoinedPp(census2016ppPr, census2011ppPr, census2006ppPr)
-
-census2016ppCma <- read_rds(file.path("data", "population_pyramid", "census2016-pp-CMA.rds"))
-census2011ppCma <- read_rds(file.path("data", "population_pyramid", "census2011-pp-CMA.rds"))
-census2006ppCma <- read_rds(file.path("data", "population_pyramid", "census2006-pp-CMA.rds"))
-censusPpCma <- getJoinedPp(census2016ppCma, census2011ppCma, census2006ppCma)
-
-census2016ppCd <- read_rds(file.path("data", "population_pyramid", "census2016-pp-CD.rds"))
-census2011ppCd <- read_rds(file.path("data", "population_pyramid", "census2011-pp-CD.rds"))
-census2006ppCd <- read_rds(file.path("data", "population_pyramid", "census2006-pp-CD.rds"))
-censusPpCd <- getJoinedPp(census2016ppCd, census2011ppCd, census2006ppCd)
-
-census2016ppCsd <- read_rds(file.path("data", "population_pyramid", "census2016-pp-CSD.rds"))
-census2011ppCsd <- read_rds(file.path("data", "population_pyramid", "census2011-pp-CSD.rds"))
-census2006ppCsd <- read_rds(file.path("data", "population_pyramid", "census2006-pp-CSD.rds"))
-censusPpCsd <- getJoinedPp(census2016ppCsd, census2011ppCsd, census2006ppCsd)
-
-census2016ppCt <- read_rds(file.path("data", "population_pyramid", "census2016-pp-CT.rds"))
-census2011ppCt <- read_rds(file.path("data", "population_pyramid", "census2011-pp-CT.rds"))
-census2006ppCt <- read_rds(file.path("data", "population_pyramid", "census2006-pp-CT.rds"))
-censusPpCt <- getJoinedPp(census2016ppCt, census2011ppCt, census2006ppCt)
-
-# census2016ppDa <- read_rds(file.path("data", "population_pyramid", "census2016-pp-DA.rds"))
-# census2006ppDa <- read_rds(file.path("data", "population_pyramid", "census2006-pp-DA.rds"))
-# census2011ppDa <- read_rds(file.path("data", "population_pyramid", "census2011-pp-DA.rds"))
-# censusPpDa <- getJoinedPp(census2016ppDa, census2011ppDa, census2006ppDa)
-
-# Mobility
-censusMobilityCma <- read_rds(file.path("data", "census2016-mobility-CMA.rds"))
-censusMobilityCd <- read_rds(file.path("data", "census2016-mobility-CD.rds"))
-censusMobilityCsd <- read_rds(file.path("data", "census2016-mobility-CSD.rds"))
-censusMobilityCt <- read_rds(file.path("data", "census2016-mobility-CT.rds"))
-# censusMobilityDa <- read_rds(file.path("data", "census2016-mobility-DA.rds"))
-
-# Housing Type
-housingTypesCma <- readRDS(file.path("data", "housing", "census2016-housing-CMA.rds"))
-housingTypesCsd <- readRDS(file.path("data", "housing", "census2016-housing-CSD.rds"))
-housingTypesCd <- readRDS(file.path("data", "housing", "census2016-housing-CD.rds"))
-housingTypesCt <- readRDS(file.path("data", "housing", "census2016-housing-CT.rds"))
-# housingTypesDa <- readRDS(file.path("data", "housing", "census2016-housing-DA.rds"))
-
-# Shelter-Cost-to-Income Ratio data
-census2016CmaStir <- read_rds(file.path("data", "census2016Spatial-stir-CMA.rds"))
-census2016CdStir <- read_rds(file.path("data", "census2016Spatial-stir-CD.rds"))
-census2016CsdStir <- read_rds(file.path("data", "census2016Spatial-stir-CSD.rds"))
-census2016CtStir <- read_rds(file.path("data", "census2016Spatial-stir-CT.rds"))
-# census2016DaStir <- read_rds(file.path("data", "census2016Spatial-stir-DA.rds"))

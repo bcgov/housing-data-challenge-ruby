@@ -195,10 +195,10 @@ for (censusLevel in c("CMA", "CD", "CSD", "CT", "DA")) {
   censusData %<>%
     select(
       -one_of(c("Shape Area", "name", "Adjusted Population (previous Census)",
-                "ruid", "C_UID", "PR_UID", "Area (sq km)"))
-    ) %<>%
-    filter(Type == censusLevel) %<>%
-    ms_simplify(keep = 0.1, keep_shapes = TRUE) %<>%
+                "PR_UID", "Area (sq km)"))
+    ) %>%
+    filter(Type == censusLevel) %>%
+    ms_simplify(keep = 0.1, keep_shapes = TRUE) %>%
     rename(
       Region = Region.Name,
       "Non-movers" = v_CA16_6695,
@@ -208,33 +208,41 @@ for (censusLevel in c("CMA", "CD", "CSD", "CT", "DA")) {
       "Internal migrants" = v_CA16_6707,
       "External migrants" = v_CA16_6716,
       "Intraprovincial migrants" = v_CA16_6710,
-      "Interprovincial migrants" = v_CA16_6713,
-    ) %<>%
+      "Interprovincial migrants" = v_CA16_6713
+    ) %>%
+    filter(!is.na(Movers) & !is.na(`Non-movers`)) %>%
     replace_na(
       Movers = 0,
       `Non-movers` = 0,
-      `Non-Migrants` = 0,
-      `Intraprovincial Migrants` = 0,
-      `Interprovincial Migrants` = 0,
-      `External Migrants` = 0
-    ) %<>%
+      `Non-migrants` = 0,
+      `Migrants` = 0,
+      `Internal migrants` = 0,
+      `Intraprovincial migrants` = 0,
+      `Interprovincial migrants` = 0,
+      `External migrants` = 0
+    ) %>%
     mutate(
       `Movers Ratio` = round(`Movers` / (`Non-movers` + `Movers`) * 100, digits = 2),
       `Non-Movers Ratio` = round(`Non-movers` / (`Non-movers` + `Movers`) * 100, digits = 2),
+      `Migrants Ratio` = round(`Migrants` / (`Non-movers` + `Movers`) * 100, digits = 2),
       `Non-Migrants Ratio` = round(`Non-migrants` / (`Non-movers` + `Movers`) * 100, digits = 2),
+      `Internal Migrants Ratio` = round(`Internal migrants` / (`Non-movers` + `Movers`) * 100, digits = 2),
       `Intraprovincial Migrants Ratio` = round(`Intraprovincial migrants` / (`Non-movers` + `Movers`) * 100, digits = 2),
       `Interprovincial Migrants Ratio` = round(`Interprovincial migrants` / (`Non-movers` + `Movers`) * 100, digits = 2),
       `External Migrants Ratio` = round(`External migrants` / (`Non-movers` + `Movers`) * 100, digits = 2)
     )
 
+  saveRDS(censusData, here::here("data", paste0("census2016-mobility-", censusLevel, ".rds")))
+
   censusData %<>%
-    mutate(`Region` = as.character(`Region`), Type = as.character(Type)) %<>%
+    mutate(`Region` = as.character(`Region`), Type = as.character(Type)) %>%
     gather(
       "Non-Movers Ratio", "Non-Migrants Ratio", "External Migrants Ratio",
       "Intraprovincial Migrants Ratio", "Interprovincial Migrants Ratio",
-      key = "Migration", value = "count")
+      key = "Migration", value = "count") %>%
+    select(GeoUID, Region, Migration, count, geometry)
 
-  saveRDS(censusData, here::here("data", paste0("census2016-mobility-", censusLevel, ".rds")))
+  saveRDS(censusData, here::here("data", paste0("census2016-mobility-", censusLevel, "-gathered.rds")))
 }
 
 # Shelter-Cost-to-Income Ratio
