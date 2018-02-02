@@ -25,6 +25,18 @@ censusMobility <- reactive({
   return(censusMobility)
 })
 
+censusMobilitySeq <- reactive({
+  censusMobilitySeq <- switch(
+    input$c_view,
+    "CMA" = censusMobilityCmaSeq,
+    "CSD" = censusMobilityCsdSeq,
+    "CD" = censusMobilityCdSeq,
+    "CT" = censusMobilityCtSeq#,
+    # "DA" = censusMobilityDa
+  )
+  return(censusMobilitySeq)
+})
+
 censusMobilityGathered <- reactive({
   censusMobilityGathered <- switch(
     input$c_view,
@@ -230,9 +242,13 @@ observe({
   # Mobility observer
   #
   censusMobility <- censusMobilityCd
+  censusMobilitySeq <- censusMobilityCdSeq
   censusMobilityGathered <- censusMobilityCdGathered
   if (!is.null(censusMobility())) {
     censusMobility <- censusMobility()
+  }
+  if (!is.null(censusMobilitySeq())) {
+    censusMobilitySeq <- censusMobilitySeq()
   }
   if (!is.null(censusMobilityGathered())) {
     censusMobilityGathered <- censusMobilityGathered()
@@ -491,6 +507,54 @@ observe({
       # fontsize.legend = 11,
       # drop.unused.levels = TRUE,
       inflate.labels = F
+    )
+  })
+
+  # censusMobilitySeq <- censusMobility %>%
+  # gather(
+  #   "Non-Movers Ratio", "Non-Migrants Ratio", "External Migrants Ratio",
+  #   "Intraprovincial Migrants Ratio", "Interprovincial Migrants Ratio",
+  #   key = "Migration", value = "count") %>%
+  # select(GeoUID, Region, Migration, count) %>%
+  # mutate(
+  #   "Movers" = ifelse(Migration == "Non-Movers Ratio", "", "Movers"),
+  #   "Migrants" = ifelse(
+  #     Migration %in% c("External Migrants Ratio", "Intraprovincial Migrants Ratio", "Interprovincial Migrants Ratio"),
+  #     "Migrants",
+  #     ""
+  #   ),
+  #   "Internal migrants" = ifelse(
+  #     Migration %in% c("Intraprovincial Migrants Ratio", "Interprovincial Migrants Ratio"),
+  #     "Internal migrants",
+  #     ""
+  #   # ),
+  #   # Migration = str_replace(
+  #   #   str_replace(Migration, " Ratio", ""),
+  #   #   " Migrants",
+  #   #   ""
+  #   ),
+  #   "sequence" = str_replace(
+  #     str_replace(
+  #       paste(Movers, Migrants, `Internal migrants`, str_replace(Migration, "-", " "), sep = "-"),
+  #       "-{2,}", "-"
+  #     ),
+  #     "^-", ""
+  #   )
+  # ) %>%
+  # filter(GeoUID == input$c_location) %>%
+  # select(sequence, count)
+  #
+  # st_geometry(censusMobilitySeq) <- NULL
+
+  sequenceColors = c(palLighterBlue, palLightRed, "steelblue", palDarkBlue, "#009900", palOther, "palegreen", palLightBlue)
+  output$mobilitySunburst <- renderSunburst({
+    sunburst(
+      censusMobilitySeq %>% filter(GeoUID == input$c_location) %>% select(sequence, count),
+      colors = sequenceColors,
+      percent = TRUE,
+      count = TRUE,
+      height = 400,
+      legend = list(w = 200, h = 25, s = 2)
     )
   })
 

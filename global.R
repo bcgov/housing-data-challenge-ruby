@@ -119,6 +119,11 @@ censusMobilityCdGathered <- read_rds(file.path("data", "census2016-mobility-CD-g
 censusMobilityCsdGathered <- read_rds(file.path("data", "census2016-mobility-CSD-gathered.rds"))
 censusMobilityCtGathered <- read_rds(file.path("data", "census2016-mobility-CT-gathered.rds"))
 # censusMobilityDa <- read_rds(file.path("data", "census2016-mobility-DA.rds"))
+censusMobilityCmaSeq <- read_rds(file.path("data", "census2016-mobility-CMA-seq.rds"))
+censusMobilityCdSeq <- read_rds(file.path("data", "census2016-mobility-CD-seq.rds"))
+censusMobilityCsdSeq <- read_rds(file.path("data", "census2016-mobility-CSD-seq.rds"))
+censusMobilityCtSeq <- read_rds(file.path("data", "census2016-mobility-CT-seq.rds"))
+# censusMobilityDa <- read_rds(file.path("data", "census2016-mobility-DA.rds"))
 
 # Housing Type
 housingTypesCma <- readRDS(file.path("data", "housing", "census2016-housing-CMA.rds"))

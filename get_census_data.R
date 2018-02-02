@@ -234,7 +234,7 @@ for (censusLevel in c("CMA", "CD", "CSD", "CT", "DA")) {
 
   saveRDS(censusData, here::here("data", paste0("census2016-mobility-", censusLevel, ".rds")))
 
-  censusData %<>%
+  censusDataGathered <- censusData %>%
     mutate(`Region` = as.character(`Region`), Type = as.character(Type)) %>%
     gather(
       "Non-Movers Ratio", "Non-Migrants Ratio", "External Migrants Ratio",
@@ -242,7 +242,44 @@ for (censusLevel in c("CMA", "CD", "CSD", "CT", "DA")) {
       key = "Migration", value = "count") %>%
     select(GeoUID, Region, Migration, count, geometry)
 
-  saveRDS(censusData, here::here("data", paste0("census2016-mobility-", censusLevel, "-gathered.rds")))
+  saveRDS(censusDataGathered, here::here("data", paste0("census2016-mobility-", censusLevel, "-gathered.rds")))
+
+  censusMobilitySeq <- censusData %>%
+  gather(
+    "Non-Movers Ratio", "Non-Migrants Ratio", "External Migrants Ratio",
+    "Intraprovincial Migrants Ratio", "Interprovincial Migrants Ratio",
+    key = "Migration", value = "count") %>%
+  select(GeoUID, Region, Migration, count) %>%
+  mutate(
+    "Movers" = ifelse(Migration == "Non-Movers Ratio", "", "Movers"),
+    "Migrants" = ifelse(
+      Migration %in% c("External Migrants Ratio", "Intraprovincial Migrants Ratio", "Interprovincial Migrants Ratio"),
+      "Migrants",
+      ""
+    ),
+    "Internal migrants" = ifelse(
+      Migration %in% c("Intraprovincial Migrants Ratio", "Interprovincial Migrants Ratio"),
+      "Internal migrants",
+      ""
+    # ),
+    # Migration = str_replace(
+    #   str_replace(Migration, " Ratio", ""),
+    #   " Migrants",
+    #   ""
+    ),
+    "sequence" = str_replace(
+      str_replace(
+        paste(Movers, Migrants, `Internal migrants`, str_replace(Migration, "-", " "), sep = "-"),
+        "-{2,}", "-"
+      ),
+      "^-", ""
+    )
+  ) %>%
+  select(GeoUID, sequence, count)
+  st_geometry(censusMobilitySeq) <- NULL
+
+  saveRDS(censusMobilitySeq, here::here("data", paste0("census2016-mobility-", censusLevel, "-seq.rds")))
+
 }
 
 # Shelter-Cost-to-Income Ratio
