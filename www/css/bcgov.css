@@ -25,6 +25,8 @@ body {
 
 .navbar-default .navbar-brand, .navbar-default .navbar-brand:hover {
     color: #fff;
+    color: transparent;
+    background: transparent url("../images/BCID_H_rgb_rev.png") no-repeat center center;
 }
 
 .leaflet-container {
@@ -50,15 +52,15 @@ hr {
 
 .container .jumbotron, .container-fluid .jumbotron {
     min-height: 960px;
-    background: url("../images/vancouver2.jpg");
+    /*background: url("../images/vancouver2.jpg");*/
+    background: url("../images/spencer-watson-528071.jpg") no-repeat 50% 0;
     border-radius: 0;
 }
 
 .container .jumbotron, .container-fluid .jumbotron h1 {
-/*    color: #333;
-    text-shadow: 5px 5px 5px #fff;*/
     color: #e7e7e7;
     margin-bottom: 50px;
+    text-align: center;
 }
 
 .container-fluid .jumbotron .quick-fact {
@@ -67,7 +69,7 @@ hr {
     background-color: rgba(255, 255, 255, 0.85);
     border: 1px solid #cfcfcf;
     padding: 30px;
-    margin-bottom: 30px;
+    margin-bottom: 65px;
 
 }
 
@@ -87,7 +89,11 @@ hr {
 
 #splash-intro {
     margin: 15px 0 30px;
-    font-size: 12px;
+    font-size: 14px;
+}
+
+#splash-intro-credit {
+    font-size: 11px;
 }
 
 .alert {

@@ -179,6 +179,10 @@ palHousingTypes <- colorNumeric(
 # Census observer
 #
 observe({
+  # Reset location
+  updateTextInput(session, "c_location", value = "")
+  updateTextInput(session, "c_location_name", value = "")
+
   # Housing type barchart
   traces = list(
     list(

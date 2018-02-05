@@ -1,0 +1,21 @@
+# Data Sources
+
+BC Housing Data Visualization Platform uses the following datasets:
+- Census Canada (years 2016, 2011 and 2006).
+- Property Transfer Tax (2017 and 2016).
+
+### Census Canada
+Census data is provided by [Statistics Canada](http://www.statcan.gc.ca/)
+and obtained through [CensusMapper API](https://censusmapper.ca/api) 
+using [cancensus R package](https://github.com/mountainMath/cancensus).
+- Statistics Canada. No date. 2006 Census of Canada (Provinces, Census Divisions, Municipalities) (database).
+- Statistics Canada. No date. 2011 Census of Canada (Provinces, Census Divisions, Municipalities) (database).
+- Statistics Canada. No date. 2016 Census of Canada (Provinces, Census Divisions, Municipalities) (database).
+
+### Property Transfer Tax
+Property transfer tax data relates to market transactions within the province.
+
+It is provided by Province of British Columbia Ministry of Finance, 
+licensed under [Open Government License - British Columbia](http://www.data.gov.bc.ca/local/dbc/docs/license/OGL-vbc2.0.pdf).
+
+The data is available fow download at [DataBC Open Data Portal](https://catalogue.data.gov.bc.ca/organization/property-taxation).

@@ -1,0 +1,28 @@
+# Code Repository
+
+The code for BC Housing Data Visualization Platform is open-sourced and publicly available
+at BC Government [github repository](https://github.com/bcgov/housing-data-challenge-ruby).
+
+## R packages
+The platform is developed using R statistical software, and realized as R [Shiny™](http://shiny.rstudio.com/) app 
+with the help of the following open-source R packages:
+- [Shiny™](https://github.com/rstudio/shiny) - Interactive web applications with R.
+- [Plotly](https://github.com/ropensci/plotly) - R implementation of plotly.js interactive graphing library. 
+- [Readr](https://github.com/tidyverse/readr) - Read flat files (csv, tsv, fwf) into R.
+- [Stringr](https://github.com/tidyverse/stringr) - String manipulation in R.
+- [Magrittr](https://github.com/tidyverse/magrittr) - Improve the readability of R code with the pipe operator.
+- [Lubridate](https://github.com/tidyverse/lubridate) - Working with dates in R.
+- [Tidyr](https://github.com/tidyverse/tidyr) - Tidy data with spread and gather functions.
+- [Dplyr](https://github.com/tidyverse/dplyr) - A grammar of data manipulation.
+- [Cancensus](https://github.com/mountainMath/cancensus) - R wrapper for calling [CensusMapper APIs](https://censusmapper.ca/api).
+- [Leaflet](https://github.com/rstudio/leaflet/) - R Interface to leaflet.js maps.
+- [RGDAL](https://r-forge.r-project.org/projects/rgdal/) - R bindings to Geospatial Data Abstraction Library.
+- [Rgeos](https://r-forge.r-project.org/projects/rgeos/) - Tools for interfacing the C++ translation of the Java Topology Suite.
+- [Sf](https://r-spatial.github.io/sf/) - Simple Features for R.
+- [Htmlwidgets](https://github.com/ramnathv/htmlwidgets) - HTML Widgets for R.
+- [DT](https://github.com/rstudio/DT) - R Interface to the jQuery Plug-in DataTables.
+- [SunburstR](https://github.com/timelyportfolio/sunburstR) - R htmlwidget for sequence sunburst charts.
+- [Treemap](https://github.com/mtennekes/treemap) - R package for treemap visualisation.
+- [ShinyJS](https://github.com/daattali/shinyjs) - Improve the user experience of your Shiny™ apps.
+- [Shinycssloaders](https://github.com/andrewsali/shinycssloaders) - CSS loader animations for Shiny™ outputs.
+- [ShinyBS](https://github.com/ebailey78/shinyBS) - Twitter Bootstrap Components for Shiny™.
