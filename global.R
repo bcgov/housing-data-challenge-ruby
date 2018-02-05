@@ -2,11 +2,11 @@
 library(here)
 library(shiny)
 library(shinyjs)
-library(rgdal)
-library(rgeos)
-library(maps)
+# library(rgdal)
+# library(rgeos)
+# library(maps)
 library(sf)
-library(rmapshaper)
+# library(rmapshaper)
 library(leaflet)
 library(readr)
 library(stringr)
@@ -16,15 +16,15 @@ library(dplyr)
 library(htmlwidgets)
 library(DT)
 library(tidyr)
-library(crosstalk)
+# library(crosstalk)
 library(plotly)
-library(cancensus)
-library(sankeyD3)
+# library(cancensus)
+# library(sankeyD3)
 library(sunburstR)
 library(treemap)
-library(data.tree)
-library(d3treeR)
-library(RColorBrewer)
+# library(data.tree)
+# library(d3treeR)
+# library(RColorBrewer)
 library(shinycssloaders)
 library(shinyBS)
 
@@ -394,7 +394,7 @@ jumbotron <- function(header, popPerc = 0, popInc = TRUE, dwellPerc = 0, dwellIn
               <h1> ", header, "</h1>
               <div class=\"container-fluid\">
               <div class=\"row\">
-              <div class=\"col-sm-5 \">
+              <div class=\"col-sm-5 col-sm-offset-1\">
               <div class=\"quick-fact\">
               <div class=\"splash-icon\">
               <i class=\"fa fa-users\"></i>
@@ -405,7 +405,7 @@ jumbotron <- function(header, popPerc = 0, popInc = TRUE, dwellPerc = 0, dwellIn
               </div>
               </div>
               </div>
-              <div class=\"col-sm-5 col-sm-offset-2\">
+              <div class=\"col-sm-5\">
               <div class=\"quick-fact\">
               <div class=\"splash-icon\">
               <i class=\"fa fa-building\"></i>
@@ -419,7 +419,7 @@ jumbotron <- function(header, popPerc = 0, popInc = TRUE, dwellPerc = 0, dwellIn
               </div>
               </div>
               <div class=\"row\">
-              <div class=\"col-sm-5\">
+              <div class=\"col-sm-5 col-sm-offset-1\">
               <div class=\"quick-fact\">
               <div class=\"splash-icon\">
               <i class=\"fa fa-briefcase\"></i>
@@ -434,7 +434,7 @@ jumbotron <- function(header, popPerc = 0, popInc = TRUE, dwellPerc = 0, dwellIn
               </div>
               </div>
               </div>
-              <div class=\"col-sm-5 col-sm-offset-2\">
+              <div class=\"col-sm-5\">
               <div class=\"quick-fact\">
               <div class=\"splash-icon\">
               <i class=\"fa fa-money\"></i>
@@ -449,7 +449,7 @@ jumbotron <- function(header, popPerc = 0, popInc = TRUE, dwellPerc = 0, dwellIn
               </div>
 
               <div class=\"row\">
-              <div class=\"col-sm-5\">
+              <div class=\"col-sm-5 col-sm-offset-1\">
               <div class=\"quick-fact\">
               <div class=\"splash-icon\">
               <i class=\"fa fa-home\"></i>
@@ -459,7 +459,7 @@ jumbotron <- function(header, popPerc = 0, popInc = TRUE, dwellPerc = 0, dwellIn
               </div>
               </div>
               </div>
-              <div class=\"col-sm-5 col-sm-offset-2\">
+              <div class=\"col-sm-5\">
               <div class=\"quick-fact\">
               <div class=\"splash-icon\">
               <i class=\"fa fa-truck\"></i>
@@ -472,7 +472,7 @@ jumbotron <- function(header, popPerc = 0, popInc = TRUE, dwellPerc = 0, dwellIn
               </div>
 
               <div class=\"row\">
-              <div class=\"col-sm-5\">
+              <div class=\"col-sm-5 col-sm-offset-1\">
               <div class=\"quick-fact\">
               <div class=\"splash-icon\">
               <i class=\"fa fa-street-view\"></i>
@@ -482,7 +482,7 @@ jumbotron <- function(header, popPerc = 0, popInc = TRUE, dwellPerc = 0, dwellIn
               "</div>
               </div>
               </div>
-              <div class=\"col-sm-5 col-sm-offset-2\">
+              <div class=\"col-sm-5\">
               <div class=\"quick-fact\">
               <div class=\"splash-icon\">
               <i class=\"fa fa-bullhorn\"></i>

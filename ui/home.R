@@ -16,7 +16,7 @@ tabPanel(
     fluidRow(
       id = "splash-intro",
       tags$div(
-        # id = "splash-intro",
+        id = "splash-intro-text",
         HTML(
           paste0(
             "This platform is the result of the ",
@@ -33,6 +33,17 @@ tabPanel(
             tags$a("feedback"),
             " on their use of this iteration including ideas as to how it could be advanced
             to further fulfill its role."
+          )
+        )
+      ),
+      tags$hr(),
+      tags$div(
+        id = "splash-intro-credit",
+        HTML(
+          paste("Photo by", tags$a(
+            href = "https://unsplash.com/photos/596V9_X_naI?utm_source=unsplash&utm_medium=referral&utm_content=creditCopyText",
+            "Spencer Watson"), "on", tags$a(
+              href = "https://unsplash.com/search/photos/vancouver?utm_source=unsplash&utm_medium=referral&utm_content=creditCopyText", "Unsplash.")
           )
         )
       )
