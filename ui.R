@@ -1,6 +1,6 @@
 ui <- navbarPage(
   theme = "css/bcgov.css",
-  title = "BC Housing Data visualization",
+  title = "BC Housing Dataviz",
   source(file.path("ui", "home.R"),  local = TRUE)$value,
   source(file.path("ui", "census.R"),  local = TRUE)$value,
   source(file.path("ui", "ptt.R"),  local = TRUE)$value,

@@ -29,6 +29,20 @@ body {
     background: transparent url("../images/BCID_H_rgb_rev.png") no-repeat center center;
 }
 
+.dropdown-menu {
+  background-color: #38598a;
+}
+
+.dropdown-menu>li>a {
+  color: #fff;
+}
+
+.navbar-default .navbar-nav>.active>a, .navbar-default .navbar-nav>.active>a:focus, .navbar-default .navbar-nav>.active>a:hover {
+    color: #fff;
+    background-color: #38598a;
+    text-decoration: underline;
+}
+
 .leaflet-container {
     font-family: Myriad-Pro, Calibri, Arial, 'sans serif';;
 }
@@ -58,27 +72,44 @@ hr {
 }
 
 .container .jumbotron, .container-fluid .jumbotron h1 {
-    color: #e7e7e7;
+    color: #e6e6e6;
     margin-bottom: 50px;
     text-align: center;
+    text-shadow: #363636 2px 2px 5px, -2px -2px 5px #363636;
+}
+
+.container-fluid .jumbotron .quick-fact-container {
+    background-color: rgba(255, 255, 255, 0.85);
+    margin-bottom: 65px;
+    padding: 30px 0;
+    border: 1px solid #cfcfcf;
 }
 
 .container-fluid .jumbotron .quick-fact {
     font-size: 18px;
-    background-color: #fff;
-    background-color: rgba(255, 255, 255, 0.85);
-    border: 1px solid #cfcfcf;
     padding: 30px;
-    margin-bottom: 65px;
-
 }
+
+/*
+.container-fluid .jumbotron .quick-fact.line2 {
+    background-color: rgba(245, 245, 245, 0.85);
+}
+
+.container-fluid .jumbotron .quick-fact.line3 {
+    background-color: rgba(205, 205, 235, 0.85);
+}
+
+.container-fluid .jumbotron .quick-fact.line4 {
+    background-color: rgba(235, 205, 205, 0.85);
+}
+*/
 
 .splash-icon {
     display: inline-block;
     font-size: 36px;
     width: 52px;
     height: 52px;
-    color: #6c6c6c;
+    color: #505050;
     vertical-align: top;
 }
 
