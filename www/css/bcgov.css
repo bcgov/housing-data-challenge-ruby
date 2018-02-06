@@ -9,12 +9,16 @@ body {
 
 .navbar-default {
     background-color: #036;
-    border-bottom: 2px solid #fcba19;
+    border-bottom: 3px solid #fcba19;
     color: #fff;
 }
 
 .navbar-default .navbar-nav>li>a {
     color: #fff;
+}
+
+.navbar-nav>li>a {
+/*    line-height: 30px; */
 }
 
 .navbar-default .navbar-nav>li>a:focus, .navbar-default .navbar-nav>li>a:hover {
@@ -27,6 +31,14 @@ body {
     color: #fff;
     color: transparent;
     background: transparent url("../images/BCID_H_rgb_rev.png") no-repeat center center;
+}
+
+.well {
+    padding: 9px 19px 0;
+}
+
+.well .shiny-input-container {
+    margin-bottom: 0;
 }
 
 .dropdown-menu {
@@ -81,7 +93,7 @@ hr {
 .container-fluid .jumbotron .quick-fact-container {
     background-color: rgba(255, 255, 255, 0.85);
     margin-bottom: 65px;
-    padding: 30px 0;
+    padding: 10px 0;
     border: 1px solid #cfcfcf;
 }
 
@@ -136,6 +148,7 @@ hr {
 .tooltip-inner {
   text-align: left;
   background-color: #393939;
+  padding: 10px 15px;
 }
 
 .tooltip.right .tooltip-arrow {

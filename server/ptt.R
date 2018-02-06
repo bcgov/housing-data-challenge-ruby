@@ -4,6 +4,12 @@ observe({
   pt_trans_period <- input$pt_trans_period
   pt_metric <- input$pt_metric
 
+  # Reset location
+  updateTextInput(session, "pt_location", value = "")
+  updateTextInput(session, "pt_location_name", value = "")
+
+  ptData <- ptProvMth
+
   # PTT observer switch
   switch(pt_view,
          "regdis" = {
@@ -157,12 +163,10 @@ observe({
   # pal <- colorNumeric("viridis", shapesDF[[pt_metric]])
   data <- shapesDF@data
 
-  output$map <- renderLeaflet({
+  output$mapPtt <- renderLeaflet({
     leaflet(shapesDF) %>%
-      setView(lng = -123.12, lat = 52.28,
-              zoom = 6) %>%
-      addProviderTiles("CartoDB.Positron", options = providerTileOptions(minZoom = 6, maxZoom = 8)) %>%
-
+      setView(lng = -123.12, lat = 52.78, zoom = 6) %>%
+      addProviderTiles(provider = "CartoDB.Positron", options = providerTileOptions(minZoom = 5, maxZoom = 12)) %>%
       addPolygons(
         data = shapesDF,
         stroke = TRUE,
@@ -170,7 +174,7 @@ observe({
         fillOpacity = 0.5,
         smoothFactor = 1,
         color = '#333',
-        layerId = shapesDF@data$OBJECTID,
+        layerId = shapesDF@data$RegionalDistrict,
         fillColor = ~ pal(shapesDF[[pt_metric]]),
         label = geoUnit,
         popup = paste0(
@@ -244,82 +248,6 @@ observe({
         xaxis = axisFormat,
         yaxis = axisFormat,
         margin = marginFormatMonthly,
-        barmode = 'group',
-        legend = legendFormat
-      ) %>%
-      config(displayModeBar = F)
-  })
-
-  # Foreign - Number of Foreign Transactions
-  output$no_foreign_period <- renderPlotly({
-    plot_ly(
-      propertyTaxPeriod %>%
-        arrange(desc(no_foreign)),
-      x = ~ geoUnit,
-      y = ~ no_foreign,
-      type = "bar",
-      marker = list(color = colForeign)
-    ) %>%
-      layout(
-        title = "Number of Foreign Transactions",
-        xaxis = axisFormat,
-        yaxis = axisFormat,
-        margin = marginFormat,
-        legend = legendFormat
-      ) %>%
-      config(displayModeBar = F)
-  })
-
-  # Foreign - FMV Mean
-  output$foreign_period_mn <- renderPlotly({
-    plot_ly(
-      propertyTaxPeriod %>%
-        filter(!is.na(mn_FMV_foreign)) %>%
-        arrange(desc(mn_FMV)),
-      x = ~ geoUnit,
-      y = ~ mn_FMV,
-      name = "Canadian",
-      marker = list(color = colCanadian),
-      type = "bar"
-    ) %>%
-      add_trace(
-        y = ~ mn_FMV_foreign,
-        name = "Foreign",
-        marker = list(color = colForeign)
-      ) %>%
-      layout(
-        title = "FMV Mean",
-        xaxis = axisFormat,
-        yaxis = axisFormat,
-        margin = marginFormat,
-        barmode = 'group',
-        legend = legendFormat
-      ) %>%
-      config(displayModeBar = F)
-  })
-
-  # Foreign - FMV Median
-  output$foreign_period_md <- renderPlotly({
-    plot_ly(
-      propertyTaxPeriod %>%
-        filter(!is.na(md_FMV_foreign)) %>%
-        arrange(desc(md_FMV)),
-      x = ~ geoUnit,
-      y = ~ md_FMV,
-      name = "Canadian",
-      marker = list(color = colCanadian),
-      type = "bar"
-    ) %>%
-      add_trace(
-        y = ~ md_FMV_foreign,
-        name = "Foreign",
-        marker = list(color = colForeign)
-      ) %>%
-      layout(
-        title = "FMV Median",
-        xaxis = axisFormat,
-        yaxis = axisFormat,
-        margin = marginFormat,
         barmode = 'group',
         legend = legendFormat
       ) %>%
@@ -472,7 +400,7 @@ output$pt_mothly <- renderPlotly({
       marker = list(color = colUnknown)
     ) %>%
     layout(
-      title = "Number of market transactions",
+      title = "Number of transactions",
       xaxis = axisFormat,
       yaxis = axisFormat,
       margin = marginFormat,
@@ -529,7 +457,7 @@ output$pt_mothly_res <- renderPlotly({
       marker = list(color = colUnknown)
     ) %>%
     layout(
-      title = "Number of market transactions - Residential",
+      title = "Number of transactions - Residential",
       xaxis = axisFormat,
       yaxis = axisFormat,
       margin = marginFormat,
@@ -561,7 +489,7 @@ output$pt_mothly_comm <- renderPlotly({
       marker = list(color = colUnknown)
     ) %>%
     layout(
-      title = "Number of market transactions - Commercial",
+      title = "Number of transactions - Commercial",
       xaxis = axisFormat,
       yaxis = axisFormat,
       margin = marginFormat,
@@ -569,4 +497,27 @@ output$pt_mothly_comm <- renderPlotly({
       legend = legendFormat
     ) %>%
     config(displayModeBar = F)
+})
+
+# Map region click observer
+observeEvent(input$mapPtt_shape_click, {
+  m <- input$mapPtt_shape_click
+  if(!is.null(m$id)){
+    # id <- str_split(m$id, "-", simplify = TRUE)
+    # locationId = id[1,2]
+
+    # updateSelectInput(session, "c_location", selected = p$id)
+    updateTextInput(session, "pt_location", value = m$id)
+
+    updateTextInput(session, "pt_location_name", value = m$id)
+    # locationLabel <- as.data.frame(censusMobility()) %>%
+    #   filter(GeoUID == locationId) %>%
+    #   mutate(label = paste0(Region, " (", GeoUID, ")")) %>%
+    #   select(label) %>%
+    #   distinct()
+    # # st_geometry(locationLabel) <- NULL
+    # updateTextInput(session, "c_location_name", value = locationLabel$label)
+    #
+    # updateSelectizeInput(session, 'c_location_pp_compare', choices = regionOptions(), server = TRUE)
+  }
 })

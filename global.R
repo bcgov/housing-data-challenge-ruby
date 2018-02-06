@@ -188,49 +188,12 @@ ptProvMth <- ptProvMth %>%
   mutate(no_foreign_perc = round(no_foreign / no_mkt_trans, 4) * 100) %>%
   mutate(sum_FMV_foreign_perc = round(sum_FMV_foreign / sum_FMV, 4) * 100)
 
-allMetrics <- c("Total Market Transactions #" = "no_mkt_trans",
-                "Res. Total #" = "no_resid_trans",
-                # "Res. - Acreage #" = "no_resid_acreage_trans",
-                # "Res. - Commerce #" = "resid_comm_count",
-                # "Res. - Farm #" = "no_resid_farm",
-                "Res. - Multi-family #" = "no_resid_fam",
-                "Res. - Single-family Res. #" = "no_res_1fam",
-                "Res. - Strata Res. #" = "no_resid_strata",
-                # "Res. - Strata Non- Res. or Rental #" = "no_resid_non_strata",
-                # "Res. - Other #" = "no_resid_other",
-                "Comm. Total #" = "no_comm_tot",
-                # "Comm. - Comm. #" = "no_comm_comm",
-                # "Comm. - Strata Non-Res. #" = "no_comm_strata_nores",
-                # "Comm. - Other #" = "no_comm_other",
-                # "Recr. Total #" = "no_recr_tot",
-                # "Farm Total #" = "no_farm_tot",
-                # "Other/Unknown Total #" = "no_unkn_tot",
-                "FMV Sum" = "sum_FMV",
-                "FMV Average" = "mn_FMV",
-                # "FMV Median" = "md_FMV",
-                "PTT Paid" = "sum_PPT_paid",
-                # "PTT Paid Median" = "md_PPT",
-                "Foreign Transactions #" = "no_foreign",
-                # "Foreign Involvement transactions - Res. #" = "no_foreign_res",
-                # "Foreign Involvement transactions - Comm. #" = "no_foreign_comm",
-                # "Foreign Involvement transactions - Other #" = "no_foreign_comm",
-                "FMV sum of Foreign Transactions" = "sum_FMV_foreign",
-                "FMV Mean of Foreign Transactions" = "mn_FMV_foreign",
-                # "FMV Median of Foreign Transactions" = "md_FMV_foreign",
-                # "Under $1 million (count, foreign involvement transactions)" = "no_lt1M_foreign",
-                # "$1 million - $3 million (count, foreign involvement transactions)" = "no_gt1M_foreign",
-                # "Over $3 million (count, foreign involvement transactions)" = "no_gt3M_foreign",
-                "Additional Tax Paid" = "add_tax_paid",
-                "Foreign Transactions %" = "no_foreign_perc",
-                "FMV Sum of Foreign %" = "sum_FMV_foreign_perc"
-)
-
 # Selection of metrics
-selectionMetrics <- c("Transactions #" = "no_mkt_trans",
-                      "FMV Sum" = "sum_FMV",
+selectionMetrics <- c("Number of Transactions" = "no_mkt_trans",
+                      "Total FMV" = "sum_FMV",
                       "PTT Paid" = "sum_PPT_paid",
-                      "Foreign Transactions #" = "no_foreign",
-                      "FMV Sum of Foreign Transactions" = "sum_FMV_foreign",
+                      "Number od Foreign Transactions" = "no_foreign",
+                      "Total FMV of Foreign Transactions" = "sum_FMV_foreign",
                       "Additional Tax Paid" = "add_tax_paid")
 
 selectionMetricsDF <- data.frame(
@@ -397,7 +360,7 @@ jumbotron <- function(header, popPerc = 0, popInc = TRUE, dwellPerc = 0, dwellIn
     <div class=\"row\">
       <div class=\"col-sm-8 col-sm-offset-2\">
         <div class=\"row quick-fact-container\">
-          <div class=\"col-sm-5 col-sm-offset-1\">
+          <div class=\"col-sm-6\">
             <div class=\"quick-fact\">
               <div class=\"splash-icon\">
                 <i class=\"fa fa-users\"></i>
@@ -408,7 +371,7 @@ jumbotron <- function(header, popPerc = 0, popInc = TRUE, dwellPerc = 0, dwellIn
               </div>
             </div>
           </div>
-          <div class=\"col-sm-5\">
+          <div class=\"col-sm-6\">
             <div class=\"quick-fact\">
               <div class=\"splash-icon\">
                 <i class=\"fa fa-building\"></i>
@@ -425,9 +388,9 @@ jumbotron <- function(header, popPerc = 0, popInc = TRUE, dwellPerc = 0, dwellIn
     </div>
 
     <div class=\"row\">
-      <div class=\"col-sm-8 col-sm-offset-1\">
+      <div class=\"col-sm-8 col-sm-offset-2\">
         <div class=\"row quick-fact-container\">
-          <div class=\"col-sm-5 col-sm-offset-1\">
+          <div class=\"col-sm-6\">
             <div class=\"quick-fact\">
               <div class=\"splash-icon\">
                 <i class=\"fa fa-briefcase\"></i>
@@ -442,7 +405,7 @@ jumbotron <- function(header, popPerc = 0, popInc = TRUE, dwellPerc = 0, dwellIn
               </div>
             </div>
           </div>
-          <div class=\"col-sm-5\">
+          <div class=\"col-sm-6\">
             <div class=\"quick-fact\">
               <div class=\"splash-icon\">
                 <i class=\"fa fa-money\"></i>
@@ -459,9 +422,9 @@ jumbotron <- function(header, popPerc = 0, popInc = TRUE, dwellPerc = 0, dwellIn
     </div>
 
     <div class=\"row\">
-      <div class=\"col-sm-8 col-sm-offset-3\">
+      <div class=\"col-sm-8 col-sm-offset-2\">
         <div class=\"row quick-fact-container\">
-          <div class=\"col-sm-5 col-sm-offset-1\">
+          <div class=\"col-sm-6\">
             <div class=\"quick-fact\">
               <div class=\"splash-icon\">
                 <i class=\"fa fa-home\"></i>
@@ -471,7 +434,7 @@ jumbotron <- function(header, popPerc = 0, popInc = TRUE, dwellPerc = 0, dwellIn
               </div>
             </div>
           </div>
-          <div class=\"col-sm-5\">
+          <div class=\"col-sm-6\">
             <div class=\"quick-fact\">
               <div class=\"splash-icon\">
                 <i class=\"fa fa-truck\"></i>
@@ -488,7 +451,7 @@ jumbotron <- function(header, popPerc = 0, popInc = TRUE, dwellPerc = 0, dwellIn
     <div class=\"row\">
       <div class=\"col-sm-8 col-sm-offset-2\">
         <div class=\"row quick-fact-container\">
-          <div class=\"col-sm-5 col-sm-offset-1\">
+          <div class=\"col-sm-6\">
             <div class=\"quick-fact\">
               <div class=\"splash-icon\">
                 <i class=\"fa fa-street-view\"></i>
@@ -498,7 +461,7 @@ jumbotron <- function(header, popPerc = 0, popInc = TRUE, dwellPerc = 0, dwellIn
               </div>
             </div>
           </div>
-          <div class=\"col-sm-5\">
+          <div class=\"col-sm-6\">
             <div class=\"quick-fact\">
               <div class=\"splash-icon\">
                 <i class=\"fa fa-bullhorn\"></i>

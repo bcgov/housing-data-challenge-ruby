@@ -303,8 +303,8 @@ observe({
   # Redraw polygons when geo-level or housing type selection changes
   output$mapCensus <- renderLeaflet({
     leaflet() %>%
-      addProviderTiles(provider = "CartoDB.Positron", options = providerTileOptions(minZoom = 6, maxZoom = 12)) %>%
-      setView(lng = -122.12, lat = 51.78, zoom = 7) %>%
+      addProviderTiles(provider = "CartoDB.Positron", options = providerTileOptions(minZoom = 5, maxZoom = 12)) %>%
+      setView(lng = -123.12, lat = 52.78, zoom = 6) %>%
       addPolygons(data = housingTypeMapData(),
         label = ~ `Region`, color = '#333',
         fillColor = ~ palHousingTypes(housingTypeMapData()$typewatch),
