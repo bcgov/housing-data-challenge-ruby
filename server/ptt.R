@@ -57,8 +57,8 @@ observe({
   updateTextInput(session, "pt_location", value = "")
   updateTextInput(session, "pt_location_name", value = "")
 
-  # pal <- colorNumeric("viridis", ptData[[pt_metric]])
-  pal <- colorQuantile("viridis", ptDataPeriod()$mn_FMV, n = 10)
+  pal <- colorNumeric("viridis", ptDataPeriod()[[pt_metric]])
+  # pal <- colorQuantile("viridis", ptDataPeriod()[[pt_metric]], n = 10)
 
   output$mapPtt <- renderLeaflet({
     leaflet() %>%
@@ -82,28 +82,23 @@ observe({
           <tr><td>Period</td><td>",
           as.Date(ptDataPeriod()$trans_period),
           "</td></tr><tr><td>Number of transactions</td><td>",
-          format(ptDataPeriod()$no_mkt_trans, big.mark = ","),
+          format(ptDataPeriod()$no_mkt_trans, big.mark = ",", scientific=FALSE),
           "</td></tr><tr><td>Number of foreign transactions</td><td>",
-          format(ptDataPeriod()$no_foreign, big.mark = ","),
+          format(ptDataPeriod()$no_foreign, big.mark = ",", scientific=FALSE),
           "</td></tr><tr><td>Number % by foreign purchasers</td><td>",
-          format(ptDataPeriod()$no_foreign_perc, big.mark = ","),
+          format(ptDataPeriod()$no_foreign_perc, big.mark = ",", scientific=FALSE),
           "</td></tr><tr><td>Total value</td><td>",
-          paste("$", format(ptDataPeriod()$sum_FMV, big.mark = ","), sep =
-                  ""),
+          paste0("$", format(ptDataPeriod()$sum_FMV, big.mark = ",", scientific=FALSE)),
           "</td></tr><tr><td>Total value by foreign purchasers</td><td>",
-          paste("$",
-                format(ptDataPeriod()$sum_FMV_foreign, big.mark = ","),
-                sep = ""),
+          paste0("$", format(ptDataPeriod()$sum_FMV_foreign, big.mark = ",", scientific=FALSE)),
           "</td></tr><tr><td>Value % by foreign purchasers</td><td>",
-          format(ptDataPeriod()$sum_FMV_foreign_perc, big.mark = ","),
+          format(ptDataPeriod()$sum_FMV_foreign_perc, big.mark = ",", scientific=FALSE),
           "</td></tr><tr><td>PTT Paid</td><td>",
-          paste("$",
-                format(ptDataPeriod()$sum_PPT_paid, big.mark = ","),
-                sep = ""),
+          paste0("$",
+                format(ptDataPeriod()$sum_PPT_paid, big.mark = ",", scientific=FALSE)),
           "</td></tr><tr><td>Additional Tax Paid</td><td>",
-          paste("$",
-                format(ptDataPeriod()$add_tax_paid, big.mark = ","),
-                sep = ""),
+          paste0("$",
+                format(ptDataPeriod()$add_tax_paid, big.mark = ",", scientific=FALSE)),
           "</td></tr></table>"
         ),
         highlight = highlightOptions(
