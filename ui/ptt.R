@@ -26,15 +26,6 @@ tabPanel(
         column(
           2,
           selectInput(
-            "pt_trans_period",
-            label = HTML('Period <i id="pt_trans_period_help" class="fa fa-question-circle-o"></i>'),
-            choices = levels(propertyTax$trans_period),
-            multiple = FALSE
-          )
-        ),
-        column(
-          2,
-          selectInput(
             "pt_view",
             label = HTML('View <i id="pt_geo_level_help" class="fa fa-question-circle-o"></i>'),
             c(
@@ -45,7 +36,17 @@ tabPanel(
           )
         ),
         column(
-          3,
+          2,
+          selectizeInput(
+            "pt_trans_period",
+            label = HTML('Period <i id="pt_trans_period_help" class="fa fa-question-circle-o"></i>'),
+            choices = periodSelection, #levels(propertyTax$trans_period),
+            multiple = FALSE,
+            selected = maxTransPeriod
+          )
+        ),
+        column(
+          2,
           selectInput("pt_metric", label = HTML('Variable <i id="pt_metric_help" class="fa fa-question-circle-o"></i>'),
                       choices = selectionMetrics)
         ),
@@ -68,43 +69,88 @@ tabPanel(
         tabsetPanel(
           tabPanel(
             "FMV",
+            icon = icon("briefcase"),
             tags$p("Total fair market value by month."),
-            plotlyOutput("pt_mothly_fmv", height = chartHeight) %>% withSpinner(color="#0dc5c1")
+            conditionalPanel(
+              condition = "input.pt_location != ''",
+              plotlyOutput("pt_mothly_fmv", height = chartHeight) %>% withSpinner(color="#0dc5c1")
+            ),
+            conditionalPanel(
+              condition = "input.pt_location == ''",
+              bsAlert("pt_location_alert_fmv")
+            )
           ),
           tabPanel(
             "Average FMV",
+            icon = icon("calculator"),
             tags$p("Average fair market value by month."),
-            plotlyOutput("pt_mothly_mnd_fmv", height = chartHeight) %>% withSpinner(color="#0dc5c1")
+            conditionalPanel(
+              condition = "input.pt_location != ''",
+              plotlyOutput("pt_mothly_mnd_fmv", height = chartHeight) %>% withSpinner(color="#0dc5c1")
+            ),
+            conditionalPanel(
+              condition = "input.pt_location == ''",
+              bsAlert("pt_location_alert_fmv_avg")
+            )
           ),
           tabPanel(
             "Tax Paid",
+            icon = icon("money"),
             tags$p("Total property transfer tax paid by month."),
-            plotlyOutput("pt_mothly_ptt", height = chartHeight) %>% withSpinner(color="#0dc5c1")
+            conditionalPanel(
+              condition = "input.pt_location != ''",
+              plotlyOutput("pt_mothly_ptt", height = chartHeight) %>% withSpinner(color="#0dc5c1")
+            ),
+            conditionalPanel(
+              condition = "input.pt_location == ''",
+              bsAlert("pt_location_alert_tax")
+            )
           ),
           tabPanel(
             "Property Types",
+            icon = icon("building-o"),
             tags$p("Number of market transactions for different
                    property types (residential, commercial, famrs, etc) by month."),
-            plotlyOutput("pt_mothly", height = chartHeight) %>% withSpinner(color="#0dc5c1")
+            conditionalPanel(
+              condition = "input.pt_location != ''",
+              plotlyOutput("pt_mothly", height = chartHeight) %>% withSpinner(color="#0dc5c1")
+            ),
+            conditionalPanel(
+              condition = "input.pt_location == ''",
+              bsAlert("pt_location_alert_types")
+            )
           ),
           tabPanel(
             "Residential",
+            icon = icon("home"),
             tags$p("Number of market transactions for residential properties by month."),
-            plotlyOutput("pt_mothly_res", height = chartHeight) %>% withSpinner(color="#0dc5c1")
+            conditionalPanel(
+              condition = "input.pt_location != ''",
+              plotlyOutput("pt_mothly_res", height = chartHeight) %>% withSpinner(color="#0dc5c1")
+            ),
+            conditionalPanel(
+              condition = "input.pt_location == ''",
+              bsAlert("pt_location_alert_res")
+            )
           ),
           tabPanel(
             "Commercial",
+            icon = icon("building"),
             tags$p("Number of market transactions for commercial properties by month."),
-            plotlyOutput("pt_mothly_comm", height = chartHeight) %>% withSpinner(color="#0dc5c1")
+            conditionalPanel(
+              condition = "input.pt_location != ''",
+              plotlyOutput("pt_mothly_comm", height = chartHeight) %>% withSpinner(color="#0dc5c1")
+            ),
+            conditionalPanel(
+              condition = "input.pt_location == ''",
+              bsAlert("pt_location_alert_comm")
+            )
           ),
           tabPanel(
-            "Variable",
-            tags$p("Charts below show the participation of foreign citizens
-                   in number of market transactions, average and median sales price (Fair Market Value)
-                   for different locations, for chosen period and geogprahical level."),
-            fluidRow(
-              plotlyOutput("interactive", height = mapHeight)
-            )
+            "All Locations",
+            icon = icon("map"),
+            tags$p("Selected variable for each location available in selected geographical level."),
+            plotlyOutput("interactive", height = mapHeight)
           )
         )
       )

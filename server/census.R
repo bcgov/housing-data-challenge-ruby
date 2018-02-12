@@ -450,7 +450,7 @@ observe({
 
   output$housingTypeTreemap <- renderPlot({
     treemap(
-      title = paste("Distribution of Housing Types at ", locationLabel()),
+      title = paste("Distribution of Housing Types in ", locationLabel()),
       housingTypesDf %>% filter(GeoUID == input$c_location) %>% mutate(ratioFormat = paste0(gsub(" ratio", "", HousingType), " - ", ratio, "%")),
       index = c("ratioFormat"),
       vSize = "ratio",
@@ -487,7 +487,7 @@ observe({
   output$c16mobilityTree <- renderPlot({
     treemap(
       # housingTypesDf %>% filter(GeoUID == input$c_location) %>% mutate(ratioFormat = paste0(gsub(" ratio", "", HousingType), " - ", ratio, "%")),
-      title = paste("Distribution of Mobility categories at ", locationLabel()),
+      title = paste("Distribution of Mobility categories in ", locationLabel()),
       censusMobilityDf %>% filter(GeoUID == input$c_location) %>% mutate(ratioFormat = paste0(Migration, " - ", count, "%")),
       index = c("ratioFormat"),
       vSize = "count",

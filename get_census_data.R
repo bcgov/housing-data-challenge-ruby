@@ -6,6 +6,7 @@ library(magrittr)
 library(stringr)
 library(tidyr)
 library(here)
+library(rmapshaper)
 
 # cancensus global config
 options(cancensus.api_key = "CensusMapper_f17c13c7fc5e60de7cdd341d5d4db866")

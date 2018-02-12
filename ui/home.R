@@ -8,10 +8,10 @@ tabPanel(
       dwellPerc = c16Prov$Total.Private.Dwellings.Change,
       dwellInc = TRUE,
       trans_period = maxTransPeriod,
-      no_mkt_trans = ptProvMth[ptProvMth$trans_period == maxTransPeriod, "no_mkt_trans"],
-      no_foreign_perc = ptProvMth[ptProvMth$trans_period == maxTransPeriod, "no_foreign_perc"] ,
-      sum_FMV = ptProvMth[ptProvMth$trans_period == maxTransPeriod, "sum_FMV"],
-      sum_FMV_foreign_perc = ptProvMth[ptProvMth$trans_period == maxTransPeriod, "sum_FMV_foreign_perc"]
+      no_mkt_trans = no_mkt_trans, #ptProv[ptProv$trans_period == maxTransPeriod, "no_mkt_trans"],
+      no_foreign_perc = no_foreign_perc, #ptProv[ptProv$trans_period == maxTransPeriod, "no_foreign_perc"] ,
+      sum_FMV = sum_FMV, #ptProv[ptProv$trans_period == maxTransPeriod, "sum_FMV"],
+      sum_FMV_foreign_perc = sum_FMV_foreign_perc#ptProv[ptProv$trans_period == maxTransPeriod, "sum_FMV_foreign_perc"]
     ),
     fluidRow(
       id = "splash-intro",

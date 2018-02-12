@@ -1,3 +1,52 @@
+createAlert(session, "pt_location_alert_fmv", alertId = "pt_location_alert_fmv_id", title = NULL, style = "alert", dismiss = FALSE, append = TRUE,
+            content = "Click location on the map to draw a time series chart showing monthly total sales values for that location.")
+createAlert(session, "pt_location_alert_fmv_avg", alertId = "pt_location_alert_fmv_avg_id", title = NULL, style = NULL, dismiss = FALSE, append = TRUE,
+            content = "Click location on the map to draw a time series chart showing monthly average sales values for that location.")
+createAlert(session, "pt_location_alert_tax", alertId = "pt_location_alert_tax_id", title = NULL, style = NULL, dismiss = FALSE, append = TRUE,
+            content = "Click location on the map to draw a time series chart showing monthly property transfer tax paid for that location.")
+createAlert(session, "pt_location_alert_types", alertId = "pt_location_alert_types_id", title = NULL, style = NULL, dismiss = FALSE, append = TRUE,
+            content = "Click location on the map to draw a time series chart showing monthly numbers of transactions for
+            different property types for that location.")
+createAlert(session, "pt_location_alert_res", alertId = "pt_location_alert_res_id", title = NULL, style = NULL, dismiss = FALSE, append = TRUE,
+            content = "Click location on the map to draw a time series chart showing monthly number of transactions
+            for residential properties for that location.")
+createAlert(session, "pt_location_alert_comm", alertId = "pt_location_alert_comm_id", title = NULL, style = NULL, dismiss = FALSE, append = TRUE,
+            content = "Click location on the map to draw a time series chart showing monthly number of transactions
+            for commerction properties for that location.")
+
+ptData <- reactive({
+  ptData <- switch(
+    input$pt_view,
+    "regdis" = ptRegDis,
+    "devreg" = ptDevReg,
+    "mun" = ptMun
+  )
+  return(ptData)
+})
+
+ptDataPeriod <- reactive({
+  ptDataPeriod <- ptData() %>%
+    filter(trans_period == input$pt_trans_period) #%>%
+  return(ptDataPeriod)
+})
+
+ptRegionOptions <- reactive({
+  ptRegionOptions <- ptDataPeriod() %>%
+    mutate(label = ptDataPeriod()$Location) %>%
+    select(label, value = GeoUID)
+  st_geometry(ptRegionOptions) <- NULL
+
+  return(ptRegionOptions %>% distinct())
+})
+
+ptLocationLabel <- reactive({
+  locationLabel <- as.data.frame(ptRegionOptions()) %>%
+    filter(value == input$pt_location) %>%
+    select(label) %>%
+    distinct()
+  return(locationLabel)
+})
+
 # This observer is responsible for PTT related data and charts.
 observe({
   pt_view <- input$pt_view
@@ -8,208 +57,55 @@ observe({
   updateTextInput(session, "pt_location", value = "")
   updateTextInput(session, "pt_location_name", value = "")
 
-  ptData <- ptProvMth
-
-  # PTT observer switch
-  switch(pt_view,
-         "regdis" = {
-           propertyTaxPeriod <- ptRegDisMth %>%
-             filter(trans_period %in% pt_trans_period)
-
-           propertyTaxPeriod$geoUnit <-
-             propertyTaxPeriod$Regional.District
-
-           # For use in overview charts
-           propertyTax <- ptRegDisMth
-           propertyTax$geoUnit <-
-             ptRegDisMth$Regional.District
-
-           c16 <- c16Divs
-           c16$geoUnitVal <- c16Divs$CDNAME
-
-           propertyTax <-
-             merge(
-               propertyTax,
-               c16,
-               by.x = "Regional.District",
-               by.y = "CDNAME",
-               sort = FALSE,
-               by = ALL
-             )
-
-           # Convert join columns to uppercase to avoid mismatches due to case sensitivity
-           bcCensusDivs@data$CDNAME <-
-             toupper(bcCensusDivs@data$CDNAME)
-           geoUnit <- as.character(bcCensusDivs$CDNAME)
-           byY <- "Regional.District"
-           shapesDF <-
-             merge(
-               bcCensusDivs,
-               propertyTaxPeriod,
-               by.x = "CDNAME",
-               by.y = "Regional.District",
-               sort = FALSE,
-               by = ALL
-             )
-         },
-         "devreg" = {
-           propertyTaxPeriod <- ptDevRegMth %>%
-             filter(trans_period %in% pt_trans_period) %>%
-             arrange_(.dots = c(paste0("desc(", pt_metric, ")")))
-
-           propertyTaxPeriod$geoUnit <-
-             propertyTaxPeriod$DevelopmentRegion
-
-           c16 <- c16EconRegs
-           c16$geoUnitVal <- c16EconRegs$ERNAME
-           c16$Total.Private.Dwellings.Change <- 0
-
-           # For use in overview charts
-           propertyTax <- ptDevRegMth
-           propertyTax$geoUnit <-
-             ptDevRegMth$DevelopmentRegion
-
-           propertyTax <-
-             merge(
-               propertyTax,
-               c16,
-               by.x = "DevelopmentRegion",
-               by.y = "ERNAME",
-               sort = FALSE,
-               by = ALL
-             )
-
-           # Convert join columns to uppercase to avoid mismatches due to case sensitivity
-           erData <- bcCensusEconRegs@data
-           erData <-
-             separate(
-               data = erData,
-               col = ERNAME,
-               into = c("ERNAME_E", "ERNAME_F"),
-               sep = "\\/",
-               fill = "right"
-             )
-           erData$ERNAME_E <-
-             trimws(toupper(gsub("--", "/", erData$ERNAME_E)))
-           bcCensusEconRegs@data$ERNAME <- erData$ERNAME_E
-
-           geoUnit <- as.character(bcCensusEconRegs$ERNAME)
-           byY <- "DevelopmentRegion"
-           shapesDF <-
-             merge(
-               bcCensusEconRegs,
-               propertyTaxPeriod,
-               by.x = "ERNAME",
-               by.y = "DevelopmentRegion",
-               sort = FALSE,
-               by = ALL
-             )
-         },
-         "mun" = {
-           propertyTaxPeriod <- ptMunMth %>%
-             filter(trans_period %in% pt_trans_period) %>%
-             arrange_(.dots = c(paste0("desc(", pt_metric, ")")))
-
-           propertyTaxPeriod$geoUnit <-
-             propertyTaxPeriod$Municipality
-
-           c16 <- c16MetroAreas
-           c16$geoUnitVal <- c16MetroAreas$CMANAME
-
-           # For use in overview charts
-           propertyTax <- ptMunMth
-           propertyTax$geoUnit <- ptMunMth$Municipality
-
-           propertyTax <-
-             merge(
-               propertyTax,
-               c16,
-               by.x = "Municipality",
-               by.y = "CMANAME",
-               sort = FALSE,
-               by = ALL
-             )
-
-           # Convert join columns to uppercase to avoid mismatches due to case sensitivity
-           bcCensusMetroAreas@data$CMANAME <-
-             toupper(bcCensusMetroAreas@data$CMANAME)
-
-           geoUnit <-
-             as.character(bcCensusMetroAreas$CMANAME)
-           byY <- "Municipality"
-           shapesDF <-
-             merge(
-               bcCensusMetroAreas,
-               propertyTaxPeriod,
-               by.x = "CMANAME",
-               by.y = "Municipality",
-               sort = FALSE,
-               by = ALL
-             )
-         })
-
-  # reorder data for chart sorting
-  propertyTaxPeriod$geoUnit <-
-    factor(propertyTaxPeriod$geoUnit,
-           levels = unique(propertyTaxPeriod$geoUnit)
-           [order(propertyTaxPeriod[[pt_metric]], decreasing = FALSE)])
-  c16$geoUnitVal <- factor(c16$geoUnitVal,
-                           levels = unique(c16$geoUnitVal)
-                           [order(c16$Population.2016, decreasing = FALSE)])
-
-  pal <-
-    colorQuantile("viridis", n = 9, shapesDF[[pt_metric]])
-  # pal <- colorBin("YlGnBu", shapesDF[[pt_metric]])
-  # pal <- colorNumeric("viridis", shapesDF[[pt_metric]])
-  data <- shapesDF@data
+  # pal <- colorNumeric("viridis", ptData[[pt_metric]])
+  pal <- colorQuantile("viridis", ptDataPeriod()$mn_FMV, n = 10)
 
   output$mapPtt <- renderLeaflet({
-    leaflet(shapesDF) %>%
+    leaflet() %>%
       setView(lng = -123.12, lat = 52.78, zoom = 6) %>%
       addProviderTiles(provider = "CartoDB.Positron", options = providerTileOptions(minZoom = 5, maxZoom = 12)) %>%
       addPolygons(
-        data = shapesDF,
+        data = ptDataPeriod(),
         stroke = TRUE,
         weight = 1,
         fillOpacity = 0.5,
-        smoothFactor = 1,
+        smoothFactor = 0.2,
         color = '#333',
-        layerId = shapesDF@data$RegionalDistrict,
-        fillColor = ~ pal(shapesDF[[pt_metric]]),
-        label = geoUnit,
+        layerId = ptDataPeriod()$GeoUID,
+        fillColor = ~ pal(ptDataPeriod()[[pt_metric]]),
+        label = ptDataPeriod()$Location,
         popup = paste0(
           "<strong>",
-          geoUnit,
+          ptDataPeriod()$Location,
           "</strong>",
           "<table class=\"leaflet-popup-table\">
           <tr><td>Period</td><td>",
-          as.Date(shapesDF$trans_period),
+          as.Date(ptDataPeriod()$trans_period),
           "</td></tr><tr><td>Number of transactions</td><td>",
-          format(shapesDF$no_mkt_trans, big.mark = ","),
+          format(ptDataPeriod()$no_mkt_trans, big.mark = ","),
           "</td></tr><tr><td>Number of foreign transactions</td><td>",
-          format(shapesDF$no_foreign, big.mark = ","),
+          format(ptDataPeriod()$no_foreign, big.mark = ","),
           "</td></tr><tr><td>Number % by foreign purchasers</td><td>",
-          format(shapesDF$no_foreign_perc, big.mark = ","),
+          format(ptDataPeriod()$no_foreign_perc, big.mark = ","),
           "</td></tr><tr><td>Total value</td><td>",
-          paste("$", format(shapesDF$sum_FMV, big.mark = ","), sep =
+          paste("$", format(ptDataPeriod()$sum_FMV, big.mark = ","), sep =
                   ""),
           "</td></tr><tr><td>Total value by foreign purchasers</td><td>",
           paste("$",
-                format(shapesDF$sum_FMV_foreign, big.mark = ","),
+                format(ptDataPeriod()$sum_FMV_foreign, big.mark = ","),
                 sep = ""),
           "</td></tr><tr><td>Value % by foreign purchasers</td><td>",
-          format(shapesDF$sum_FMV_foreign_perc, big.mark = ","),
+          format(ptDataPeriod()$sum_FMV_foreign_perc, big.mark = ","),
           "</td></tr><tr><td>PTT Paid</td><td>",
           paste("$",
-                format(shapesDF$sum_PPT_paid, big.mark = ","),
+                format(ptDataPeriod()$sum_PPT_paid, big.mark = ","),
                 sep = ""),
           "</td></tr><tr><td>Additional Tax Paid</td><td>",
           paste("$",
-                format(shapesDF$add_tax_paid, big.mark = ","),
+                format(ptDataPeriod()$add_tax_paid, big.mark = ","),
                 sep = ""),
           "</td></tr></table>"
         ),
-        # group = "divisions",
         highlight = highlightOptions(
           weight = 5,
           color = "#696969",
@@ -220,31 +116,30 @@ observe({
       addLegend(
         "bottomleft",
         pal = pal,
-        values = shapesDF$no_mkt_trans,
-        title = "Transactions #",
-        labFormat = labelFormat(prefix = "$"),
+        values = ptDataPeriod()[[pt_metric]],
+        title = selectionMetricsDF %>% filter(value == rlang::sym(pt_metric)) %>% pull(label), # pt_metric, # "Transactions #",
+        # labFormat = labelFormat(prefix = "$"),
         opacity = 0.8
-      ) %>%
+      ) #%>%
       # addLayersControl(
       #     overlayGroups = c("Census Divisions"),
       #     options = layersControlOptions(collapsed = FALSE)
       # ) %>%
-      clearGroup(group = "selected")
+      # clearGroup(group = "selected")
   })
 
 
   # Interactive based on user input
   output$interactive <- renderPlotly({
     plot_ly(
-      propertyTaxPeriod,
-      x = ~ propertyTaxPeriod[[pt_metric]],
-      y = ~ geoUnit,
+      ptDataPeriod(),
+      x = ~ ptDataPeriod()[[pt_metric]],
+      y = ~ Location,
       type = "bar",
       orientation = "h"
     ) %>%
       layout(
-        title = pt_metric,
-        #"Number of market transactions",
+        title = selectionMetricsDF %>% filter(value == rlang::sym(pt_metric)) %>% pull(label),
         xaxis = axisFormat,
         yaxis = axisFormat,
         margin = marginFormatMonthly,
@@ -259,7 +154,7 @@ observe({
 # Monthly Overview - FMV (Fair Market Value)
 output$pt_mothly_fmv <- renderPlotly({
   plot_ly(
-    ptProvMth,
+    ptData() %>% filter(GeoUID == input$pt_location),
     x = ~ trans_period,
     y = ~ sum_FMV,
     name = "Total FMV",
@@ -283,7 +178,7 @@ output$pt_mothly_fmv <- renderPlotly({
       )
     ) %>%
     layout(
-      title = "FMV (Fair Market Value)",
+      title = paste("FMV (Fair Market Value) in", ptLocationLabel()),
       xaxis = axisFormat,
       yaxis = axisFormat,
       yaxis2 = list(
@@ -301,7 +196,7 @@ output$pt_mothly_fmv <- renderPlotly({
 # Monthly Overview - Average FMV
 output$pt_mothly_mnd_fmv <- renderPlotly({
   plot_ly(
-    ptProvMth,
+    ptData() %>% filter(GeoUID == input$pt_location),
     x = ~ trans_period,
     y = ~ mn_FMV,
     name = "Mean FMV",
@@ -333,7 +228,7 @@ output$pt_mothly_mnd_fmv <- renderPlotly({
       )
     ) %>%
     layout(
-      title = "Average FMV",
+      title = paste("Average FMV in", ptLocationLabel()),
       xaxis = axisFormat,
       yaxis = axisFormat,
       margin = marginFormat,
@@ -345,7 +240,7 @@ output$pt_mothly_mnd_fmv <- renderPlotly({
 # Monthly Overview - Property Transfer Tax
 output$pt_mothly_ptt <- renderPlotly({
   plot_ly(
-    ptProvMth,
+    ptData() %>% filter(GeoUID == input$pt_location),
     x = ~ trans_period,
     y = ~ sum_PPT_paid,
     name = "PTT",
@@ -359,7 +254,7 @@ output$pt_mothly_ptt <- renderPlotly({
       line = list(shape = "spline", color = colForeign)
     ) %>%
     layout(
-      title = "Property Transfer Tax",
+      title = paste("Property Transfer Tax Paid in", ptLocationLabel()),
       xaxis = axisFormat,
       yaxis = axisFormat,
       margin = marginFormat,
@@ -371,7 +266,7 @@ output$pt_mothly_ptt <- renderPlotly({
 # Monthly Overview - Number of market transactions
 output$pt_mothly <- renderPlotly({
   plot_ly(
-    ptProvMth,
+    ptData() %>% filter(GeoUID == input$pt_location),
     x = ~ trans_period,
     y = ~ no_resid_trans,
     name = "Residential",
@@ -400,7 +295,7 @@ output$pt_mothly <- renderPlotly({
       marker = list(color = colUnknown)
     ) %>%
     layout(
-      title = "Number of transactions",
+      title = paste("Number of Transactions in", ptLocationLabel()),
       xaxis = axisFormat,
       yaxis = axisFormat,
       margin = marginFormat,
@@ -413,7 +308,7 @@ output$pt_mothly <- renderPlotly({
 # Monthly Overview - Number of market transactions - Residential
 output$pt_mothly_res <- renderPlotly({
   plot_ly(
-    ptProvMth,
+    ptData() %>% filter(GeoUID == input$pt_location),
     x = ~ trans_period,
     y = ~ no_res_1fam,
     name = "Single Family",
@@ -457,7 +352,7 @@ output$pt_mothly_res <- renderPlotly({
       marker = list(color = colUnknown)
     ) %>%
     layout(
-      title = "Number of transactions - Residential",
+      title = paste("Number of Transactions (Residential) in", ptLocationLabel()),
       xaxis = axisFormat,
       yaxis = axisFormat,
       margin = marginFormat,
@@ -470,7 +365,7 @@ output$pt_mothly_res <- renderPlotly({
 # Monthly Overview - Number of market transactions - Commercial
 output$pt_mothly_comm <- renderPlotly({
   plot_ly(
-    ptProvMth,
+    ptData() %>% filter(GeoUID == input$pt_location),
     x = ~ trans_period,
     y = ~ no_comm_comm,
     name = "Commerce",
@@ -489,7 +384,7 @@ output$pt_mothly_comm <- renderPlotly({
       marker = list(color = colUnknown)
     ) %>%
     layout(
-      title = "Number of transactions - Commercial",
+      title = paste("Number of transactions (Commercial) in", ptLocationLabel()),
       xaxis = axisFormat,
       yaxis = axisFormat,
       margin = marginFormat,
@@ -509,14 +404,15 @@ observeEvent(input$mapPtt_shape_click, {
     # updateSelectInput(session, "c_location", selected = p$id)
     updateTextInput(session, "pt_location", value = m$id)
 
-    updateTextInput(session, "pt_location_name", value = m$id)
-    # locationLabel <- as.data.frame(censusMobility()) %>%
-    #   filter(GeoUID == locationId) %>%
-    #   mutate(label = paste0(Region, " (", GeoUID, ")")) %>%
-    #   select(label) %>%
-    #   distinct()
-    # # st_geometry(locationLabel) <- NULL
-    # updateTextInput(session, "c_location_name", value = locationLabel$label)
+    # updateTextInput(session, "pt_location_name", value = m$id)
+    locationLabel <- as.data.frame(ptDataPeriod()) %>%
+      # filter(GeoUID == locationId) %>%
+      filter(GeoUID == m$id) %>%
+      mutate(label = Location) %>%
+      select(label) %>%
+      distinct()
+    # st_geometry(locationLabel) <- NULL
+    updateTextInput(session, "pt_location_name", value = locationLabel$label)
     #
     # updateSelectizeInput(session, 'c_location_pp_compare', choices = regionOptions(), server = TRUE)
   }

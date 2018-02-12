@@ -2,7 +2,7 @@ library(here)
 library(dplyr)
 library(readr)
 library(stringr)
-devtools::install_github("mountainmath/cancensus")
+# devtools::install_github("mountainmath/cancensus")
 library(cancensus)
 
 options(cancensus.api_key = "CensusMapper_f17c13c7fc5e60de7cdd341d5d4db866")
@@ -24,13 +24,13 @@ shapesCSD <- get_census_geometry(
   dataset = censusDataset, regions = list(PR = "59"), level = 'CSD', geo_format = "sf"
 )
 
-shapesCT <- get_census_geometry(
-  dataset = censusDataset, regions = list(PR = "59"), level = 'CT', geo_format = "sf"
-)
-
-shapesCDA <- get_census_geometry(
-  dataset = censusDataset, regions = list(PR = "59"), level = 'DA', geo_format = "sf"
-)
+# shapesCT <- get_census_geometry(
+#   dataset = censusDataset, regions = list(PR = "59"), level = 'CT', geo_format = "sf"
+# )
+#
+# shapesCDA <- get_census_geometry(
+#   dataset = censusDataset, regions = list(PR = "59"), level = 'DA', geo_format = "sf"
+# )
 
 geoCD$CDuid <- as.character(geoCD$CDuid)
 cd <- dplyr::inner_join(geoCD, shapesCD, by = c("CDuid" = "GeoUID"))

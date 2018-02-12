@@ -38,10 +38,10 @@ Sys.setenv(TZ = "America/Vancouver")
 
 # Read objects
 # Property transfer tax
-ptRegDisMth <- readRDS("./data/pt-regional-district-monthly.rds")
-ptMunMth <- readRDS("./data/pt-municipal-monthly.rds")
-ptDevRegMth <- readRDS("./data/pt-development-region-monthly.rds")
-ptProvMth <- readRDS("./data/pt-provincial-monthly.rds")
+ptRegDis <- readRDS(here::here("data", "ptt-regional-district.rds"))
+ptMun <- readRDS(here::here("data", "ptt-municipality.rds"))
+ptDevReg <- readRDS(here::here("data", "ptt-development-region.rds"))
+ptProv <- readRDS(here::here("data", "ptt-province.rds"))
 
 # boundaries shapefiles
 bcCensusDivs <- readRDS("./data/bc2011CensusDivisions.rds")
@@ -49,11 +49,7 @@ bcCensusEconRegs <- readRDS("./data/bc2011EconomicRegions.rds")
 bcCensusTracts <- readRDS("./data/bc2011Tracts.rds")
 bcCensusMetroAreas <- readRDS(("./data/bc2011MetropolitanAreas.rds"))
 
-# census 2016
-c16Divs <- readRDS("./data/census2016-divisions.rds")
-c16EconRegs <- readRDS("./data/census2016-economic-regions.rds")
-c16Tracts <- readRDS("./data/census2016-tracts.rds")
-c16MetroAreas <- readRDS("./data/census2016-metro-areas.rds")
+# census 2016 - used for home page info boxes
 c16Prov <- readRDS("./data/census2016-province.rds")
 
 # Average Age
@@ -78,6 +74,7 @@ getJoinedPp <- function(c16, c11, c06) {
   return(censusPp)
 }
 
+# Not used
 # census2016ppPr <- read_rds(file.path("data", "population_pyramid", "census2016-pp-PR.rds"))
 # census2011ppPr <- read_rds(file.path("data", "population_pyramid", "census2011-pp-PR.rds"))
 # census2006ppPr <- read_rds(file.path("data", "population_pyramid", "census2006-pp-PR.rds"))
@@ -139,80 +136,45 @@ census2016CsdStir <- read_rds(file.path("data", "census2016Spatial-stir-CSD.rds"
 census2016CtStir <- read_rds(file.path("data", "census2016Spatial-stir-CT.rds"))
 # census2016DaStir <- read_rds(file.path("data", "census2016Spatial-stir-DA.rds"))
 
-# options(cancensus.api_key = "CensusMapper_f17c13c7fc5e60de7cdd341d5d4db866")
-# dir.create('./cache', showWarnings = TRUE, recursive = FALSE, mode = "0777")
-# Sys.chmod(list.dirs("."), "777")
-# options(cancensus.cache_path = "./cache/")
-
-#  Cleanup - @TODO Move this to getdata.R
-# c16EconRegs$ERNAME <-
-#   gsub("LOWER MAINLAND--SOUTHWEST", "MAINLAND/SOUTHWEST", c16EconRegs$ERNAME)
-# c16EconRegs$ERNAME <-
-#   gsub("THOMPSON--OKANAGAN", "THOMPSON/OKANAGAN", c16EconRegs$ERNAME)
-# c16EconRegs$ERNAME <-
-#   gsub("VANCOUVER ISLAND AND COAST", "VANCOUVER ISLAND/COAST", c16EconRegs$ERNAME)
-# c16EconRegs$Total.Private.Dwellings.2011 <- 0
-
-ptDevRegMth$DevelopmentRegion <-
-  gsub("MAINLAND/SOUTHWEST", "LOWER MAINLAND/SOUTHWEST", ptDevRegMth$DevelopmentRegion)
-ptDevRegMth$DevelopmentRegion <-
-  gsub("VANCOUVER ISLAND/COAST", "VANCOUVER ISLAND AND COAST", ptDevRegMth$DevelopmentRegion)
-ptDevRegMth$Total.Private.Dwellings.Change <- 0
-
-ptMunMth$Municipality <-
-  gsub("ABBOTSFORD", "ABBOTSFORD - MISSION", ptMunMth$Municipality)
-
-
-# addRatioColumn <- function(df, ratioCol, dividend, divisor, decimals = 3) {
-#     df <- df %>%
-#         mutate_(ratioCol = round(dividend / divisor, decimals)) %>%
-#         filter(!is.na(dividend)) %>%
-#         filter(!is.na(divisor))
-#     return(df)
-# }
-
-# Add Percentage of Foreign Transactions column
-ptRegDisMth <- ptRegDisMth %>%
-  mutate(no_foreign_perc = round(no_foreign / no_mkt_trans, 4) * 100) %>%
-  mutate(sum_FMV_foreign_perc = round(sum_FMV_foreign / sum_FMV, 4) * 100)
-
-ptDevRegMth <- ptDevRegMth %>%
-  mutate(no_foreign_perc = round(no_foreign / no_mkt_trans, 4) * 100) %>%
-  mutate(sum_FMV_foreign_perc = round(sum_FMV_foreign / sum_FMV, 4) * 100)
-
-ptMunMth <- ptMunMth %>%
-  mutate(no_foreign_perc = round(no_foreign / no_mkt_trans, 4) * 100) %>%
-  mutate(sum_FMV_foreign_perc = round(sum_FMV_foreign / sum_FMV, 4) * 100)
-
-ptProvMth <- ptProvMth %>%
-  mutate(no_foreign_perc = round(no_foreign / no_mkt_trans, 4) * 100) %>%
-  mutate(sum_FMV_foreign_perc = round(sum_FMV_foreign / sum_FMV, 4) * 100)
-
 # Selection of metrics
-selectionMetrics <- c("Number of Transactions" = "no_mkt_trans",
-                      "Total FMV" = "sum_FMV",
-                      "PTT Paid" = "sum_PPT_paid",
-                      "Number od Foreign Transactions" = "no_foreign",
-                      "Total FMV of Foreign Transactions" = "sum_FMV_foreign",
-                      "Additional Tax Paid" = "add_tax_paid")
-
-selectionMetricsDF <- data.frame(
-  Metric =
-    c("no_mkt_trans", "sum_FMV", "sum_PPT_paid", "no_foreign",
-      "sum_FMV_foreign", "add_tax_paid"),
-  MetricName =
-    c("Transactions #", "FMV Sum", "PTT Paid", "Foreign Transactions #",
-      "FMV Sum of Foreign Transactions", "Additional Tax Paid")
+selectionMetrics <- c(
+  # "Number of Transactions" = "no_mkt_trans",
+  # "Total FMV" = "sum_FMV",
+  # "PTT Paid" = "sum_PPT_paid",
+  # "Number of Foreign Transactions" = "no_foreign",
+  # "Total FMV of Foreign Transactions" = "sum_FMV_foreign",
+  # "Additional Tax Paid" = "add_tax_paid",
+  "Average FMV" = "mn_FMV",
+  "Average Foreign FMV" = "mn_FMV_foreign",
+  "% of Foreign Transactions" = "no_foreign_perc"
 )
 
-maxTransPeriod <- max(ptProvMth$trans_period)
-propertyTax <- ptRegDisMth
+selectionMetricsDF <- data.frame(
+  value =
+    c("no_mkt_trans", "sum_FMV", "sum_PPT_paid", "no_foreign", "no_foreign_perc",
+      "sum_FMV_foreign", "add_tax_paid", "mn_FMV", "mn_FMV_foreign"),
+  label =
+    c("Number of Transactions", "Total FMV", "PTT Paid", "Number of Foreign Transactions",
+      "Percentage of Foreign Transactions", "Total FMV of Foreign Transactions",
+      "Additional Tax Paid", "Average FMV", "Average Foreign FMV")
+)
+
+maxTransPeriod <- max(ptProv$trans_period)
+propertyTax <- ptRegDis
 chartHeight <- 600
 mapHeight <- 600
 
-pt_view <- 'devreg'
-pt_trans_period <- '2016-12-01'
-pt_metric <- 'no_mkt_trans'
+periodSelection <- as.data.frame(propertyTax) %>%
+  select(trans_period) %>%
+  distinct() %>%
+  mutate(label = paste(year(trans_period), month(trans_period, label = TRUE))) %>%
+  rename(value = trans_period) %>%
+  arrange(desc(value))
+periodSelection <- setNames(periodSelection$value, periodSelection$label)
+
+# pt_view <- 'devreg'
+# pt_trans_period <- '2017-12-01'
+# pt_metric <- 'no_mkt_trans'
 
 geoLevels <- c(
   "Census Division" = "CD",
@@ -232,48 +194,6 @@ housingTypesList <- c(
   "Other single attached house ratio",
   "Movable dwelling ratio"
 )
-
-propertyTaxPeriod <- ptRegDisMth %>%
-  filter(trans_period %in% maxTransPeriod)
-
-propertyTaxPeriod$geoUnit <- propertyTaxPeriod$Regional.District
-
-# For use in overview charts
-propertyTax <- ptRegDisMth
-propertyTax$geoUnit <- ptRegDisMth$Regional.District
-
-# Convert join columns to uppercase to avoid mismatches due to case sensitivity
-bcCensusDivs@data$CDNAME <- toupper(bcCensusDivs@data$CDNAME)
-geoUnit <- as.character(bcCensusDivs$CDNAME)
-byY <- "Regional.District"
-shapesDF <-
-  merge(
-    bcCensusDivs,
-    propertyTaxPeriod,
-    by.x = "CDNAME",
-    by.y = "Regional.District",
-    sort = FALSE,
-    by = ALL
-  )
-
-# Color palette
-pal <-
-  colorQuantile("YlGnBu", n = 9, as.integer(shapesDF$no_mkt_trans))
-data <- shapesDF@data
-
-# viridis
-getPal <- function(pal, dom, bins) {
-  colorBin(palette = pal,
-           domain = dom,
-           bins = bins)
-}
-
-# palViridis <-
-#   getPal(
-#     viridis::viridis(4),
-#     censusData$v_CA16_2447,
-#     c(0, 30000, 60000, 75000, 90000, 100000, 120000)
-#   )
 
 htSummary <- as_tibble(housingTypesCd) %>%
   mutate("PRUID" = "59") %>%
@@ -352,6 +272,11 @@ jumbotron <- function(header, popPerc = 0, popInc = TRUE, dwellPerc = 0, dwellIn
                     spend more than 30% of their income on shelter cost.")
   boxPp <- paste0("Census subdivision with the highest average age (<strong>", ageSummary$`Average Age`,"</strong>) is ",
                  ageSummary$Region, ".")
+
+  no_mkt_trans <- as_tibble(ptProv) %>% filter(trans_period == maxTransPeriod) %>% pull("no_mkt_trans")
+  no_foreign_perc <- as_tibble(ptProv) %>% filter(trans_period == maxTransPeriod) %>% pull("no_foreign_perc")
+  sum_FMV <- as_tibble(ptProv) %>% filter(trans_period == maxTransPeriod) %>% pull("sum_FMV")
+  sum_FMV_foreign_perc <- as_tibble(ptProv) %>% filter(trans_period == maxTransPeriod) %>% pull("sum_FMV_foreign_perc")
 
   HTML(paste0(
 "<div class=\"jumbotron\">
