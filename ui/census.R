@@ -66,7 +66,7 @@ tabPanel(
         tabsetPanel(
           id = "censusTopicsTabs",
           tabPanel(
-            "Population Age & Sex",
+            "Population Age & Gender",
             value = "Population",
             icon = icon("venus-mars"),
             tags$p("The age profile of an area has a significant impact on the type of housing that is required.
@@ -175,6 +175,6 @@ tabPanel(
         )
       )
     ),
-    tags$p("Data source: Statistics Canada (Statistics Canada Open Data License)")
+    tags$p("Data source: Statistics Canada (Statistics Canada Open Data Licence)")
   )
 )

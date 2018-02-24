@@ -1,10 +1,10 @@
 # Code Repository
 
-The code for BC Housing Data Visualization Platform is open-sourced and publicly available
-at BC Government [github repository](https://github.com/bcgov/housing-data-challenge-ruby).
+The code for BC Housing Data Visualization app is open-sourced and publicly available
+at BC Government [GitHub repository](https://github.com/bcgov/housing-data-challenge-ruby).
 
 ## R packages
-The platform is developed using R statistical software, and realized as R [Shiny™](http://shiny.rstudio.com/) app 
+The platform is developed using [R statistical software](https://www.r-project.org/), and realized as R [Shiny™](http://shiny.rstudio.com/) app 
 with the help of the following open-source R packages:
 - [Shiny™](https://github.com/rstudio/shiny) - Interactive web applications with R.
 - [Plotly](https://github.com/ropensci/plotly) - R implementation of plotly.js interactive graphing library. 
@@ -19,6 +19,7 @@ with the help of the following open-source R packages:
 - [RGDAL](https://r-forge.r-project.org/projects/rgdal/) - R bindings to Geospatial Data Abstraction Library.
 - [Rgeos](https://r-forge.r-project.org/projects/rgeos/) - Tools for interfacing the C++ translation of the Java Topology Suite.
 - [Sf](https://r-spatial.github.io/sf/) - Simple Features for R.
+- [rmapshaper](https://github.com/ateucher/rmapshaper) - An R wrapper for the mapshaper javascript library.
 - [Htmlwidgets](https://github.com/ramnathv/htmlwidgets) - HTML Widgets for R.
 - [DT](https://github.com/rstudio/DT) - R Interface to the jQuery Plug-in DataTables.
 - [SunburstR](https://github.com/timelyportfolio/sunburstR) - R htmlwidget for sequence sunburst charts.

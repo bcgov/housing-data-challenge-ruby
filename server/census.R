@@ -1,5 +1,5 @@
 createAlert(session, "c_location_alert_pp", alertId = "c_location_alert_pp_id", title = NULL, style = "alert", dismiss = FALSE, append = TRUE,
-            content = "Click location on the map to draw a population distribution by age and sex for that location.")
+            content = "Click location on the map to draw a population distribution by age and gender for that location.")
 createAlert(session, "c_location_alert_m", alertId = "c_location_alert_m_id", title = NULL, style = NULL, dismiss = FALSE, append = TRUE,
             content = "Click location on the map to draw a chart showing ratios of different population mobility categories for that location.")
 createAlert(session, "c_location_alert_ht", alertId = "c_location_alert_ht_id", title = NULL, style = NULL, dismiss = FALSE, append = TRUE,
@@ -186,8 +186,8 @@ observe({
   # Housing type barchart
   traces = list(
     list(
-      x = housingTypes()$`Region`, y = housingTypes()$`Appartment in tall building`,
-      color = colNonStrataRental, name = "Appartment in tall building"
+      x = housingTypes()$`Region`, y = housingTypes()$`Apartment in tall building`,
+      color = colNonStrataRental, name = "Apartment in tall building"
     ),
     list(
       x = housingTypes()$`Region`, y = housingTypes()$`Semi detached house`,
@@ -198,12 +198,12 @@ observe({
       color = colResidential, name = "Row house"
     ),
     list(
-      x = housingTypes()$`Region`, y = housingTypes()$`Appartment in duplex`,
-      color = colMultiFam, name = "Appartment in duplex"
+      x = housingTypes()$`Region`, y = housingTypes()$`Apartment in duplex`,
+      color = colMultiFam, name = "Apartment in duplex"
     ),
     list(
-      x = housingTypes()$`Region`, y = housingTypes()$`Appartment in small building`,
-      color = colStrata, name = "Appartment in small building"
+      x = housingTypes()$`Region`, y = housingTypes()$`Apartment in small building`,
+      color = colStrata, name = "Apartment in small building"
     ),
     list(
       x = housingTypes()$`Region`, y = housingTypes()$`Other single attached house`,
@@ -317,14 +317,14 @@ observe({
           format(housingTypeMapData()$`Single detached house ratio`, big.mark = ","), "</strong></td></tr>",
           "<tr><td>Semi detached house ratio</strong></td><td>",
           format(housingTypeMapData()$`Semi detached house ratio`, big.mark = ","), "</strong></td></tr>",
-          "<tr><td>Appartment in duplex ratio</strong></td><td>",
-          format(housingTypeMapData()$`Appartment in duplex ratio`, big.mark = ","), "</strong></td></tr>",
+          "<tr><td>Apartment in duplex ratio</strong></td><td>",
+          format(housingTypeMapData()$`Apartment in duplex ratio`, big.mark = ","), "</strong></td></tr>",
           "<tr><td>Row house ratio</strong></td><td>",
           format(housingTypeMapData()$`Row house ratio`, big.mark = ","), "</strong></td></tr>",
-          "<tr><td>Appartment in small building ratio</strong></td><td>",
-          format(housingTypeMapData()$`Appartment in small building ratio`, big.mark = ","), "</strong></td></tr>",
-          "<tr><td>Appartment in tall building ratio</strong></td><td>",
-          format(housingTypeMapData()$`Appartment in tall building ratio`, big.mark = ","), "</strong></td></tr>",
+          "<tr><td>Apartment in small building ratio</strong></td><td>",
+          format(housingTypeMapData()$`Apartment in small building ratio`, big.mark = ","), "</strong></td></tr>",
+          "<tr><td>Apartment in tall building ratio</strong></td><td>",
+          format(housingTypeMapData()$`Apartment in tall building ratio`, big.mark = ","), "</strong></td></tr>",
           "<tr><td>Other single attached house ratio</strong></td><td>",
           format(housingTypeMapData()$`Other single attached house ratio`, big.mark = ","), "</strong></td></tr>",
           "<tr><td>Movable dwelling ratio</strong></td><td>",
@@ -439,11 +439,11 @@ observe({
   housingTypesDf %<>%
     gather(
       "Single detached house ratio",
-      "Appartment in tall building ratio",
+      "Apartment in tall building ratio",
       "Semi detached house ratio",
       "Row house ratio",
-      "Appartment in duplex ratio",
-      "Appartment in small building ratio",
+      "Apartment in duplex ratio",
+      "Apartment in small building ratio",
       "Other single attached house ratio",
       "Movable dwelling ratio",
       key = "HousingType", value = "ratio")

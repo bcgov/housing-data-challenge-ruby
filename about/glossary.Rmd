@@ -1,4 +1,4 @@
 # Glossary of Terms
 
-Following is the glossary of terms used in BC Housing Data Visualization platofrm.
+Following is the glossary of terms used in BC Housing Data Visualization app.
 

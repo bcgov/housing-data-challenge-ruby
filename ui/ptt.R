@@ -110,7 +110,7 @@ tabPanel(
             "Property Types",
             icon = icon("building-o"),
             tags$p("Number of market transactions for different
-                   property types (residential, commercial, famrs, etc) by month."),
+                   property types (residential, commercial, farms, etc) by month."),
             conditionalPanel(
               condition = "input.pt_location != ''",
               plotlyOutput("pt_mothly", height = chartHeight) %>% withSpinner(color="#0dc5c1")

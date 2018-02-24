@@ -16,6 +16,6 @@ using [cancensus R package](https://github.com/mountainMath/cancensus).
 Property transfer tax data relates to market transactions within the province.
 
 It is provided by Province of British Columbia Ministry of Finance, 
-licensed under [Open Government License - British Columbia](http://www.data.gov.bc.ca/local/dbc/docs/license/OGL-vbc2.0.pdf).
+licensed under [Open Government LicenCe - British Columbia](http://www.data.gov.bc.ca/local/dbc/docs/license/OGL-vbc2.0.pdf).
 
-The data is available fow download at [DataBC Open Data Portal](https://catalogue.data.gov.bc.ca/organization/property-taxation).
+The data is available for download at [B.C. Data Catalogue administered by DataBC](https://catalogue.data.gov.bc.ca/organization/property-taxation).

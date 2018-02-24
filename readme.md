@@ -74,7 +74,7 @@ cd simple-R-shiny
 ### Credits
 Data sources:
 
-- [Property Transfer Tax Data 2016](https://catalogue.data.gov.bc.ca/dataset/property-transfer-tax-data-2016) (Open Government License - British Columbia)
+- [Property Transfer Tax Data 2016](https://catalogue.data.gov.bc.ca/dataset/property-transfer-tax-data-2016) (Open Government Licence - British Columbia)
 - Statistics Canada. 2017. Population and Dwelling Count Highlight Tables, 2016 Census. "Population and Dwelling Count Highlight Tables, 2016 Census" "2016 Census: Release topics." Census. Statistics Canada Catalogue no. 98-402-X2016001. Ottawa, Ontario. February 8.
 http://www12.statcan.gc.ca/census-recensement/2016/dp-pd/hlt-fst/pd-pl/index-eng.cfm (accessed March 3, 2017.) (Statistics Canada Open Licence Agreement)
 

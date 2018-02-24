@@ -65,101 +65,101 @@ getHousingTypesData <- function(year, censusLevel = "CMA", regions) {
     ms_simplify(keep = 0.05, keep_shapes = TRUE) %<>%
     # TODO: cater to vectors of other years too
     rename(
-      "Appartment in tall building" = v_CA16_410,
+      "Apartment in tall building" = v_CA16_410,
       "Semi detached house" = v_CA16_412,
       "Row house" = v_CA16_413,
-      "Appartment in duplex" = v_CA16_414,
-      "Appartment in small building" = v_CA16_415,
+      "Apartment in duplex" = v_CA16_414,
+      "Apartment in small building" = v_CA16_415,
       "Other single attached house" = v_CA16_416,
       "Movable dwelling" = v_CA16_417,
       "Single detached house" = v_CA16_409
     ) %<>%
     replace_na(`Single detached house` = 0,
-               `Appartment in tall building` = 0,
+               `Apartment in tall building` = 0,
                `Semi detached house` = 0,
                `Row house` = 0,
-               `Appartment in duplex` = 0,
-               `Appartment in small building` = 0,
+               `Apartment in duplex` = 0,
+               `Apartment in small building` = 0,
                `Other single attached house` = 0,
                `Movable dwelling` = 0) %<>%
     mutate(
       "Single detached house ratio" = round(`Single detached house` * 100 / (
         `Single detached house` +
-          `Appartment in tall building` +
+          `Apartment in tall building` +
           `Semi detached house` +
           `Row house` +
-          `Appartment in duplex` +
-          `Appartment in small building` +
+          `Apartment in duplex` +
+          `Apartment in small building` +
           `Other single attached house` +
           `Movable dwelling`
       ), digits = 2),
-      "Appartment in tall building ratio" = round(`Appartment in tall building` * 100 / (
+      "Apartment in tall building ratio" = round(`Apartment in tall building` * 100 / (
         `Single detached house` +
-          `Appartment in tall building` +
+          `Apartment in tall building` +
           `Semi detached house` +
           `Row house` +
-          `Appartment in duplex` +
-          `Appartment in small building` +
+          `Apartment in duplex` +
+          `Apartment in small building` +
           `Other single attached house` +
           `Movable dwelling`
       ), digits = 2),
       "Semi detached house ratio" = round(`Semi detached house` * 100 / (
         `Single detached house` +
-          `Appartment in tall building` +
+          `Apartment in tall building` +
           `Semi detached house` +
           `Row house` +
-          `Appartment in duplex` +
-          `Appartment in small building` +
+          `Apartment in duplex` +
+          `Apartment in small building` +
           `Other single attached house` +
           `Movable dwelling`
       ), digits = 2),
       "Row house ratio" = round(`Row house` * 100 / (
         `Single detached house` +
-          `Appartment in tall building` +
+          `Apartment in tall building` +
           `Semi detached house` +
           `Row house` +
-          `Appartment in duplex` +
-          `Appartment in small building` +
+          `Apartment in duplex` +
+          `Apartment in small building` +
           `Other single attached house` +
           `Movable dwelling`
       ), digits = 2),
-      "Appartment in duplex ratio" = round(`Appartment in duplex` * 100 / (
+      "Apartment in duplex ratio" = round(`Apartment in duplex` * 100 / (
         `Single detached house` +
-          `Appartment in tall building` +
+          `Apartment in tall building` +
           `Semi detached house` +
           `Row house` +
-          `Appartment in duplex` +
-          `Appartment in small building` +
+          `Apartment in duplex` +
+          `Apartment in small building` +
           `Other single attached house` +
           `Movable dwelling`
       ), digits = 2),
-      "Appartment in small building ratio" = round(`Appartment in small building` * 100 / (
+      "Apartment in small building ratio" = round(`Apartment in small building` * 100 / (
         `Single detached house` +
-          `Appartment in tall building` +
+          `Apartment in tall building` +
           `Semi detached house` +
           `Row house` +
-          `Appartment in duplex` +
-          `Appartment in small building` +
+          `Apartment in duplex` +
+          `Apartment in small building` +
           `Other single attached house` +
           `Movable dwelling`
       ), digits = 2),
       "Other single attached house ratio" = round(`Other single attached house` * 100 / (
         `Single detached house` +
-          `Appartment in tall building` +
+          `Apartment in tall building` +
           `Semi detached house` +
           `Row house` +
-          `Appartment in duplex` +
-          `Appartment in small building` +
+          `Apartment in duplex` +
+          `Apartment in small building` +
           `Other single attached house` +
           `Movable dwelling`
       ), digits = 2),
       "Movable dwelling ratio" = round(`Movable dwelling` * 100 / (
         `Single detached house` +
-          `Appartment in tall building` +
+          `Apartment in tall building` +
           `Semi detached house` +
           `Row house` +
-          `Appartment in duplex` +
-          `Appartment in small building` +
+          `Apartment in duplex` +
+          `Apartment in small building` +
           `Other single attached house` +
           `Movable dwelling`
       ), digits = 2)

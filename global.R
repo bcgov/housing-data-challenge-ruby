@@ -187,10 +187,10 @@ geoLevels <- c(
 housingTypesList <- c(
   "Single detached house ratio",
   "Semi detached house ratio",
-  "Appartment in duplex ratio",
+  "Apartment in duplex ratio",
   "Row house ratio",
-  "Appartment in small building ratio",
-  "Appartment in tall building ratio",
+  "Apartment in small building ratio",
+  "Apartment in tall building ratio",
   "Other single attached house ratio",
   "Movable dwelling ratio"
 )
@@ -200,21 +200,21 @@ htSummary <- as_tibble(housingTypesCd) %>%
   group_by(`PRUID`) %>%
   summarise(
     "Single detached house" = sum(`Single detached house`),
-    "Appartment in tall building" = sum(`Appartment in tall building`),
+    "Apartment in tall building" = sum(`Apartment in tall building`),
     "Semi detached house" = sum(`Semi detached house`),
     "Row house" = sum(`Row house`),
-    "Appartment in duplex" = sum(`Appartment in duplex`),
-    "Appartment in small building" = sum(`Appartment in small building`),
+    "Apartment in duplex" = sum(`Apartment in duplex`),
+    "Apartment in small building" = sum(`Apartment in small building`),
     "Other single attached house" = sum(`Other single attached house`),
     "Movable dwelling" = sum(`Movable dwelling`)
   ) %>%
   mutate("Single detached house ratio" = round(`Single detached house` * 100 / (
     `Single detached house` +
-      `Appartment in tall building` +
+      `Apartment in tall building` +
       `Semi detached house` +
       `Row house` +
-      `Appartment in duplex` +
-      `Appartment in small building` +
+      `Apartment in duplex` +
+      `Apartment in small building` +
       `Other single attached house` +
       `Movable dwelling`
   ), digits = 2)) %>%
