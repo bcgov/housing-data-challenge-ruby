@@ -593,7 +593,7 @@ observe({
                 text = ~paste('Census 2006</br>', Region, abs(percentage_2006), '%'))
     }
 
-    ppTitle <- paste('Population Pyramid for', locationLabel(), '- Census year', input$c_year)
+    ppTitle <- paste('Population Pyramid for', locationLabel(), '- Census year 2016')
     if (input$c_location_pp_compare != "") {
       p %<>% add_trace(x = ~percentage_compare, y = ~age, name = ~ paste(Region_compare, '2016'), type = "scatter", mode = 'lines+markers',
                             line = list(color = '#cc222299', shape = "spline"),
