@@ -362,7 +362,7 @@ jumbotron <- function(header, popPerc = 0, popInc = TRUE, dwellPerc = 0, dwellIn
           <div class=\"col-sm-6\">
             <div class=\"quick-fact\">
               <div class=\"splash-icon\">
-                <i class=\"fa fa-truck\"></i>
+                <i class=\"fa fa-bullhorn\"></i>
               </div>
               <div class=\"splash-text\">",
                 boxStir,"
@@ -389,7 +389,7 @@ jumbotron <- function(header, popPerc = 0, popInc = TRUE, dwellPerc = 0, dwellIn
           <div class=\"col-sm-6\">
             <div class=\"quick-fact\">
               <div class=\"splash-icon\">
-                <i class=\"fa fa-bullhorn\"></i>
+                <i class=\"fa fa-truck\"></i>
               </div>
               <div class=\"splash-text\">",
                 boxMobility,"
