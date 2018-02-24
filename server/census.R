@@ -183,51 +183,6 @@ observe({
   updateTextInput(session, "c_location", value = "")
   updateTextInput(session, "c_location_name", value = "")
 
-  # Housing type barchart
-  traces = list(
-    list(
-      x = housingTypes()$`Region`, y = housingTypes()$`Apartment in tall building`,
-      color = colNonStrataRental, name = "Apartment in tall building"
-    ),
-    list(
-      x = housingTypes()$`Region`, y = housingTypes()$`Semi detached house`,
-      color = colCommercial, name = "Semi-detached house"
-    ),
-    list(
-      x = housingTypes()$`Region`, y = housingTypes()$`Row house`,
-      color = colResidential, name = "Row house"
-    ),
-    list(
-      x = housingTypes()$`Region`, y = housingTypes()$`Apartment in duplex`,
-      color = colMultiFam, name = "Apartment in duplex"
-    ),
-    list(
-      x = housingTypes()$`Region`, y = housingTypes()$`Apartment in small building`,
-      color = colStrata, name = "Apartment in small building"
-    ),
-    list(
-      x = housingTypes()$`Region`, y = housingTypes()$`Other single attached house`,
-      color = colAcreage, name = "Other single-attached house"
-    ),
-    list(
-      x = housingTypes()$`Region`, y = housingTypes()$`Movable dwelling`,
-      color = colForeign, name = "Movable dwelling"
-    )
-  )
-  c16dwellTypePlot <- plotmy(
-    housingTypes(),
-    housingTypes()$`Region`,
-    housingTypes()$`Single detached house`,
-    "Single-detached house",
-    "bar",
-    colSingleFam,
-    "Type of dwelling",
-    traces
-  )
-  output$c16dwellType <- renderPlotly({
-    c16dwellTypePlot
-  })
-
   # Defaults and shape the data
   if (!is.null(housingTypes())) {
     housingTypes <- housingTypes()
@@ -470,9 +425,10 @@ observe({
       border.lwds = c(1),
       force.print.labels = FALSE,
       # title.legend = "Housing Types",
-      # position.legend = "right",
-      # fontsize.legend = 11,
-      # drop.unused.levels = TRUE,
+      position.legend = "right",
+      fontsize.legend = 10,
+      format.legend = list(scientific = FALSE, big.mark = " "),
+      drop.unused.levels = TRUE,
       inflate.labels = F
     )
   })
@@ -484,35 +440,35 @@ observe({
   censusMobilityDf <- censusMobilityGathered
   st_geometry(censusMobilityDf) <- NULL
 
-  output$c16mobilityTree <- renderPlot({
-    treemap(
-      # housingTypesDf %>% filter(GeoUID == input$c_location) %>% mutate(ratioFormat = paste0(gsub(" ratio", "", HousingType), " - ", ratio, "%")),
-      title = paste("Distribution of Mobility categories in ", locationLabel()),
-      censusMobilityDf %>% filter(GeoUID == input$c_location) %>% mutate(ratioFormat = paste0(Migration, " - ", count, "%")),
-      index = c("ratioFormat"),
-      vSize = "count",
-      type = "index",
-      vColor = "Migration",
-      palette = c(palOther, palLighterBlue, palLightBlue, palDarkBlue, palLightRed),
-      algorithm = "pivotSize",
-      # sortID = "Migration",
-      fontsize.title = c(14),
-      fontsize.labels = c(12),
-      fontcolor.labels = c("#121212"),
-      fontface.labels = c(1),
-      bg.labels = c("#CCCCCCDC"),
-      align.labels = list(c("center", "center")),
-      overlap.labels = 0.5,
-      border.col = "#696969",
-      border.lwds = c(1),
-      force.print.labels = FALSE,
-      # title.legend = "Mobility categories",
-      # position.legend = "bottom",
-      # fontsize.legend = 11,
-      # drop.unused.levels = TRUE,
-      inflate.labels = F
-    )
-  })
+  # output$c16mobilityTree <- renderPlot({
+  #   treemap(
+  #     # housingTypesDf %>% filter(GeoUID == input$c_location) %>% mutate(ratioFormat = paste0(gsub(" ratio", "", HousingType), " - ", ratio, "%")),
+  #     title = paste("Distribution of Mobility categories in ", locationLabel()),
+  #     censusMobilityDf %>% filter(GeoUID == input$c_location) %>% mutate(ratioFormat = paste0(Migration, " - ", count, "%")),
+  #     index = c("ratioFormat"),
+  #     vSize = "count",
+  #     type = "index",
+  #     vColor = "Migration",
+  #     palette = c(palOther, palLighterBlue, palLightBlue, palDarkBlue, palLightRed),
+  #     algorithm = "pivotSize",
+  #     # sortID = "Migration",
+  #     fontsize.title = c(14),
+  #     fontsize.labels = c(12),
+  #     fontcolor.labels = c("#121212"),
+  #     fontface.labels = c(1),
+  #     bg.labels = c("#CCCCCCDC"),
+  #     align.labels = list(c("center", "center")),
+  #     overlap.labels = 0.5,
+  #     border.col = "#696969",
+  #     border.lwds = c(1),
+  #     force.print.labels = FALSE,
+  #     # title.legend = "Mobility categories",
+  #     # position.legend = "bottom",
+  #     # fontsize.legend = 11,
+  #     # drop.unused.levels = TRUE,
+  #     inflate.labels = F
+  #   )
+  # })
 
   # censusMobilitySeq <- censusMobility %>%
   # gather(
@@ -628,44 +584,44 @@ observe({
   #
   # STIR Lollipop
   #
-  output$stirLollipop <- renderPlotly(
-    plot_ly(censusStir() %>% top_n(25, percent_more_than_30), x = ~percent_more_than_30,
-            name = "More than 30%", y = ~`GeoUID`, type = 'bar', orientation = 'h',
-            marker = list(
-              color = ~percent_more_than_30, # color = "lightsalmon",
-              line = list(width = 0.1),
-              hoverinfo="x+y+name"
-            )
-      ) %>%
-      add_trace(x = ~percent_more_than_30, name = "Less than 30%",
-                type="scatter",
-                marker = list(size = 15,
-                              color = ~percent_more_than_30, #color = 'lightsalmon',
-                              line = list(color = 'lightsalmon',
-                                          width = 4))
-      ) %>%
-      layout(
-        title = "Percentage of households having Shelter-Cost-to-Income Ratio > 30%",
-        bargap = 0.85,
-        xaxis = list(
-          title = "", showgrid = FALSE, showline = FALSE, zerolinecolor = "#e6e6e6",
-          showticklabels = TRUE, zeroline = TRUE, domain = c(0.15, 1)
-        ),
-        yaxis = list(
-          title = "", showgrid = FALSE, showline = FALSE, zerolinecolor = "#cccccc",
-          showticklabels = FALSE, zeroline = TRUE),
-        margin = list(l = 150, r = 10, t = 70, b = 30),
-        showlegend = FALSE) %>%
-    # labeling the y-axis
-    add_annotations(xref = 'paper', yref = 'y', x = 0.14, y = ~`GeoUID`,
-                    xanchor = 'right',
-                    text = ~paste0(`Region`, ' (', `GeoUID`, ')'),
-                    font = list(family = 'Arial', size = 12,
-                                color = 'rgb(67, 67, 67)'),
-                    showarrow = FALSE, align = 'right') %>%
-      config(displayModeBar = F)
-
-  )
+  # output$stirLollipop <- renderPlotly(
+  #   plot_ly(censusStir() %>% top_n(25, percent_more_than_30), x = ~percent_more_than_30,
+  #           name = "More than 30%", y = ~`GeoUID`, type = 'bar', orientation = 'h',
+  #           marker = list(
+  #             color = ~percent_more_than_30, # color = "lightsalmon",
+  #             line = list(width = 0.1),
+  #             hoverinfo="x+y+name"
+  #           )
+  #     ) %>%
+  #     add_trace(x = ~percent_more_than_30, name = "Less than 30%",
+  #               type="scatter",
+  #               marker = list(size = 15,
+  #                             color = ~percent_more_than_30, #color = 'lightsalmon',
+  #                             line = list(color = 'lightsalmon',
+  #                                         width = 4))
+  #     ) %>%
+  #     layout(
+  #       title = "Percentage of households having Shelter-Cost-to-Income Ratio > 30%",
+  #       bargap = 0.85,
+  #       xaxis = list(
+  #         title = "", showgrid = FALSE, showline = FALSE, zerolinecolor = "#e6e6e6",
+  #         showticklabels = TRUE, zeroline = TRUE, domain = c(0.15, 1)
+  #       ),
+  #       yaxis = list(
+  #         title = "", showgrid = FALSE, showline = FALSE, zerolinecolor = "#cccccc",
+  #         showticklabels = FALSE, zeroline = TRUE),
+  #       margin = list(l = 150, r = 10, t = 70, b = 30),
+  #       showlegend = FALSE) %>%
+  #   # labeling the y-axis
+  #   add_annotations(xref = 'paper', yref = 'y', x = 0.14, y = ~`GeoUID`,
+  #                   xanchor = 'right',
+  #                   text = ~paste0(`Region`, ' (', `GeoUID`, ')'),
+  #                   font = list(family = 'Arial', size = 12,
+  #                               color = 'rgb(67, 67, 67)'),
+  #                   showarrow = FALSE, align = 'right') %>%
+  #     config(displayModeBar = F)
+  #
+  # )
 
   # STIR Stacked Bar
   topLabels <- c('More than 30%', 'Less than 30%')

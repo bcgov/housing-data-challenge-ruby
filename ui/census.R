@@ -87,9 +87,6 @@ tabPanel(
                 bsAlert("c_location_alert_ht")
               )
 
-            ),
-            fluidRow(
-              column(12, plotlyOutput("c16dwellType", height = chartHeight) %>% withSpinner(color="#0dc5c1"))
             )
           ),
 
@@ -144,8 +141,8 @@ tabPanel(
             fluidRow(
               conditionalPanel(
                 condition = "input.c_location != ''",
-                column(12, sunburstOutput("mobilitySunburst", height = chartHeight) %>% withSpinner(color="#0dc5c1")),
-                column(12, plotOutput("c16mobilityTree", height = chartHeight) %>% withSpinner(color="#0dc5c1"))
+                column(12, sunburstOutput("mobilitySunburst", height = chartHeight) %>% withSpinner(color="#0dc5c1"))#,
+                # column(12, plotOutput("c16mobilityTree", height = chartHeight) %>% withSpinner(color="#0dc5c1"))
               ),
               conditionalPanel(
                 condition = "input.c_location == ''",
@@ -164,9 +161,9 @@ tabPanel(
                    and measured through the Shelter-cost-To-Income Ratio (STIR)."),
             tags$p("The reports shows proportion of households with greater than 30% of pre-tax income spent on shelter."),
             fluidRow(
-              column(12,
-                plotlyOutput("stirLollipop", height = chartHeight) %>% withSpinner(color="#0dc5c1")
-              ),
+              # column(12,
+              #   plotlyOutput("stirLollipop", height = chartHeight) %>% withSpinner(color="#0dc5c1")
+              # ),
               column(
                 12,
                 plotlyOutput("stirStacked", height = chartHeight) %>% withSpinner(color="#0dc5c1")

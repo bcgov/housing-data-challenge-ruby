@@ -193,34 +193,16 @@ output$pt_mothly_mnd_fmv <- renderPlotly({
   plot_ly(
     ptData() %>% filter(GeoUID == input$pt_location),
     x = ~ trans_period,
-    y = ~ mn_FMV,
-    name = "Mean FMV",
+    y = ~ md_FMV,
+    name = "Median FMV",
     type = 'scatter',
     mode = 'lines',
     line = list(shape = "spline", color = colCanadian)
   ) %>%
     add_lines(
-      y = ~ mn_FMV_foreign,
-      name = "Mean FMV Foreign",
-      line = list(shape = "spline", color = colForeign)
-    ) %>%
-    add_lines(
-      y = ~ md_FMV,
-      name = "Median FMV",
-      line = list(
-        shape = "spline",
-        color = colCanadian,
-        dash = 'dot'
-      )
-    ) %>%
-    add_lines(
       y = ~ md_FMV_foreign,
       name = "Median FMV Foreign",
-      line = list(
-        shape = "spline",
-        color = colForeign,
-        dash = 'dot'
-      )
+      line = list(shape = "spline", color = colForeign)
     ) %>%
     layout(
       title = paste("Average FMV in", ptLocationLabel()),
