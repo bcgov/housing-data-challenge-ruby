@@ -334,6 +334,22 @@ observe({
         highlight = highlightOptions(
           weight = 5, color = "#696969", dashArray = "", fillOpacity = 0.75, bringToFront = TRUE)
       ) %>%
+      addPolygons(data = censusAvgAge,
+        label = ~ `Region`, color = '#333', fillColor = ~ palAvgAge(censusAvgAge$`Average Age`),
+        stroke = TRUE, weight = 1, fillOpacity = 0.5, smoothFactor = 0.2,
+        layerId = ~ paste0("p-", GeoUID), group = "Population",
+        popup = paste0(
+          "<strong>", paste0(censusAvgAge$`Region`, " (", censusAvgAge$GeoUID), ")</strong>",
+          "<table class=\"leaflet-popup-table\"><tr><td>Census Year</td><td>2016</td></tr>",
+          "<tr><td>Population</td><td>", format(censusAvgAge$Population, big.mark = ","),
+          "</td></tr><tr><td>Dwellings</td><td>", format(censusAvgAge$Dwellings, big.mark = ","),
+          "</td></tr><tr><td>Households</td><td>", format(censusAvgAge$Households, big.mark = ","),
+          "</td></tr><tr><td><strong>Average Age</strong></td><td><strong>",
+          format(censusAvgAge$`Average Age`, big.mark = ","), "</strong></td></tr></table>"
+        ),
+        highlight = highlightOptions(
+          weight = 5, color = "#696969", dashArray = "", fillOpacity = 0.75, bringToFront = TRUE)
+      ) %>%
       addPolygons(data = censusMobility,
         label = ~ `Region`, color = '#333', fillColor = ~ palMobility(censusMobility$`Movers Ratio`),
         stroke = TRUE, weight = 1, fillOpacity = 0.5, smoothFactor = 0.2,
@@ -369,25 +385,9 @@ observe({
         highlight = highlightOptions(
           weight = 5, color = "#696969", dashArray = "", fillOpacity = 0.5, bringToFront = TRUE)
       ) %>%
-      addPolygons(data = censusAvgAge,
-        label = ~ `Region`, color = '#333', fillColor = ~ palAvgAge(censusAvgAge$`Average Age`),
-        stroke = TRUE, weight = 1, fillOpacity = 0.5, smoothFactor = 0.2,
-        layerId = ~ paste0("p-", GeoUID), group = "Population",
-        popup = paste0(
-          "<strong>", paste0(censusAvgAge$`Region`, " (", censusAvgAge$GeoUID), ")</strong>",
-          "<table class=\"leaflet-popup-table\"><tr><td>Census Year</td><td>2016</td></tr>",
-          "<tr><td>Population</td><td>", format(censusAvgAge$Population, big.mark = ","),
-          "</td></tr><tr><td>Dwellings</td><td>", format(censusAvgAge$Dwellings, big.mark = ","),
-          "</td></tr><tr><td>Households</td><td>", format(censusAvgAge$Households, big.mark = ","),
-          "</td></tr><tr><td><strong>Average Age</strong></td><td><strong>",
-          format(censusAvgAge$`Average Age`, big.mark = ","), "</strong></td></tr></table>"
-        ),
-        highlight = highlightOptions(
-          weight = 5, color = "#696969", dashArray = "", fillOpacity = 0.75, bringToFront = TRUE)
-      ) %>%
     # Layers control
     addLayersControl(
-      baseGroups = c("Population", "Housing", "Mobility", "STIR"),
+      baseGroups = c("Housing", "Population", "Mobility", "STIR"),
       options = layersControlOptions(collapsed = FALSE)
     )
   })
@@ -404,7 +404,7 @@ observe({
     if (selectedGroup == 'Population') {
       mapCensus %>%
         addLegend(
-          "bottomleft", title = "Average Age", opacity = 0.5,
+          "bottomleft", title = "Average age", opacity = 0.5,
           pal = palAvgAge, values = censusAvgAge$`Average Age`
         )
     } else if (selectedGroup == 'Housing') {
@@ -417,7 +417,7 @@ observe({
     } else if (selectedGroup == 'Mobility') {
       mapCensus <- mapCensus %>%
         addLegend(
-          "bottomleft", title = "Movers Ratio", opacity = 0.5,
+          "bottomleft", title = "Movers ratio", opacity = 0.5,
           pal = palMobility, values = censusMobility$`Movers Ratio`#,
           # labFormat = labelFormat(suffix = "%")
         )

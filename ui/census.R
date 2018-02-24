@@ -19,7 +19,7 @@ tabPanel(
       ),
       bsTooltip(
         "c_housing_types_help", placement = "right", trigger = "hover", options = NULL,
-        title = "Selecting a housing type will redraw the map and shade the areas for selected geographical level based on the ratio of selected housing type compared in all dwellings."
+        title = "Changing a housing type selection will redraw the map and shade the areas based on the ratio of selected housing type compared to all types."
       ),
       bsTooltip(
         "c_location_pp_compare_help", placement = "right", trigger = "hover", options = NULL,
@@ -62,9 +62,38 @@ tabPanel(
       ),
       column(
         7,
-        # Population pyramid
         tabsetPanel(
           id = "censusTopicsTabs",
+
+          # Housing Type
+          tabPanel(
+            "Housing Type",
+            value = "Housing",
+            icon = icon("home"),
+            tags$p("For the purpose of the Census, housing type is defined by \"structural type\",
+                   which includes single detached house, semi-detached and row houses, and a variety of apartment categories."),
+            tags$p("This report gives insights into diversity of the housing types in an area."),
+            fluidRow(
+              selectizeInput('c_housing_types', choices = housingTypesList,
+                             label = HTML('Housing Type <i id="c_housing_types_help" class="fa fa-question-circle-o"></i>'))
+            ),
+            fluidRow(
+              conditionalPanel(
+                condition = "input.c_location != ''",
+                column(12, plotOutput("housingTypeTreemap", height = chartHeight) %>% withSpinner(color="#0dc5c1"))
+              ),
+              conditionalPanel(
+                condition = "input.c_location == ''",
+                bsAlert("c_location_alert_ht")
+              )
+
+            ),
+            fluidRow(
+              column(12, plotlyOutput("c16dwellType", height = chartHeight) %>% withSpinner(color="#0dc5c1"))
+            )
+          ),
+
+          # Population pyramid
           tabPanel(
             "Population Age & Gender",
             value = "Population",
@@ -123,34 +152,6 @@ tabPanel(
                 bsAlert("c_location_alert_m")
               )
 
-            )
-          ),
-
-          # Housing Type
-          tabPanel(
-            "Housing Type",
-            value = "Housing",
-            icon = icon("home"),
-            tags$p("For the purpose of the Census, housing type is defined by \"structural type\",
-                   which includes single detached house, semi-detached and row houses, and a variety of apartment categories."),
-            tags$p("This report gives insights into diversity of the housing types in an area."),
-            fluidRow(
-              selectizeInput('c_housing_types', choices = housingTypesList,
-                             label = HTML('Housing Type <i id="c_housing_types_help" class="fa fa-question-circle-o"></i>'))
-            ),
-            fluidRow(
-              conditionalPanel(
-                condition = "input.c_location != ''",
-                column(12, plotOutput("housingTypeTreemap", height = chartHeight) %>% withSpinner(color="#0dc5c1"))
-              ),
-              conditionalPanel(
-                condition = "input.c_location == ''",
-                bsAlert("c_location_alert_ht")
-              )
-
-            ),
-            fluidRow(
-              column(12, plotlyOutput("c16dwellType", height = chartHeight) %>% withSpinner(color="#0dc5c1"))
             )
           ),
 
