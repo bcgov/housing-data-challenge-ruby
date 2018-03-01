@@ -5,6 +5,13 @@ Following is the glossary of terms used in BC Housing Data Visualization app.
 
 ## Census
 
+Housing type
+
+Population: Age and Sex
+
+Mobility
+
+
 [Shelter cost](http://www12.statcan.gc.ca/census-recensement/2016/ref/dict/households-menage033-eng.cfm)
 > 'Shelter cost' refers to the average monthly total of all shelter expenses paid by households that own or rent their dwelling.
 >
@@ -21,5 +28,9 @@ Following is the glossary of terms used in BC Housing Data Visualization app.
 ## Property Transfer Tax
 
 Information about [the British Columbia Property Transfer Tax](https://www2.gov.bc.ca/gov/content/taxes/property-taxes/property-transfer-tax)
+
+* Fair Market Value: "the price that would be paid by a willing purchaser to a willing seller for a property (land and improvements) in the open market on the date of registration."
+
+* Foreign participation: 
 
 
