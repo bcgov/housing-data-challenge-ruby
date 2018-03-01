@@ -17,3 +17,9 @@ Following is the glossary of terms used in BC Housing Data Visualization app.
 (from [Reference materials, 2016 Census: Housing](http://www12.statcan.gc.ca/census-recensement/2016/ref/98-501/98-501-x2016007-eng.cfm))
 
 
+
+## Property Transfer Tax
+
+Information about [the British Columbia Property Transfer Tax](https://www2.gov.bc.ca/gov/content/taxes/property-taxes/property-transfer-tax)
+
+
