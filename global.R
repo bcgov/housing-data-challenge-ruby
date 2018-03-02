@@ -299,7 +299,7 @@ jumbotron <- function(header, popPerc = 0, popInc = TRUE, dwellPerc = 0, dwellIn
               </div>
               <div class=\"splash-text\">
                 <p>
-                  <a href=\"#\" class=\"btn btn-primary explore-population\">
+                  <a href=\"#\" class=\"btn btn-bcgov explore-population\">
                     <i class=\"fa fa-users\"></i>&nbsp;Explore population
                   </a>
                 </p>
@@ -325,7 +325,7 @@ jumbotron <- function(header, popPerc = 0, popInc = TRUE, dwellPerc = 0, dwellIn
                 "</strong> (<strong>", sum_FMV_foreign_perc , "%</strong> foreign).
               </div>
               <div class=\"splash-text\">
-                <a href=\"#\" class=\"btn btn-primary explore-ptt\">
+                <a href=\"#\" class=\"btn btn-bcgov explore-ptt\">
                   <i class=\"fa fa-money\"></i>&nbsp;Explore property sales
                 </a>
               </div>
@@ -353,7 +353,7 @@ jumbotron <- function(header, popPerc = 0, popInc = TRUE, dwellPerc = 0, dwellIn
               </div>
               <div class=\"splash-text\">
                 <p>
-                  <a href=\"#\" class=\"btn btn-primary explore-housing\">
+                  <a href=\"#\" class=\"btn btn-bcgov explore-housing\">
                     <i class=\"fa fa-home\"></i>&nbsp;Explore housing types
                   </a>
                 </p>
@@ -369,7 +369,7 @@ jumbotron <- function(header, popPerc = 0, popInc = TRUE, dwellPerc = 0, dwellIn
               boxStir,"
               </div>
               <div class=\"splash-text\">
-                <a href=\"#\" class=\"btn btn-primary explore-mobility\">
+                <a href=\"#\" class=\"btn btn-bcgov explore-mobility\">
                   <i class=\"fa fa-truck\"></i>&nbsp;Explore mobility
                 </a>
               </div>
@@ -377,7 +377,7 @@ jumbotron <- function(header, popPerc = 0, popInc = TRUE, dwellPerc = 0, dwellIn
               boxMobility,"
               </div>
               <div class=\"splash-text\">
-                <a href=\"#\" class=\"btn btn-primary explore-stir\">
+                <a href=\"#\" class=\"btn btn-bcgov explore-stir\">
                   <i class=\"fa fa-bullhorn\"></i>&nbsp;Explore shelter cost
                 </a>
               </div>
