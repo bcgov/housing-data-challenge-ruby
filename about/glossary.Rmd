@@ -30,13 +30,21 @@ Housing type: [Structural Type of Dwelling](http://www12.statcan.gc.ca/census-re
 
 The results of the Census of Canada are reported at a variety of geographic levels, from Dissemination Areas to the Canadian total, and a variety of areas in between.
 
-----------------       | -----------------
-Census Region          | other descriptor
-----------------       |------------------
-Census Division        | Regional District
-Census Sub-division    | Municipality (or rural area)
-Census Tract           | (no equivalent)
-Dissemination Area     | (no equivalent)
+Some names used by Statistics Canada have British Columbia parallels you might be more familiar with:
+
+
+-------------------- ------------------------------
+Census Region        Alternate area name
+-------------------- ------------------------------    
+Census Division      Regional District
+
+Census Sub-division  Municipality (or rural area)
+
+Census Tract         (no equivalent)
+
+Dissemination Area   (no equivalent)
+-------------------- ------------------------------
+
 
 ---
 
