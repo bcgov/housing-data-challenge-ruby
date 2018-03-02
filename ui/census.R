@@ -58,7 +58,7 @@ tabPanel(
     fluidRow(
       column(
         5,
-        leafletOutput("mapCensus", height = mapHeight * 1.5) %>% withSpinner(color="#0dc5c1")
+        leafletOutput("mapCensus", height = mapHeight) %>% withSpinner(color="#0dc5c1")
       ),
       column(
         7,
@@ -97,7 +97,7 @@ tabPanel(
             icon = icon("venus-mars"),
             tags$p("The age profile of an area has a significant impact on the type of housing that is required.
                    An abundance of children suggests a need for family housing, while a greater proportion of seniors
-                   may indicate a need for “downsized” housing."),
+                   may indicate a need for \"downsized\" housing."),
             fluidRow(
               conditionalPanel(
                 condition = "input.c_location != ''",

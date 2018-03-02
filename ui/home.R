@@ -2,7 +2,7 @@ tabPanel(
   "Home",
   fluidPage(
     jumbotron(
-      header = "BC Housing Market Data Visualization",
+      header = "BC Housing Market",
       popPerc = c16Prov$Population.Change,
       popInc = TRUE,
       dwellPerc = c16Prov$Total.Private.Dwellings.Change,

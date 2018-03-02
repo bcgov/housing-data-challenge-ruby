@@ -266,11 +266,11 @@ jumbotron <- function(header, popPerc = 0, popInc = TRUE, dwellPerc = 0, dwellIn
 
   boxHousingType <- paste0("At the province level, <strong>", htSummary$`Single detached house ratio`, "%</strong> of dwellings are
                           <strong>single-family homes</strong>.")
-  boxMobility <- paste0(mSummary$Region, " census division has the highest ratio of movers in the last year - <strong>",
+  boxMobility <- paste0(mSummary$Region, " region has the highest ratio of movers in the last year - <strong>",
                        mSummary$`Movers Ratio`, "%</strong>.")
   boxStir <- paste0("In ", stirSummary$Region, ", <strong>", stirSummary$percent_more_than_30, "%</strong> of households
                     spend more than 30% of their income on shelter cost.")
-  boxPp <- paste0("Census subdivision with the highest average age (<strong>", ageSummary$`Average Age`,"</strong>) is ",
+  boxPp <- paste0("Municipality with the highest average age (<strong>", ageSummary$`Average Age`,"</strong>) is ",
                  ageSummary$Region, ".")
 
   no_mkt_trans <- as_tibble(ptProv) %>% filter(trans_period == maxTransPeriod) %>% pull("no_mkt_trans")
@@ -283,89 +283,51 @@ jumbotron <- function(header, popPerc = 0, popInc = TRUE, dwellPerc = 0, dwellIn
   <h1> ", header, "</h1>
   <div class=\"container-fluid\">
     <div class=\"row\">
-      <div class=\"col-sm-8 col-sm-offset-2\">
+      <div class=\"col-sm-10 col-sm-offset-1\">
         <div class=\"row quick-fact-container\">
-          <div class=\"col-sm-6\">
+          <div class=\"col-sm-5\">
             <div class=\"quick-fact\">
-              <div class=\"splash-icon\">
-                <i class=\"fa fa-users\"></i>
+              <div class=\"splash-text\">
+                <h3><i class=\"fa fa-users\"></i>&nbsp;Population</h3>
               </div>
               <div class=\"splash-text\">
-                Between 2011 and 2016 census, BC&nbsp;population
+                Between 2011 and 2016 censuses, BC&nbsp;population
                 has ", popChange ," by <strong>", popPerc , "%</strong>.
               </div>
-            </div>
-          </div>
-          <div class=\"col-sm-6\">
-            <div class=\"quick-fact\">
-              <div class=\"splash-icon\">
-                <i class=\"fa fa-building\"></i>
+              <div class=\"splash-text\">",
+                boxPp,"
               </div>
               <div class=\"splash-text\">
-                At the same time, number of private
-                dwellings has ", dwellChange ," by <strong>", dwellPerc ,
-                "%</strong>.
+                <p>
+                  <a href=\"#\" class=\"btn btn-primary explore-population\">
+                    <i class=\"fa fa-users\"></i>&nbsp;Explore population
+                  </a>
+                </p>
               </div>
             </div>
           </div>
-        </div>
-      </div>
-    </div>
-
-    <div class=\"row\">
-      <div class=\"col-sm-8 col-sm-offset-2\">
-        <div class=\"row quick-fact-container\">
-          <div class=\"col-sm-6\">
+          <div class=\"col-sm-5 col-sm-offset-2\">
             <div class=\"quick-fact\">
-              <div class=\"splash-icon\">
-                <i class=\"fa fa-briefcase\"></i>
+              <div class=\"splash-text\">
+                <h3><i class=\"fa fa-money\"></i>&nbsp;Property Sales</h3>
               </div>
               <div class=\"splash-text\">
                 In ", paste(month(ymd(maxTransPeriod), label = TRUE, abbr = FALSE),
-                year(maxTransPeriod)), ", there were <strong>",
+                            year(maxTransPeriod)), ", there were <strong>",
                 format(no_mkt_trans, big.mark=","),
                 "</strong> housing market transactions, <strong>",
                 format(no_foreign_perc, big.mark=","),
                 "%</strong> of which involved foreign citizens.
-              </div>
-            </div>
-          </div>
-          <div class=\"col-sm-6\">
-            <div class=\"quick-fact\">
-              <div class=\"splash-icon\">
-                <i class=\"fa fa-money\"></i>
               </div>
               <div class=\"splash-text\">
                 The volume of these transactions was <strong>",
                 paste("$", format(sum_FMV, big.mark=","), sep="") ,
                 "</strong> (<strong>", sum_FMV_foreign_perc , "%</strong> foreign).
               </div>
-            </div>
-          </div>
-        </div>
-      </div>
-    </div>
-
-    <div class=\"row\">
-      <div class=\"col-sm-8 col-sm-offset-2\">
-        <div class=\"row quick-fact-container\">
-          <div class=\"col-sm-6\">
-            <div class=\"quick-fact\">
-              <div class=\"splash-icon\">
-                <i class=\"fa fa-home\"></i>
-              </div>
-              <div class=\"splash-text\">",
-                boxHousingType ,"
-              </div>
-            </div>
-          </div>
-          <div class=\"col-sm-6\">
-            <div class=\"quick-fact\">
-              <div class=\"splash-icon\">
-                <i class=\"fa fa-bullhorn\"></i>
-              </div>
-              <div class=\"splash-text\">",
-                boxStir,"
+              <div class=\"splash-text\">
+                <a href=\"#\" class=\"btn btn-primary explore-ptt\">
+                  <i class=\"fa fa-money\"></i>&nbsp;Explore property sales
+                </a>
               </div>
             </div>
           </div>
@@ -374,31 +336,57 @@ jumbotron <- function(header, popPerc = 0, popInc = TRUE, dwellPerc = 0, dwellIn
     </div>
 
     <div class=\"row\">
-      <div class=\"col-sm-8 col-sm-offset-2\">
+      <div class=\"col-sm-10 col-sm-offset-1\">
         <div class=\"row quick-fact-container\">
-          <div class=\"col-sm-6\">
+          <div class=\"col-sm-5\">
             <div class=\"quick-fact\">
-              <div class=\"splash-icon\">
-                <i class=\"fa fa-street-view\"></i>
+              <div class=\"splash-text\">
+                <h3><i class=\"fa fa-home\"></i>&nbsp;Housing</h3>
+              </div>
+              <div class=\"splash-text\">
+                At the same time, number of private
+                dwellings has ", dwellChange ," by <strong>", dwellPerc ,
+                "%</strong>
               </div>
               <div class=\"splash-text\">",
-                boxPp,"
+                boxHousingType,"
+              </div>
+              <div class=\"splash-text\">
+                <p>
+                  <a href=\"#\" class=\"btn btn-primary explore-housing\">
+                    <i class=\"fa fa-home\"></i>&nbsp;Explore housing types
+                  </a>
+                </p>
               </div>
             </div>
           </div>
-          <div class=\"col-sm-6\">
+          <div class=\"col-sm-5 col-sm-offset-2\">
             <div class=\"quick-fact\">
-              <div class=\"splash-icon\">
-                <i class=\"fa fa-truck\"></i>
+              <div class=\"splash-text\">
+                <h3><i class=\"fa fa-truck\"></i>&nbsp;Shelter Cost and Mobility</h3>
               </div>
               <div class=\"splash-text\">",
-                boxMobility,"
+              boxStir,"
+              </div>
+              <div class=\"splash-text\">
+                <a href=\"#\" class=\"btn btn-primary explore-mobility\">
+                  <i class=\"fa fa-truck\"></i>&nbsp;Explore mobility
+                </a>
+              </div>
+              <div class=\"splash-text\">",
+              boxMobility,"
+              </div>
+              <div class=\"splash-text\">
+                <a href=\"#\" class=\"btn btn-primary explore-stir\">
+                  <i class=\"fa fa-bullhorn\"></i>&nbsp;Explore shelter cost
+                </a>
               </div>
             </div>
           </div>
         </div>
       </div>
     </div>
+
   </div>
 </div>") )
 }
