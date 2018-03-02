@@ -5,11 +5,13 @@ Following is the glossary of terms used in BC Housing Data Visualization app.
 
 ## Census
 
-Housing type
+Housing type: [Structural Type of Dwelling](http://www12.statcan.gc.ca/census-recensement/2016/ref/guides/001/98-500-x2016001-eng.cfm)
 
-Population: Age and Sex
 
-Mobility
+[Population: Age and Sex](http://www12.statcan.gc.ca/census-recensement/2016/ref/98-501/98-501-x2016002-eng.cfm) 
+
+
+[Mobility and migration](http://www12.statcan.gc.ca/census-recensement/2016/ref/98-501/98-501-x2016014-eng.cfm)
 
 
 [Shelter cost](http://www12.statcan.gc.ca/census-recensement/2016/ref/dict/households-menage033-eng.cfm)
@@ -18,19 +20,48 @@ Mobility
 >Shelter costs for owner households include, where applicable, mortgage payments, property taxes and condominium fees, along with the costs of electricity, heat, water and other municipal services. For renter households, shelter costs include, where applicable, the rent and the costs of electricity, heat, water and other municipal services.
 
 
-[Shelter-to-income ratio (STIR)](http://www12.statcan.gc.ca/census-recensement/2016/ref/dict/households-menage028-eng.cfm)
+* [Shelter-to-income ratio (STIR)](http://www12.statcan.gc.ca/census-recensement/2016/ref/dict/households-menage028-eng.cfm)
 > 'Shelter-cost-to-income ratio' refers to the proportion of average total income of household which is spent on shelter costs.
 
 (from [Reference materials, 2016 Census: Housing](http://www12.statcan.gc.ca/census-recensement/2016/ref/98-501/98-501-x2016007-eng.cfm))
 
 
+### Census Geography
+
+The results of the Census of Canada are reported at a variety of geographic levels, from Dissemination Areas to the Canadian total, and a variety of areas in between.
+
+----------------       | -----------------
+Census Region          | other descriptor
+----------------       |------------------
+Census Division        | Regional District
+Census Sub-division    | Municipality (or rural area)
+Census Tract           | (no equivalent)
+Dissemination Area     | (no equivalent)
+
+---
+
+
+
+The main Statistics Canada Census page on [Geography](http://www12.statcan.gc.ca/census-recensement/2016/geo/index-eng.cfm)
+
+
+[Standard Geographical Classification (SGC) reference maps](http://www12.statcan.gc.ca/census-recensement/2011/geo/map-carte/ref/sgc-cgt/index-eng.cfm)
+
+
+
+
+
+***
 
 ## Property Transfer Tax
 
 Information about [the British Columbia Property Transfer Tax](https://www2.gov.bc.ca/gov/content/taxes/property-taxes/property-transfer-tax)
 
-* Fair Market Value: "the price that would be paid by a willing purchaser to a willing seller for a property (land and improvements) in the open market on the date of registration."
+[Property Transfer Tax: Glossary](https://catalogue.data.gov.bc.ca/dataset/property-transfer-tax-data-2017/resource/01e47c50-d525-448e-9b25-842ba97be6be) at the [DataBC Data Catalogue](https://catalogue.data.gov.bc.ca/dataset)
 
-* Foreign participation: 
+* Fair Market Value: "The price that would be paid by a willing purchaser to a willing seller for a property (land and improvements) in the open market on the date of registration."
+
+* Foreign involvement: "Transactions in which all or some of the parties involved are foreign purchasers, i.e., purchasers who are not Canadian citizens or permanent residents of Canada."
+
 
 
