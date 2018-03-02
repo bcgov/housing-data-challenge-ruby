@@ -12,6 +12,20 @@ using [cancensus R package](https://github.com/mountainMath/cancensus).
 - Statistics Canada. No date. 2011 Census of Canada (Provinces, Census Divisions, Municipalities) (database).
 - Statistics Canada. No date. 2016 Census of Canada (Provinces, Census Divisions, Municipalities) (database).
 
+Statistics Canada provides a wealth of detail about the information collected in the Census. Some of the key pages are:
+
+* [Census Program homepage](http://www12.statcan.gc.ca/census-recensement/index-eng.cfm)
+
+* [Data products, 2016 Census](http://www12.statcan.gc.ca/census-recensement/2016/dp-pd/index-eng.cfm)
+
+   - [Data tables, 2016 Census](http://www12.statcan.gc.ca/census-recensement/2016/dp-pd/dt-td/index-eng.cfm), grouped by topic, variable, and map 
+   
+   - [Reference materials, 2016 Census](http://www12.statcan.gc.ca/census-recensement/2016/ref/index-eng.cfm): concepts and definitions, reference guides and other materials
+   
+   - [Reference materials, 2016 Census: Housing](http://www12.statcan.gc.ca/census-recensement/2016/ref/98-501/98-501-x2016007-eng.cfm)
+
+
+
 ### Property Transfer Tax
 Property transfer tax data relates to market transactions within the province.
 
