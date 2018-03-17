@@ -92,7 +92,7 @@ tabPanel(
 
           # Population pyramid
           tabPanel(
-            "Population Age & Gender",
+            "Population Age & Sex",
             value = "Population",
             icon = icon("venus-mars"),
             tags$p("The age profile of an area has a significant impact on the type of housing that is required.
