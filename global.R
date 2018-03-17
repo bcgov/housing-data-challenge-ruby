@@ -1,12 +1,7 @@
-# devtools::install_github('andrewsali/shinycssloaders')
 library(here)
 library(shiny)
 library(shinyjs)
-# library(rgdal)
-# library(rgeos)
-# library(maps)
 library(sf)
-# library(rmapshaper)
 library(leaflet)
 library(readr)
 library(stringr)
@@ -16,22 +11,14 @@ library(dplyr)
 library(htmlwidgets)
 library(DT)
 library(tidyr)
-# library(crosstalk)
 library(plotly)
-# library(cancensus)
-# library(sankeyD3)
 library(sunburstR)
 library(treemap)
-# library(data.tree)
-# library(d3treeR)
-# library(RColorBrewer)
 library(shinycssloaders)
 library(shinyBS)
 
 # source files
-source("modules/controls.R")
-source("modules/chartFormat.R")
-# source("get_geography.R")
+source("helpers/chartFormat.R")
 
 options(stringsAsFactors = F)
 Sys.setenv(TZ = "America/Vancouver")
@@ -138,12 +125,6 @@ census2016CtStir <- read_rds(file.path("data", "census2016Spatial-stir-CT.rds"))
 
 # Selection of metrics
 selectionMetrics <- c(
-  # "Number of Transactions" = "no_mkt_trans",
-  # "Total FMV" = "sum_FMV",
-  # "PTT Paid" = "sum_PPT_paid",
-  # "Number of Foreign Transactions" = "no_foreign",
-  # "Total FMV of Foreign Transactions" = "sum_FMV_foreign",
-  # "Additional Tax Paid" = "add_tax_paid",
   "Average FMV" = "mn_FMV",
   "Average Foreign FMV" = "mn_FMV_foreign",
   "% of Foreign Transactions" = "no_foreign_perc"
@@ -171,10 +152,6 @@ periodSelection <- as.data.frame(propertyTax) %>%
   rename(value = trans_period) %>%
   arrange(desc(value))
 periodSelection <- setNames(periodSelection$value, periodSelection$label)
-
-# pt_view <- 'devreg'
-# pt_trans_period <- '2017-12-01'
-# pt_metric <- 'no_mkt_trans'
 
 geoLevels <- c(
   "Census Division" = "CD",
@@ -390,47 +367,3 @@ jumbotron <- function(header, popPerc = 0, popInc = TRUE, dwellPerc = 0, dwellIn
   </div>
 </div>") )
 }
-
-# Function to dynamically create plotly charts
-plotmy <-
-  function(pmData,
-           pmxAxis,
-           pmyAxis,
-           pmName,
-           pmType,
-           pmMarker,
-           pmTitle,
-           pmTraces) {
-    # configure chart
-    plotme <- plot_ly(
-      pmData %>% arrange(desc(pmyAxis)),
-      x = pmxAxis,
-      y = pmyAxis,
-      name = pmName,
-      type = pmType,
-      marker = list(color = pmMarker)#,
-      # titlefont = list(size = 12)
-    ) %>%
-      layout(
-        title = pmTitle,
-        xaxis = axisFormat,
-        yaxis = axisFormat,
-        margin = marginFormat,
-        legend = legendFormat
-      ) %>%
-      config(displayModeBar = F)
-
-    # add traces dynamically
-    for (pmTrace in pmTraces) {
-      plotme <- add_trace(
-        plotme,
-        y = pmTrace[['y']],
-        x = pmTrace[['x']],
-        name = pmTrace[['name']],
-        marker = list(color = pmTrace[['color']]) #,
-        #evaluate = TRUE
-      )
-    }
-
-    plotme
-  }

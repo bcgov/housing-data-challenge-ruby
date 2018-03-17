@@ -119,7 +119,7 @@ censusPp2016LocationCompare <- reactive({
   censusPp2016Compare <- inner_join(
     censusPp2016CompareA,
     censusPp2016CompareB,
-    by = c("age", "sex") # $compare_loc <- censusPp2016Compare$percentage
+    by = c("age", "sex")
   )
   return(censusPp2016Compare)
 })
@@ -130,7 +130,6 @@ locationLabel <- reactive({
     filter(value == input$c_location) %>%
     select(label) %>%
     distinct()
-  # st_geometry(locationLabel) <- NULL
   return(locationLabel)
 })
 
@@ -141,7 +140,6 @@ locationCompareLabel <- reactive({
     mutate(label = paste0(Region, " (", GeoUID, ")")) %>%
     select(label) %>%
     distinct()
-  # st_geometry(locationCompareLabel) <- NULL
   return(locationCompareLabel)
 })
 
@@ -219,7 +217,7 @@ observe({
     domain = censusMobility$`Movers Ratio`,
     na.color = "#e6e6e6"
   )
-  palLightRed <- "#fc95a4"# "#feb87e"# "#e85361"# "#e08176"
+  palLightRed <- "#fc95a4"
   palLighterBlue <- colNonStrataRental
   palLightBlue <- colMultiFam
   palDarkBlue <- colSingleFam
@@ -309,8 +307,6 @@ observe({
         label = ~ `Region`, color = '#333', fillColor = ~ palMobility(censusMobility$`Movers Ratio`),
         stroke = TRUE, weight = 1, fillOpacity = 0.5, smoothFactor = 0.2,
         layerId = ~ paste0("m-", GeoUID), group = "Mobility",
-        # fillOpacity = 0.5,
-        # smoothFactor = 1,
         popup = paste0(
           "<strong>", paste0(censusMobility$`Region`, " (", censusMobility$GeoUID), ")</strong>",
           "<table class=\"leaflet-popup-table\"><tr><td>Census Year</td><td>2016</td></tr>",
@@ -373,8 +369,7 @@ observe({
       mapCensus <- mapCensus %>%
         addLegend(
           "bottomleft", title = "Movers ratio", opacity = 0.5,
-          pal = palMobility, values = censusMobility$`Movers Ratio`#,
-          # labFormat = labelFormat(suffix = "%")
+          pal = palMobility, values = censusMobility$`Movers Ratio`
         )
     } else if (selectedGroup == 'STIR') {
       mapCensus <- mapCensus %>%
@@ -440,72 +435,6 @@ observe({
   censusMobilityDf <- censusMobilityGathered
   st_geometry(censusMobilityDf) <- NULL
 
-  # output$c16mobilityTree <- renderPlot({
-  #   treemap(
-  #     # housingTypesDf %>% filter(GeoUID == input$c_location) %>% mutate(ratioFormat = paste0(gsub(" ratio", "", HousingType), " - ", ratio, "%")),
-  #     title = paste("Distribution of Mobility categories in ", locationLabel()),
-  #     censusMobilityDf %>% filter(GeoUID == input$c_location) %>% mutate(ratioFormat = paste0(Migration, " - ", count, "%")),
-  #     index = c("ratioFormat"),
-  #     vSize = "count",
-  #     type = "index",
-  #     vColor = "Migration",
-  #     palette = c(palOther, palLighterBlue, palLightBlue, palDarkBlue, palLightRed),
-  #     algorithm = "pivotSize",
-  #     # sortID = "Migration",
-  #     fontsize.title = c(14),
-  #     fontsize.labels = c(12),
-  #     fontcolor.labels = c("#121212"),
-  #     fontface.labels = c(1),
-  #     bg.labels = c("#CCCCCCDC"),
-  #     align.labels = list(c("center", "center")),
-  #     overlap.labels = 0.5,
-  #     border.col = "#696969",
-  #     border.lwds = c(1),
-  #     force.print.labels = FALSE,
-  #     # title.legend = "Mobility categories",
-  #     # position.legend = "bottom",
-  #     # fontsize.legend = 11,
-  #     # drop.unused.levels = TRUE,
-  #     inflate.labels = F
-  #   )
-  # })
-
-  # censusMobilitySeq <- censusMobility %>%
-  # gather(
-  #   "Non-Movers Ratio", "Non-Migrants Ratio", "External Migrants Ratio",
-  #   "Intraprovincial Migrants Ratio", "Interprovincial Migrants Ratio",
-  #   key = "Migration", value = "count") %>%
-  # select(GeoUID, Region, Migration, count) %>%
-  # mutate(
-  #   "Movers" = ifelse(Migration == "Non-Movers Ratio", "", "Movers"),
-  #   "Migrants" = ifelse(
-  #     Migration %in% c("External Migrants Ratio", "Intraprovincial Migrants Ratio", "Interprovincial Migrants Ratio"),
-  #     "Migrants",
-  #     ""
-  #   ),
-  #   "Internal migrants" = ifelse(
-  #     Migration %in% c("Intraprovincial Migrants Ratio", "Interprovincial Migrants Ratio"),
-  #     "Internal migrants",
-  #     ""
-  #   # ),
-  #   # Migration = str_replace(
-  #   #   str_replace(Migration, " Ratio", ""),
-  #   #   " Migrants",
-  #   #   ""
-  #   ),
-  #   "sequence" = str_replace(
-  #     str_replace(
-  #       paste(Movers, Migrants, `Internal migrants`, str_replace(Migration, "-", " "), sep = "-"),
-  #       "-{2,}", "-"
-  #     ),
-  #     "^-", ""
-  #   )
-  # ) %>%
-  # filter(GeoUID == input$c_location) %>%
-  # select(sequence, count)
-  #
-  # st_geometry(censusMobilitySeq) <- NULL
-
   sequenceColors = c(palLighterBlue, palLightRed, "steelblue", palDarkBlue, "#009900", palOther, "palegreen", palLightBlue)
   output$mobilitySunburst <- renderSunburst({
     sunburst(
@@ -522,13 +451,11 @@ observe({
   # Population Pyramid
   #
   output$popPyr <- renderPlotly({
-    # plot_ly(censusPp2016() %>% filter(GeoUID == input$c_location),
     p <- plot_ly(censusPp2016LocationCompare(),
             x = ~percentage_2016, y = ~age, name = ~paste(Region, '2016'), color = ~sex, type = 'bar', orientation = 'h',
             hoverinfo = 'y+text+name', text = ~paste('Census 2016</br>', Region, abs(percentage_2016), '%'), colors = c(colCommercial, colMultiFam)) %>%
       add_annotations(xref = 'x', yref = 'y',
                       x = ~(percentage_2016 / abs(percentage_2016) / 2), y = ~age,
-                      # x = 1, y = ~age,
                       text = ~paste(abs(percentage_2016), '%'),
                       font = list(family = 'Arial', size = 12,
                                   color = 'rgb(67, 67, 67)'),
@@ -560,7 +487,6 @@ observe({
                         text = ~paste('compared to', locationCompareLabel()),
                         font = list(size = 12, color = '#969696'),
                         showarrow = FALSE)
-      # ppTitle <- paste(ppTitle, '<br />compared to', locationCompareLabel())
     }
     p %>%
       layout(bargap = 0.05, barmode = 'overlay',
@@ -580,48 +506,6 @@ observe({
              legend = list(orientation = 'h')) %>%
       config(displayModeBar = F)
   })
-
-  #
-  # STIR Lollipop
-  #
-  # output$stirLollipop <- renderPlotly(
-  #   plot_ly(censusStir() %>% top_n(25, percent_more_than_30), x = ~percent_more_than_30,
-  #           name = "More than 30%", y = ~`GeoUID`, type = 'bar', orientation = 'h',
-  #           marker = list(
-  #             color = ~percent_more_than_30, # color = "lightsalmon",
-  #             line = list(width = 0.1),
-  #             hoverinfo="x+y+name"
-  #           )
-  #     ) %>%
-  #     add_trace(x = ~percent_more_than_30, name = "Less than 30%",
-  #               type="scatter",
-  #               marker = list(size = 15,
-  #                             color = ~percent_more_than_30, #color = 'lightsalmon',
-  #                             line = list(color = 'lightsalmon',
-  #                                         width = 4))
-  #     ) %>%
-  #     layout(
-  #       title = "Percentage of households having Shelter-Cost-to-Income Ratio > 30%",
-  #       bargap = 0.85,
-  #       xaxis = list(
-  #         title = "", showgrid = FALSE, showline = FALSE, zerolinecolor = "#e6e6e6",
-  #         showticklabels = TRUE, zeroline = TRUE, domain = c(0.15, 1)
-  #       ),
-  #       yaxis = list(
-  #         title = "", showgrid = FALSE, showline = FALSE, zerolinecolor = "#cccccc",
-  #         showticklabels = FALSE, zeroline = TRUE),
-  #       margin = list(l = 150, r = 10, t = 70, b = 30),
-  #       showlegend = FALSE) %>%
-  #   # labeling the y-axis
-  #   add_annotations(xref = 'paper', yref = 'y', x = 0.14, y = ~`GeoUID`,
-  #                   xanchor = 'right',
-  #                   text = ~paste0(`Region`, ' (', `GeoUID`, ')'),
-  #                   font = list(family = 'Arial', size = 12,
-  #                               color = 'rgb(67, 67, 67)'),
-  #                   showarrow = FALSE, align = 'right') %>%
-  #     config(displayModeBar = F)
-  #
-  # )
 
   # STIR Stacked Bar
   topLabels <- c('More than 30%', 'Less than 30%')
@@ -689,7 +573,6 @@ observeEvent(input$mapCensus_shape_click, {
     id <- str_split(m$id, "-", simplify = TRUE)
     locationId = id[1,2]
 
-    # updateSelectInput(session, "c_location", selected = p$id)
     updateTextInput(session, "c_location", value = locationId)
 
     locationLabel <- as.data.frame(censusMobility()) %>%
@@ -697,7 +580,6 @@ observeEvent(input$mapCensus_shape_click, {
       mutate(label = paste0(Region, " (", GeoUID, ")")) %>%
       select(label) %>%
       distinct()
-    # st_geometry(locationLabel) <- NULL
     updateTextInput(session, "c_location_name", value = locationLabel$label)
 
     updateSelectizeInput(session, 'c_location_pp_compare', choices = regionOptions(), server = TRUE)

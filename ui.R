@@ -5,7 +5,6 @@ ui <- navbarPage(
   source(file.path("ui", "census.R"),  local = TRUE)$value,
   source(file.path("ui", "ptt.R"),  local = TRUE)$value,
   source(file.path("ui", "about.R"),  local = TRUE)$value,
-  # source(file.path("ui", "census_search.R"),  local = TRUE)$value
   tabPanel("Feedback", id = "feedback"),
   tags$head(tags$script(src="js/bcgov.js")),
   tags$head(tags$link(rel="shortcut icon", href="/images/favicon.ico")),

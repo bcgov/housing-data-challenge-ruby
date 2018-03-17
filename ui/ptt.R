@@ -40,7 +40,7 @@ tabPanel(
           selectizeInput(
             "pt_trans_period",
             label = HTML('Period <i id="pt_trans_period_help" class="fa fa-question-circle-o"></i>'),
-            choices = periodSelection, #levels(propertyTax$trans_period),
+            choices = periodSelection,
             multiple = FALSE,
             selected = maxTransPeriod
           )

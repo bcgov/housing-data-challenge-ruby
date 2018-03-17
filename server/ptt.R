@@ -26,7 +26,7 @@ ptData <- reactive({
 
 ptDataPeriod <- reactive({
   ptDataPeriod <- ptData() %>%
-    filter(trans_period == input$pt_trans_period) #%>%
+    filter(trans_period == input$pt_trans_period)
   return(ptDataPeriod)
 })
 
@@ -58,7 +58,6 @@ observe({
   updateTextInput(session, "pt_location_name", value = "")
 
   pal <- colorNumeric("viridis", ptDataPeriod()[[pt_metric]])
-  # pal <- colorQuantile("viridis", ptDataPeriod()[[pt_metric]], n = 10)
 
   output$mapPtt <- renderLeaflet({
     leaflet() %>%
@@ -112,15 +111,9 @@ observe({
         "bottomleft",
         pal = pal,
         values = ptDataPeriod()[[pt_metric]],
-        title = selectionMetricsDF %>% filter(value == rlang::sym(pt_metric)) %>% pull(label), # pt_metric, # "Transactions #",
-        # labFormat = labelFormat(prefix = "$"),
+        title = selectionMetricsDF %>% filter(value == rlang::sym(pt_metric)) %>% pull(label),
         opacity = 0.8
-      ) #%>%
-      # addLayersControl(
-      #     overlayGroups = c("Census Divisions"),
-      #     options = layersControlOptions(collapsed = FALSE)
-      # ) %>%
-      # clearGroup(group = "selected")
+      )
   })
 
 
@@ -375,22 +368,14 @@ output$pt_mothly_comm <- renderPlotly({
 observeEvent(input$mapPtt_shape_click, {
   m <- input$mapPtt_shape_click
   if(!is.null(m$id)){
-    # id <- str_split(m$id, "-", simplify = TRUE)
-    # locationId = id[1,2]
 
-    # updateSelectInput(session, "c_location", selected = p$id)
     updateTextInput(session, "pt_location", value = m$id)
 
-    # updateTextInput(session, "pt_location_name", value = m$id)
     locationLabel <- as.data.frame(ptDataPeriod()) %>%
-      # filter(GeoUID == locationId) %>%
       filter(GeoUID == m$id) %>%
       mutate(label = Location) %>%
       select(label) %>%
       distinct()
-    # st_geometry(locationLabel) <- NULL
     updateTextInput(session, "pt_location_name", value = locationLabel$label)
-    #
-    # updateSelectizeInput(session, 'c_location_pp_compare', choices = regionOptions(), server = TRUE)
   }
 })

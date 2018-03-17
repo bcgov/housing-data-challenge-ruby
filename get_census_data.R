@@ -1,4 +1,3 @@
-# devtools::install_github("mountainmath/cancensus")
 library(cancensus)
 library(dplyr)
 library(readr)
@@ -9,7 +8,8 @@ library(here)
 library(rmapshaper)
 
 # cancensus global config
-options(cancensus.api_key = "CensusMapper_f17c13c7fc5e60de7cdd341d5d4db866")
+# Obtain a free API key by signing up for a CensusMapper account at https://censusmapper.ca/users/sign_up.
+options(cancensus.api_key = "my.census.mapper.api.key")
 options(cancensus.cache_path = here::here("cache"))
 
 # get only BC regions
