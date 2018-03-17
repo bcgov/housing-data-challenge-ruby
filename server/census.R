@@ -128,8 +128,7 @@ censusPp2016LocationCompare <- reactive({
 locationLabel <- reactive({
   locationLabel <- as.data.frame(regionOptions()) %>%
     filter(value == input$c_location) %>%
-    select(label) %>%
-    distinct()
+    pull(label)
   return(locationLabel)
 })
 
@@ -138,8 +137,7 @@ locationCompareLabel <- reactive({
   locationCompareLabel <- as.data.frame(censusMobility()) %>%
     filter(GeoUID == input$c_location_pp_compare) %>%
     mutate(label = paste0(Region, " (", GeoUID, ")")) %>%
-    select(label) %>%
-    distinct()
+    pull(label)
   return(locationCompareLabel)
 })
 
@@ -429,21 +427,33 @@ observe({
   })
 
   #
-  # Mobility treemap
+  # Mobility sunburst chart
   #
   # Have to drop geometry, i.e. convert sf to df to use in treemap
   censusMobilityDf <- censusMobilityGathered
   st_geometry(censusMobilityDf) <- NULL
 
+  output$mobility_sunburst_title <- renderText(paste("Mobility Distribution for ", locationLabel()))
   sequenceColors = c(palLighterBlue, palLightRed, "steelblue", palDarkBlue, "#009900", palOther, "palegreen", palLightBlue)
   output$mobilitySunburst <- renderSunburst({
-    sunburst(
+    sb <- sunburst(
       censusMobilitySeq %>% filter(GeoUID == input$c_location) %>% select(sequence, count),
       colors = sequenceColors,
       percent = TRUE,
       count = TRUE,
       height = 400,
-      legend = list(w = 200, h = 25, s = 2)
+      legend = list(w = 200, h = 25, s = 2, t = 10),
+      withD3 = T
+    )
+    htmlwidgets::onRender(
+      sb,
+      "
+      function(el, x) {
+        d3.selectAll('.sunburst-legend text').attr('font-size', '12px');
+        d3.select(el).select('.sunburst-togglelegend').property('checked', true);
+        d3.select(el).select('.sunburst-legend').style('visibility', '');
+      }
+      "
     )
   })
 
@@ -578,9 +588,8 @@ observeEvent(input$mapCensus_shape_click, {
     locationLabel <- as.data.frame(censusMobility()) %>%
       filter(GeoUID == locationId) %>%
       mutate(label = paste0(Region, " (", GeoUID, ")")) %>%
-      select(label) %>%
-      distinct()
-    updateTextInput(session, "c_location_name", value = locationLabel$label)
+      pull(label)
+    updateTextInput(session, "c_location_name", value = locationLabel)
 
     updateSelectizeInput(session, 'c_location_pp_compare', choices = regionOptions(), server = TRUE)
   }

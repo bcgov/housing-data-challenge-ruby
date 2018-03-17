@@ -262,3 +262,10 @@ ul.inline li a:link, nav ul.inline li a:visited {
     display: block;
     text-align: center;
 }
+
+/* Mobility sunburst title */
+#mobility_sunburst_title {
+    font-size: 14px;
+    text-align: center;
+    font-weight: bold;
+}

@@ -141,8 +141,11 @@ tabPanel(
             fluidRow(
               conditionalPanel(
                 condition = "input.c_location != ''",
-                column(12, sunburstOutput("mobilitySunburst", height = chartHeight) %>% withSpinner(color="#0dc5c1"))#,
-                # column(12, plotOutput("c16mobilityTree", height = chartHeight) %>% withSpinner(color="#0dc5c1"))
+                column(
+                  12,
+                  textOutput("mobility_sunburst_title"),
+                  sunburstOutput("mobilitySunburst", height = chartHeight) %>% withSpinner(color="#0dc5c1")
+                )
               ),
               conditionalPanel(
                 condition = "input.c_location == ''",
