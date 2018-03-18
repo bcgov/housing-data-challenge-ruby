@@ -25,10 +25,10 @@ Sys.setenv(TZ = "America/Vancouver")
 
 # Read objects
 # Property transfer tax
-ptRegDis <- readRDS(here::here("data", "ptt-regional-district.rds"))
-ptMun <- readRDS(here::here("data", "ptt-municipality.rds"))
-ptDevReg <- readRDS(here::here("data", "ptt-development-region.rds"))
-ptProv <- readRDS(here::here("data", "ptt-province.rds"))
+ptRegDis <- readRDS(here::here("app", "data", "ptt-regional-district.rds"))
+ptMun <- readRDS(here::here("app", "data", "ptt-municipality.rds"))
+ptDevReg <- readRDS(here::here("app", "data", "ptt-development-region.rds"))
+ptProv <- readRDS(here::here("app", "data", "ptt-province.rds"))
 
 # boundaries shapefiles
 bcCensusDivs <- readRDS("./data/bc2011CensusDivisions.rds")
