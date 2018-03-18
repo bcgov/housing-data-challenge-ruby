@@ -58,7 +58,7 @@ tabPanel(
     fluidRow(
       column(
         5,
-        leafletOutput("mapCensus", height = mapHeight) %>% withSpinner(color="#0dc5c1")
+        leafletOutput("mapCensus", height = mapHeightCensus) %>% withSpinner(color="#0dc5c1")
       ),
       column(
         7,

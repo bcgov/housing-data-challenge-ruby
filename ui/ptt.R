@@ -64,7 +64,7 @@ tabPanel(
     ),
 
     fluidRow(
-      column(5, leafletOutput("mapPtt", height = mapHeight)),
+      column(5, leafletOutput("mapPtt", height = mapHeightPtt)),
       column(7,
         tabsetPanel(
           tabPanel(

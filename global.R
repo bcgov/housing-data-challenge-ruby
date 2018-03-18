@@ -143,7 +143,8 @@ selectionMetricsDF <- data.frame(
 maxTransPeriod <- max(ptProv$trans_period)
 propertyTax <- ptRegDis
 chartHeight <- 600
-mapHeight <- 600
+mapHeightPtt <- 600
+mapHeightCensus <- 800
 
 periodSelection <- as.data.frame(propertyTax) %>%
   select(trans_period) %>%
