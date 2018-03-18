@@ -1,0 +1,2 @@
+rgdal leaflet maps dplyr htmlwidgets DT rgeos tidyr crosstalk plotly
+here shiny sf here readr stringr magrittr rlang rgdal leaflet maps tidyverse dplyr ggplot2 htmlwidgets DT rgeos tidyr crosstalk plotly devtools shinyjs feather stringr htmltools sunburstR treemap data.tree RColorBrewer shinycssloaders rmapshaper shinyBS

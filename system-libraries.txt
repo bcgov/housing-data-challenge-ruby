@@ -1,0 +1,1 @@
+libgdal-dev libproj-dev libssl-dev git libxml2-dev libudunits2-dev libjq-dev libprotobuf-dev libv8-3.14-dev protobuf-compiler
