@@ -4,7 +4,7 @@ This app is a solution for BC Government Data Visualization Challenge to provide
 improved data visualization capacity and usefullness of Crown data with regards 
 to the housing market and condiotions in BC.
 
-App is publicly available at http://bcdevx.rubyind.com/housing/.
+App is publicly available at https://bcdevx.rubyind.com/.
 
 ## Table of Contents
 

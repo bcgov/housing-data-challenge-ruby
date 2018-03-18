@@ -150,7 +150,7 @@ tabPanel(
             "All Locations",
             icon = icon("map"),
             tags$p("Selected variable for each location available in selected geographical level."),
-            plotlyOutput("interactive", height = mapHeight)
+            plotlyOutput("interactive", height = mapHeightPtt)
           )
         )
       )
