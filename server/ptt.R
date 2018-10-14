@@ -103,7 +103,6 @@ observe({
         highlight = highlightOptions(
           weight = 5,
           color = "#696969",
-          dashArray = "",
           fillOpacity = 0.5,
           bringToFront = TRUE)
       ) %>%

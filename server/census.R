@@ -283,7 +283,7 @@ observe({
           "</table>"
         ),
         highlight = highlightOptions(
-          weight = 5, color = "#696969", dashArray = "", fillOpacity = 0.75, bringToFront = TRUE)
+          weight = 5, color = "#696969", fillOpacity = 0.75, bringToFront = TRUE)
       ) %>%
       addPolygons(data = censusAvgAge,
         label = ~ `Region`, color = '#333', fillColor = ~ palAvgAge(censusAvgAge$`Average Age`),
@@ -299,7 +299,7 @@ observe({
           format(censusAvgAge$`Average Age`, big.mark = ","), "</strong></td></tr></table>"
         ),
         highlight = highlightOptions(
-          weight = 5, color = "#696969", dashArray = "", fillOpacity = 0.75, bringToFront = TRUE)
+          weight = 5, color = "#696969", fillOpacity = 0.75, bringToFront = TRUE)
       ) %>%
       addPolygons(data = censusMobility,
         label = ~ `Region`, color = '#333', fillColor = ~ palMobility(censusMobility$`Movers Ratio`),
@@ -315,7 +315,7 @@ observe({
           format(censusMobility$`Movers Ratio`, big.mark = ","), "</strong></td></tr></table>"
         ),
         highlight = highlightOptions(
-          weight = 5, color = "#696969", dashArray = "", fillOpacity = 0.75, bringToFront = TRUE)
+          weight = 5, color = "#696969", fillOpacity = 0.75, bringToFront = TRUE)
       ) %>%
       addPolygons(data = censusStir,
         label = ~ `Region`, color = '#333', fillColor = ~ palStir(censusStir$percent_more_than_30),
@@ -332,7 +332,7 @@ observe({
           format(censusStir$percent_more_than_30, big.mark = ","), "</strong></td></tr></table>"
         ),
         highlight = highlightOptions(
-          weight = 5, color = "#696969", dashArray = "", fillOpacity = 0.5, bringToFront = TRUE)
+          weight = 5, color = "#696969", fillOpacity = 0.5, bringToFront = TRUE)
       ) %>%
     # Layers control
     addLayersControl(
