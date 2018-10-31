@@ -167,6 +167,14 @@ hr {
     border: 1px solid #e3e3e3;
 }
 
+#housingTypeTreemap.shiny-output-error:before {
+  content: "";
+}
+
+#housingTypeTreemap.shiny-output-error {
+  color: #393939;
+}
+
 .tooltip-inner {
     text-align: left;
     background-color: #393939;

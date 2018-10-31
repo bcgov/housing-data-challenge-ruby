@@ -5,6 +5,7 @@ library(magrittr)
 library(stringr)
 library(tidyr)
 library(here)
+library(sf)
 library(rmapshaper)
 
 # cancensus global config
@@ -74,96 +75,33 @@ getHousingTypesData <- function(year, censusLevel = "CMA", regions) {
       "Movable dwelling" = v_CA16_417,
       "Single detached house" = v_CA16_409
     ) %<>%
-    replace_na(`Single detached house` = 0,
+    replace_na(list(`Single detached house` = 0,
                `Apartment in tall building` = 0,
                `Semi detached house` = 0,
                `Row house` = 0,
                `Apartment in duplex` = 0,
                `Apartment in small building` = 0,
                `Other single attached house` = 0,
-               `Movable dwelling` = 0) %<>%
+               `Movable dwelling` = 0)) %<>%
     mutate(
-      "Single detached house ratio" = round(`Single detached house` * 100 / (
-        `Single detached house` +
-          `Apartment in tall building` +
-          `Semi detached house` +
-          `Row house` +
-          `Apartment in duplex` +
-          `Apartment in small building` +
-          `Other single attached house` +
-          `Movable dwelling`
-      ), digits = 2),
-      "Apartment in tall building ratio" = round(`Apartment in tall building` * 100 / (
-        `Single detached house` +
-          `Apartment in tall building` +
-          `Semi detached house` +
-          `Row house` +
-          `Apartment in duplex` +
-          `Apartment in small building` +
-          `Other single attached house` +
-          `Movable dwelling`
-      ), digits = 2),
-      "Semi detached house ratio" = round(`Semi detached house` * 100 / (
-        `Single detached house` +
-          `Apartment in tall building` +
-          `Semi detached house` +
-          `Row house` +
-          `Apartment in duplex` +
-          `Apartment in small building` +
-          `Other single attached house` +
-          `Movable dwelling`
-      ), digits = 2),
-      "Row house ratio" = round(`Row house` * 100 / (
-        `Single detached house` +
-          `Apartment in tall building` +
-          `Semi detached house` +
-          `Row house` +
-          `Apartment in duplex` +
-          `Apartment in small building` +
-          `Other single attached house` +
-          `Movable dwelling`
-      ), digits = 2),
-      "Apartment in duplex ratio" = round(`Apartment in duplex` * 100 / (
-        `Single detached house` +
-          `Apartment in tall building` +
-          `Semi detached house` +
-          `Row house` +
-          `Apartment in duplex` +
-          `Apartment in small building` +
-          `Other single attached house` +
-          `Movable dwelling`
-      ), digits = 2),
-      "Apartment in small building ratio" = round(`Apartment in small building` * 100 / (
-        `Single detached house` +
-          `Apartment in tall building` +
-          `Semi detached house` +
-          `Row house` +
-          `Apartment in duplex` +
-          `Apartment in small building` +
-          `Other single attached house` +
-          `Movable dwelling`
-      ), digits = 2),
-      "Other single attached house ratio" = round(`Other single attached house` * 100 / (
-        `Single detached house` +
-          `Apartment in tall building` +
-          `Semi detached house` +
-          `Row house` +
-          `Apartment in duplex` +
-          `Apartment in small building` +
-          `Other single attached house` +
-          `Movable dwelling`
-      ), digits = 2),
-      "Movable dwelling ratio" = round(`Movable dwelling` * 100 / (
-        `Single detached house` +
-          `Apartment in tall building` +
-          `Semi detached house` +
-          `Row house` +
-          `Apartment in duplex` +
-          `Apartment in small building` +
-          `Other single attached house` +
-          `Movable dwelling`
-      ), digits = 2)
-    )
+      "SumAll" = `Single detached house` +
+        `Apartment in tall building` +
+        `Semi detached house` +
+        `Row house` +
+        `Apartment in duplex` +
+        `Apartment in small building` +
+        `Other single attached house` +
+        `Movable dwelling`,
+      "Single detached house ratio" = if_else(SumAll == 0, 0, round(`Single detached house` * 100 / SumAll, digits = 2)),
+      "Apartment in tall building ratio" = if_else(SumAll == 0, 0, round(`Apartment in tall building` * 100 / SumAll, digits = 2)),
+      "Semi detached house ratio" = if_else(SumAll == 0, 0, round(`Semi detached house` * 100 / SumAll, digits = 2)),
+      "Row house ratio" = if_else(SumAll == 0, 0, round(`Row house` * 100 / SumAll, digits = 2)),
+      "Apartment in duplex ratio" = if_else(SumAll == 0, 0, round(`Apartment in duplex` * 100 / SumAll, digits = 2)),
+      "Apartment in small building ratio" = if_else(SumAll == 0, 0, round(`Apartment in small building` * 100 / SumAll, digits = 2)),
+      "Other single attached house ratio" = if_else(SumAll == 0, 0, round(`Other single attached house` * 100 / SumAll, digits = 2)),
+      "Movable dwelling ratio" = if_else(SumAll == 0, 0, round(`Movable dwelling` * 100 / SumAll, digits = 2))
+    ) %>%
+    select(-one_of(c("SumAll")))
 
   saveRDS(censusHousing, here::here("data", "housing", paste0("census",  year, "-housing-", censusLevel, ".rds")))
 }
@@ -171,11 +109,10 @@ getHousingTypesData <- function(year, censusLevel = "CMA", regions) {
 # Loop through year and geographical levels and save housing types-related data
 # for (censusYear in c("2006", "2011", "2016")) {
 for (censusYear in c("2016")) {
-  for (censusLevel in c("CMA", "CD", "CSD", "CT", "DA")) {
+  for (censusLevel in c("CMA", "CD", "CSD", "CT")) {
     getHousingTypesData(censusYear, censusLevel, regions)
   }
 }
-
 
 # mobility
 vectorsMobility <- search_census_vectors(' Mobility status 1 year ago', "CA16", type = "Total") %>%
@@ -212,7 +149,7 @@ for (censusLevel in c("CMA", "CD", "CSD", "CT", "DA")) {
       "Interprovincial migrants" = v_CA16_6713
     ) %>%
     filter(!is.na(Movers) & !is.na(`Non-movers`)) %>%
-    replace_na(
+    replace_na(list(
       Movers = 0,
       `Non-movers` = 0,
       `Non-migrants` = 0,
@@ -220,7 +157,7 @@ for (censusLevel in c("CMA", "CD", "CSD", "CT", "DA")) {
       `Internal migrants` = 0,
       `Intraprovincial migrants` = 0,
       `Interprovincial migrants` = 0,
-      `External migrants` = 0
+      `External migrants` = 0)
     ) %>%
     mutate(
       `Movers Ratio` = round(`Movers` / (`Non-movers` + `Movers`) * 100, digits = 2),

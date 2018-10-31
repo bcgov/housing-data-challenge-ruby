@@ -110,10 +110,10 @@ censusMobilityCtSeq <- read_rds(file.path("data", "census2016-mobility-CT-seq.rd
 # censusMobilityDa <- read_rds(file.path("data", "census2016-mobility-DA.rds"))
 
 # Housing Type
-housingTypesCma <- readRDS(file.path("data", "housing", "census2016-housing-CMA.rds"))
-housingTypesCsd <- readRDS(file.path("data", "housing", "census2016-housing-CSD.rds"))
-housingTypesCd <- readRDS(file.path("data", "housing", "census2016-housing-CD.rds"))
-housingTypesCt <- readRDS(file.path("data", "housing", "census2016-housing-CT.rds"))
+housingTypesCma <- readRDS(file.path("data", "housing", "census2016-housing-CMA.rds")) %>% na.omit()
+housingTypesCsd <- readRDS(file.path("data", "housing", "census2016-housing-CSD.rds")) %>% na.omit()
+housingTypesCd <- readRDS(file.path("data", "housing", "census2016-housing-CD.rds")) %>% na.omit()
+housingTypesCt <- readRDS(file.path("data", "housing", "census2016-housing-CT.rds")) %>% na.omit()
 # housingTypesDa <- readRDS(file.path("data", "housing", "census2016-housing-DA.rds"))
 
 # Shelter-Cost-to-Income Ratio data
