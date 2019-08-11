@@ -149,7 +149,7 @@ mapHeightCensus <- 800
 periodSelection <- as.data.frame(propertyTax) %>%
   select(trans_period) %>%
   distinct() %>%
-  mutate(label = paste(year(trans_period), month(trans_period, label = TRUE))) %>%
+  mutate(label = paste(lubridate::year(trans_period), lubridate::month(trans_period, label = TRUE))) %>%
   rename(value = trans_period) %>%
   arrange(desc(value))
 periodSelection <- setNames(periodSelection$value, periodSelection$label)
@@ -290,8 +290,8 @@ jumbotron <- function(header, popPerc = 0, popInc = TRUE, dwellPerc = 0, dwellIn
                 <h3><i class=\"fa fa-money\"></i>&nbsp;Property Sales</h3>
               </div>
               <div class=\"splash-text\">
-                In ", paste(month(ymd(maxTransPeriod), label = TRUE, abbr = FALSE),
-                            year(maxTransPeriod)), ", there were <strong>",
+                In ", paste(lubridate::month(ymd(maxTransPeriod), label = TRUE, abbr = FALSE),
+                            lubridate::year(maxTransPeriod)), ", there were <strong>",
                 format(no_mkt_trans, big.mark=","),
                 "</strong> housing market transactions, <strong>",
                 format(no_foreign_perc, big.mark=","),
