@@ -22,6 +22,7 @@ censusMobility <- reactive({
     "CT" = censusMobilityCt#,
     # "DA" = censusMobilityDa
   )
+
   return(censusMobility)
 })
 
@@ -93,6 +94,8 @@ regionOptions <- reactive({
       mutate(label = paste0(censusMobility()$`Region`, " (", censusMobility()$GeoUID, ")")) %>%
       select(label, value = GeoUID)
     st_geometry(regionOptions) <- NULL
+
+    updateSelectizeInput(session, 'c_location_pp_compare', choices = regionOptions, server = TRUE, selected = "")
 
     return(regionOptions %>% distinct())
 })
@@ -590,7 +593,5 @@ observeEvent(input$mapCensus_shape_click, {
       mutate(label = paste0(Region, " (", GeoUID, ")")) %>%
       pull(label)
     updateTextInput(session, "c_location_name", value = locationLabel)
-
-    updateSelectizeInput(session, 'c_location_pp_compare', choices = regionOptions(), server = TRUE)
   }
 })

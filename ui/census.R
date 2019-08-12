@@ -115,9 +115,15 @@ tabPanel(
                     ),
                     column(
                       4,
-                      selectizeInput("c_location_pp_compare",
-                                     label = HTML('Compare with <i id="c_location_pp_compare_help" class="fa fa-question-circle-o"></i>'),
-                                     choices = NULL, options = list(placeholder = "Select a location"))
+                      selectizeInput(
+                        "c_location_pp_compare",
+                        label = HTML('Compare with <i id="c_location_pp_compare_help" class="fa fa-question-circle-o"></i>'),
+                        choices = NULL,
+                        options = list(
+                          placeholder = "Select a location",
+                          onInitialize = I('function() { this.setValue(""); }')
+                        )
+                      )
                     )
                   ),
                   fluidRow(
