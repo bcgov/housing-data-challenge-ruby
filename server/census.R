@@ -515,7 +515,6 @@ observe({
              ),
              yaxis = list(title = ""),
              title = ppTitle,
-             titleFont = list(size = 12, color = "#ff0000"),
              legend = list(orientation = 'h')) %>%
       config(displayModeBar = F)
   })
