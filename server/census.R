@@ -375,7 +375,7 @@ observe({
     } else if (selectedGroup == 'STIR') {
       mapCensus <- mapCensus %>%
         addLegend(
-          title="Percentage of<br>households with<br>STIR > 30%", "bottomleft", opacity = 0.5,
+          title = "Percentage of<br>households with<br>STIR > 30%", "bottomleft", opacity = 0.5,
           pal = palStir, values = censusStir$percent_more_than_30,
           labFormat = labelFormat(suffix = "%")
         )
@@ -579,9 +579,9 @@ observe({
 })
 
 # Map region click observer
-observeEvent(input$mapCensus_shape_click, {
+observeEvent(input$mapCensus_shape_click, priority = 1, {
   m <- input$mapCensus_shape_click
-  if(!is.null(m$id)){
+  if (!is.null(m$id)) {
     id <- str_split(m$id, "-", simplify = TRUE)
     locationId = id[1,2]
 
@@ -593,4 +593,9 @@ observeEvent(input$mapCensus_shape_click, {
       pull(label)
     updateTextInput(session, "c_location_name", value = locationLabel)
   }
+  freezeReactiveValue(input, "mapCensus_click")
+})
+
+observeEvent(input$mapCensus_click, {
+  m <- input$mapCensus_click
 })

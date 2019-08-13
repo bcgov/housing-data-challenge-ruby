@@ -1,8 +1,34 @@
+# Detach any lodaded packages ----
+suppressPackageStartupMessages(library(attempt))
+
+detach_all <- function() {
+  all_attached <- paste(
+    "package:",
+    names(sessionInfo()$otherPkgs),
+    sep = ""
+  )
+  attempt(
+    suppressWarnings(
+      lapply(
+        all_attached,
+        detach,
+        character.only = TRUE,
+        unload = TRUE
+      )
+    ),
+    silent = TRUE
+  )
+}
+
+detach_all()
+
+# Load packages ----
 library(here)
 library(shiny)
 library(shinyjs)
 library(sf)
 library(leaflet)
+library(leaflet.extras)
 library(readr)
 library(stringr)
 library(magrittr)
@@ -17,13 +43,14 @@ library(treemap)
 library(shinycssloaders)
 library(shinyBS)
 
-# source files
+# Source relevant files ----
 source("helpers/chartFormat.R")
 
+# Set app options ----
 options(stringsAsFactors = F)
 Sys.setenv(TZ = "America/Vancouver")
 
-# Read objects
+# Read data objects ----
 # Property transfer tax
 ptRegDis <- readRDS(here::here("data", "ptt-regional-district.rds"))
 ptMun <- readRDS(here::here("data", "ptt-municipality.rds"))
@@ -123,7 +150,7 @@ census2016CsdStir <- read_rds(file.path("data", "census2016Spatial-stir-CSD.rds"
 census2016CtStir <- read_rds(file.path("data", "census2016Spatial-stir-CT.rds"))
 # census2016DaStir <- read_rds(file.path("data", "census2016Spatial-stir-DA.rds"))
 
-# Selection of metrics
+# Selection of metrics, variables and options ----
 selectionMetrics <- c(
   "Average FMV" = "mn_FMV",
   "Average Foreign FMV" = "mn_FMV_foreign",
@@ -227,7 +254,7 @@ stirSummary <- as_tibble(census2016CsdStir) %>%
   top_n(1) %>%
   select(`Region`, `percent_more_than_30`)
 
-# Add a homepage Jumbotron
+# Add a homepage Jumbotron ----
 jumbotron <- function(header, popPerc = 0, popInc = TRUE, dwellPerc = 0, dwellInc = TRUE,
                       trans_period, no_mkt_trans = 0, no_foreign_perc = 0,
                       sum_FMV = 0, sum_FMV_foreign_perc = 0) {
