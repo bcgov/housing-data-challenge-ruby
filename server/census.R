@@ -465,7 +465,7 @@ observe({
   #
   output$popPyr <- renderPlotly({
     p <- plot_ly(censusPp2016LocationCompare(),
-            x = ~percentage_2016, y = ~age, name = ~paste(Region, '2016'), color = ~sex, type = 'bar', orientation = 'h',
+            x = ~percentage_2016, y = ~age, name = ~paste(Region, '2016', sex), color = ~sex, type = 'bar', orientation = 'h',
             hoverinfo = 'y+text+name', text = ~paste('Census 2016</br>', Region, abs(percentage_2016), '%'), colors = c(colCommercial, colMultiFam)) %>%
       add_annotations(xref = 'x', yref = 'y',
                       x = ~(percentage_2016 / abs(percentage_2016) / 2), y = ~age,
@@ -475,7 +475,7 @@ observe({
                       showarrow = FALSE)
 
     if (input$c_pp_compare_2011 == TRUE) {
-      p %<>% add_trace(x = ~percentage_2011, y = ~age, name = ~paste(Region, '2011'), type = "scatter", mode = 'lines+markers',
+      p %<>% add_trace(x = ~percentage_2011, y = ~age, name = ~paste(Region, '2011', sex), type = "scatter", mode = 'lines+markers',
                 line = list(color = '#22229999', shape = "spline"),
                 hoverinfo = "x+y+text",
                 text = ~paste('Census 2011</br>', Region, abs(percentage_2011), '%')
@@ -483,7 +483,7 @@ observe({
     }
 
     if (input$c_pp_compare_2006 == TRUE) {
-      p %<>% add_trace(x = ~percentage_2006, y = ~age, name = ~paste(Region, '2006'), type = "scatter", mode = 'lines+markers',
+      p %<>% add_trace(x = ~percentage_2006, y = ~age, name = ~paste(Region, '2006', sex), type = "scatter", mode = 'lines+markers',
                 line = list(color = '#22992299', shape = "spline"),
                 hoverinfo = "x+y+text",
                 text = ~paste('Census 2006</br>', Region, abs(percentage_2006), '%'))
@@ -491,7 +491,7 @@ observe({
 
     ppTitle <- paste('Population Pyramid for', locationLabel(), '- Census year 2016')
     if (input$c_location_pp_compare != "") {
-      p %<>% add_trace(x = ~percentage_compare, y = ~age, name = ~ paste(Region_compare, '2016'), type = "scatter", mode = 'lines+markers',
+      p %<>% add_trace(x = ~percentage_compare, y = ~age, name = ~ paste(Region_compare, '2016', sex), type = "scatter", mode = 'lines+markers',
                             line = list(color = '#cc222299', shape = "spline"),
                             hoverinfo = "x+y+text",
                             text = ~paste('Census 2016</br>', Region_compare, abs(percentage_compare), '%')) %>%
