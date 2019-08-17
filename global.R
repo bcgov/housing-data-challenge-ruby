@@ -42,6 +42,7 @@ library(sunburstR)
 library(treemap)
 library(shinycssloaders)
 library(shinyBS)
+library(bchousing)
 
 # Source relevant files ----
 source("helpers/chartFormat.R")
@@ -52,10 +53,14 @@ Sys.setenv(TZ = "America/Vancouver")
 
 # Read data objects ----
 # Property transfer tax
-ptRegDis <- readRDS(here::here("data", "ptt-regional-district.rds"))
-ptMun <- readRDS(here::here("data", "ptt-municipality.rds"))
-ptDevReg <- readRDS(here::here("data", "ptt-development-region.rds"))
-ptProv <- readRDS(here::here("data", "ptt-province.rds"))
+# ptRegDis <- readRDS(here::here("data", "ptt-regional-district.rds"))
+# ptMun <- readRDS(here::here("data", "ptt-municipality.rds"))
+# ptDevReg <- readRDS(here::here("data", "ptt-development-region.rds"))
+# ptProv <- readRDS(here::here("data", "ptt-province.rds"))
+
+ptRegDis <- bchousing:: ptt_rd_sf
+ptMun <- ptt_mun_sf
+ptDevReg <- ptt_dr_sf
 
 # boundaries shapefiles
 bcCensusDivs <- readRDS("./data/bc2011CensusDivisions.rds")
@@ -167,7 +172,7 @@ selectionMetricsDF <- data.frame(
       "Additional Tax Paid", "Average FMV", "Average Foreign FMV")
 )
 
-maxTransPeriod <- max(ptProv$trans_period)
+maxTransPeriod <- ptt_prov_dash$max_trans_period
 propertyTax <- ptRegDis
 chartHeight <- 600
 mapHeightPtt <- 600
@@ -278,10 +283,10 @@ jumbotron <- function(header, popPerc = 0, popInc = TRUE, dwellPerc = 0, dwellIn
   boxPp <- paste0("Municipality with the highest average age (<strong>", ageSummary$`Average Age`,"</strong>) is ",
                  ageSummary$Region, ".")
 
-  no_mkt_trans <- as_tibble(ptProv) %>% filter(trans_period == maxTransPeriod) %>% pull("no_mkt_trans")
-  no_foreign_perc <- as_tibble(ptProv) %>% filter(trans_period == maxTransPeriod) %>% pull("no_foreign_perc")
-  sum_FMV <- as_tibble(ptProv) %>% filter(trans_period == maxTransPeriod) %>% pull("sum_FMV")
-  sum_FMV_foreign_perc <- as_tibble(ptProv) %>% filter(trans_period == maxTransPeriod) %>% pull("sum_FMV_foreign_perc")
+  no_mkt_trans <- ptt_prov_dash$tot_mkt_trans
+  no_foreign_perc <- ptt_prov_dash$no_foreign_perc
+  sum_FMV <- ptt_prov_dash$sum_FMV
+  sum_FMV_foreign_perc <- ptt_prov_dash$sum_FMV_foreign_perc
 
   HTML(paste0(
 "<div class=\"jumbotron\">
