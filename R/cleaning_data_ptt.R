@@ -55,6 +55,14 @@ AddTransactionPeriodColumns <- function(data) {
 #' @export
 WranglePttData <- function(data) {
   data <- data %>%
+    mutate(
+      DevelopmentRegion = as_factor(as.character(DevelopmentRegion)),
+      RegionalDistrict = as_factor(as.character(RegionalDistrict)),
+      Municipality = as_factor(as.character(Municipality))
+    ) %>%
+    filter(
+      !DevelopmentRegion %in% c('REST OF PROVINCE', 'UNKNOWN', 'UNKNOWN/RURAL') & !is.na(DevelopmentRegion)
+    ) %>%
     AddTransactionPeriodColumns() %>%
     dplyr::mutate(
       # Transform regions' names to Title Case
@@ -64,7 +72,11 @@ WranglePttData <- function(data) {
       Municipality = stringr::str_replace(Municipality, 'City Of ', ''),
       Municipality = stringr::str_replace(Municipality, 'District Of ', ''),
       Municipality = stringr::str_replace(Municipality, 'Town Of ', ''),
-      Municipality = stringr::str_replace(Municipality, 'Village Of ', '')
+      Municipality = stringr::str_replace(Municipality, 'Village Of ', ''),
+      n_foreign_tran_nona = as.numeric(replace_na(n_foreign_tran, 0)),
+      sum_FMV_foreign_nona = as.numeric(replace_na(sum_FMV_foreign, 0)),
+      no_foreign_perc = round(n_foreign_tran_nona / tot_mkt_trans * 100, 2),
+      sum_FMV_foreign_perc = round(sum_FMV_foreign_nona / sum_FMV * 100, 2)
     )
 
   return(data)
@@ -171,6 +183,9 @@ WrangleShapeFiles <- function(data, id_column, name_column, pr_uid = 59) {
 #' @param shapes  Shapes sf object
 #' @param geo_name Column to join on
 #'
+#' @import dplyr
+#' @import sf
+#'
 #' @return sf data frame
 #' @export
 JoinPttShapes <- function(ptt_data, shapes, geo_name) {
@@ -182,6 +197,10 @@ JoinPttShapes <- function(ptt_data, shapes, geo_name) {
     dplyr::group_by(GeoName, trans_period) %>%
     dplyr::filter(row_number() == 1) %>%
     dplyr::ungroup()
+
+  # https://github.com/r-spatial/mapview/issues/72
+  ptt_sf <- ptt_sf %>%
+    sf::st_transform(crs = 4326)
 
   return(ptt_sf)
 }

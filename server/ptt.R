@@ -32,14 +32,14 @@ ptDataPeriod <- reactive({
 
 ptRegionOptions <- reactive({
   ptRegionOptions <- ptDataPeriod() %>%
-    mutate(label = ptDataPeriod()$Location) %>%
+    mutate(label = ptDataPeriod()$GeoName) %>%
     select(label, value = GeoUID)
   st_geometry(ptRegionOptions) <- NULL
 
   return(ptRegionOptions %>% distinct())
 })
 
-ptLocationLabel <- reactive({
+ptGeoNameLabel <- reactive({
   locationLabel <- as.data.frame(ptRegionOptions()) %>%
     filter(value == input$pt_location) %>%
     select(label) %>%
@@ -72,18 +72,18 @@ observe({
         color = '#333',
         layerId = ptDataPeriod()$GeoUID,
         fillColor = ~ pal(ptDataPeriod()[[pt_metric]]),
-        label = ptDataPeriod()$Location,
+        label = ptDataPeriod()$GeoName,
         popup = paste0(
           "<strong>",
-          ptDataPeriod()$Location,
+          ptDataPeriod()$GeoName,
           "</strong>",
           "<table class=\"leaflet-popup-table\">
           <tr><td>Period</td><td>",
           as.Date(ptDataPeriod()$trans_period),
           "</td></tr><tr><td>Number of transactions</td><td>",
-          format(ptDataPeriod()$no_mkt_trans, big.mark = ",", scientific=FALSE),
+          format(ptDataPeriod()$tot_mkt_trans, big.mark = ",", scientific=FALSE),
           "</td></tr><tr><td>Number of foreign transactions</td><td>",
-          format(ptDataPeriod()$no_foreign, big.mark = ",", scientific=FALSE),
+          format(ptDataPeriod()$n_foreign_tran, big.mark = ",", scientific=FALSE),
           "</td></tr><tr><td>Number % by foreign purchasers</td><td>",
           format(ptDataPeriod()$no_foreign_perc, big.mark = ",", scientific=FALSE),
           "</td></tr><tr><td>Total value</td><td>",
@@ -121,7 +121,7 @@ observe({
     plot_ly(
       ptDataPeriod(),
       x = ~ ptDataPeriod()[[pt_metric]],
-      y = ~ Location,
+      y = ~ GeoName,
       type = "bar",
       orientation = "h"
     ) %>%
@@ -165,7 +165,7 @@ output$pt_mothly_fmv <- renderPlotly({
       )
     ) %>%
     layout(
-      title = paste("FMV (Fair Market Value) in", ptLocationLabel()),
+      title = paste("FMV (Fair Market Value) in", ptGeoNameLabel()),
       xaxis = axisFormat,
       yaxis = axisFormat,
       yaxis2 = list(
@@ -197,7 +197,7 @@ output$pt_mothly_mnd_fmv <- renderPlotly({
       line = list(shape = "spline", color = colForeign)
     ) %>%
     layout(
-      title = paste("Average FMV in", ptLocationLabel()),
+      title = paste("Average FMV in", ptGeoNameLabel()),
       xaxis = axisFormat,
       yaxis = axisFormat,
       margin = marginFormat,
@@ -223,7 +223,7 @@ output$pt_mothly_ptt <- renderPlotly({
       line = list(shape = "spline", color = colForeign)
     ) %>%
     layout(
-      title = paste("Property Transfer Tax Paid in", ptLocationLabel()),
+      title = paste("Property Transfer Tax Paid in", ptGeoNameLabel()),
       xaxis = axisFormat,
       yaxis = axisFormat,
       margin = marginFormat,
@@ -264,7 +264,7 @@ output$pt_mothly <- renderPlotly({
       marker = list(color = colUnknown)
     ) %>%
     layout(
-      title = paste("Number of Transactions in", ptLocationLabel()),
+      title = paste("Number of Transactions in", ptGeoNameLabel()),
       xaxis = axisFormat,
       yaxis = axisFormat,
       margin = marginFormat,
@@ -321,7 +321,7 @@ output$pt_mothly_res <- renderPlotly({
       marker = list(color = colUnknown)
     ) %>%
     layout(
-      title = paste("Number of Transactions (Residential) in", ptLocationLabel()),
+      title = paste("Number of Transactions (Residential) in", ptGeoNameLabel()),
       xaxis = axisFormat,
       yaxis = axisFormat,
       margin = marginFormat,
@@ -353,7 +353,7 @@ output$pt_mothly_comm <- renderPlotly({
       marker = list(color = colUnknown)
     ) %>%
     layout(
-      title = paste("Number of transactions (Commercial) in", ptLocationLabel()),
+      title = paste("Number of transactions (Commercial) in", ptGeoNameLabel()),
       xaxis = axisFormat,
       yaxis = axisFormat,
       margin = marginFormat,
@@ -372,7 +372,7 @@ observeEvent(input$mapPtt_shape_click, {
 
     locationLabel <- as.data.frame(ptDataPeriod()) %>%
       filter(GeoUID == m$id) %>%
-      mutate(label = Location) %>%
+      mutate(label = GeoName) %>%
       select(label) %>%
       distinct()
     updateTextInput(session, "pt_location_name", value = locationLabel$label)

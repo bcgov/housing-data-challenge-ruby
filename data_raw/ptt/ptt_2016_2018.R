@@ -6,8 +6,8 @@ library(bcdata)
 library(bchousing)
 
 # 02. Load prepared csv files ----
-ptt_dr_raw <- read_csv(here::here("data_raw", "ptt", "DR_all_years.csv"))
-ptt_rd_raw <- read_csv(here::here("data_raw", "ptt", "Regional_all_years.csv"))
+ptt_dr_raw <- read_csv(here::here("data_raw", "ptt", "DR_all_years.csv"), na = c("", "NA", "nr"))
+ptt_rd_raw <- read_csv(here::here("data_raw", "ptt", "Regional_all_years.csv"), na = c("", "NA", "nr"))
 ptt_mun_raw <- read_csv(
   file = here::here("data_raw", "ptt", "Municipal_all_years.csv"),
   na = c("", "NA", "nr"),
