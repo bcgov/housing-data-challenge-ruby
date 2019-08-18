@@ -21,6 +21,9 @@ ptData <- reactive({
     "devreg" = ptDevReg,
     "mun" = ptMun
   )
+
+  ptData <- ptData %>% arrange(trans_period)
+
   return(ptData)
 })
 
@@ -147,19 +150,18 @@ output$pt_mothly_fmv <- renderPlotly({
     name = "Total FMV",
     type = 'scatter',
     mode = 'lines',
-    line = list(shape = "spline", color = colCanadian)
+    line = list(color = colCanadian)
   ) %>%
     add_lines(
       y = ~ sum_FMV_foreign,
       name = "Total FMV Foreign",
-      line = list(shape = "spline", color = colForeign)
+      line = list(color = colForeign)
     ) %>%
     add_lines(
       y = ~ no_foreign_perc,
       name = "Foreign %",
       yaxis = "y2",
       line = list(
-        shape = "spline",
         color = colForeign,
         dash = 'dot'
       )
@@ -180,7 +182,7 @@ output$pt_mothly_fmv <- renderPlotly({
     config(displayModeBar = F)
 })
 
-# Monthly Overview - Average FMV
+# Monthly Overview - Average and Median FMV
 output$pt_mothly_mnd_fmv <- renderPlotly({
   plot_ly(
     ptData() %>% filter(GeoUID == input$pt_location),
@@ -189,12 +191,28 @@ output$pt_mothly_mnd_fmv <- renderPlotly({
     name = "Median FMV",
     type = 'scatter',
     mode = 'lines',
-    line = list(shape = "spline", color = colCanadian)
+    line = list(color = colCanadian)
   ) %>%
     add_lines(
-      y = ~ md_FMV_foreign,
+      y = ~ md_FMV_foreign_res,
       name = "Median FMV Foreign",
-      line = list(shape = "spline", color = colForeign)
+      line = list(color = colForeign)
+    ) %>%
+    add_lines(
+      y = ~ mn_FMV,
+      name = "Mean FMV",
+      line = list(
+        color = colCanadian,
+        dash = 'dot'
+      )
+    ) %>%
+    add_lines(
+      y = ~ mn_FMV_foreign_res,
+      name = "Mean FMV Foreign",
+      line = list(
+        color = colForeign,
+        dash = 'dot'
+      )
     ) %>%
     layout(
       title = paste("Average FMV in", ptGeoNameLabel()),
@@ -215,12 +233,12 @@ output$pt_mothly_ptt <- renderPlotly({
     name = "PTT",
     type = 'scatter',
     mode = 'lines',
-    line = list(shape = "spline", color = colCanadian)
+    line = list(color = colCanadian)
   ) %>%
     add_lines(
       y = ~ add_tax_paid,
       name = "Additional PTT",
-      line = list(shape = "spline", color = colForeign)
+      line = list(color = colForeign)
     ) %>%
     layout(
       title = paste("Property Transfer Tax Paid in", ptGeoNameLabel()),
@@ -237,29 +255,29 @@ output$pt_mothly <- renderPlotly({
   plot_ly(
     ptData() %>% filter(GeoUID == input$pt_location),
     x = ~ trans_period,
-    y = ~ no_resid_trans,
+    y = ~ no_res_trans,
     name = "Residential",
     type = "bar",
     marker = list(color = colResidential),
     hoverinfo = "y+name"
   ) %>%
     add_trace(
-      y = ~ no_comm_tot,
+      y = ~ n_comm_tran,
       name = "Commercial",
       marker = list(color = colCommercial)
     ) %>%
     add_trace(
-      y = ~ no_recr_tot,
+      y = ~ n_recr_tran,
       name = "Recreational",
       marker = list(color = colRecreational)
     ) %>%
     add_trace(
-      y = ~ no_farm_tot,
+      y = ~ n_farm_tran,
       name = "Farms",
       marker = list(color = colFarms)
     ) %>%
     add_trace(
-      y = ~ no_unkn_tot,
+      y = ~ n_unkn_tran,
       name = "Unknown",
       marker = list(color = colUnknown)
     ) %>%
@@ -279,44 +297,29 @@ output$pt_mothly_res <- renderPlotly({
   plot_ly(
     ptData() %>% filter(GeoUID == input$pt_location),
     x = ~ trans_period,
-    y = ~ no_res_1fam,
+    y = ~ n_res_1fam_dwelling,
     name = "Single Family",
     type = "bar",
     marker = list(color = colSingleFam),
     hoverinfo = "y+name"
   ) %>%
     add_trace(
-      y = ~ no_resid_fam,
+      y = ~ n_res_fam,
       name = "Multi Family",
       marker = list(color = colMultiFam)
     ) %>%
     add_trace(
-      y = ~ no_resid_strata,
+      y = ~  (n_res_strata),
       name = "Strata",
       marker = list(color = colStrata)
     ) %>%
     add_trace(
-      y = ~ no_resid_non_strata,
-      name = "Non-strata / Rental",
-      marker = list(color = colNonStrataRental)
-    ) %>%
-    add_trace(
-      y = ~ no_resid_acreage_trans,
+      y = ~ n_res_acreage_trans,
       name = "Acreage",
       marker = list(color = colAcreage)
     ) %>%
     add_trace(
-      y = ~ resid_comm_count,
-      name = "Commercial",
-      marker = list(color = colCommercial)
-    ) %>%
-    add_trace(
-      y = ~ no_resid_farm,
-      name = "Farm",
-      marker = list(color = colFarms)
-    ) %>%
-    add_trace(
-      y = ~ no_resid_other,
+      y = ~ n_res_other,
       name = "Other",
       marker = list(color = colUnknown)
     ) %>%
@@ -336,19 +339,19 @@ output$pt_mothly_comm <- renderPlotly({
   plot_ly(
     ptData() %>% filter(GeoUID == input$pt_location),
     x = ~ trans_period,
-    y = ~ no_comm_comm,
+    y = ~ n_comm_comm,
     name = "Commerce",
     type = "bar",
     marker = list(color = colCommercial),
     hoverinfo = "y+name"
   ) %>%
     add_trace(
-      y = ~ no_comm_strata_nores,
+      y = ~ n_comm_strata_nores,
       name = "Strata non-residential",
       marker = list(color = colStrata)
     ) %>%
     add_trace(
-      y = ~ no_comm_other,
+      y = ~ n_comm_other,
       name = "Other",
       marker = list(color = colUnknown)
     ) %>%

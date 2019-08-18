@@ -2,7 +2,7 @@ Package: bchousing
 Title: BC Housing Data Visualization
 Version: 0.0.0.9000
 Authors@R: person('Sasha', 'Bogdanovic', email = 'sasha@rubyind.com', role = c('cre', 'aut'))
-Description: A shiny application that provides data visalization of various housing-related open data.
+Description: A shiny application that provides data visualization of various housing-related open data.
 License: Apache-2.0
 Encoding: UTF-8
 LazyData: true

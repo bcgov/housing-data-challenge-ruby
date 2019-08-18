@@ -121,7 +121,7 @@ WrangleShapeFiles <- function(data, id_column, name_column, pr_uid = 59) {
   )
 
   # Simplify polygons
-  shapes <- rmapshaper::ms_simplify(shapes, keep = 0.01, keep_shapes = TRUE)
+  shapes <- rmapshaper::ms_simplify(shapes, keep = 0.02, keep_shapes = TRUE)
 
   #
   shapes <- shapes %>%
@@ -194,7 +194,8 @@ JoinPttShapes <- function(ptt_data, shapes, geo_name) {
     ptt_data,
     by = c("GeoName" = geo_name)
   ) %>%
-    dplyr::group_by(GeoName, trans_period) %>%
+    dplyr::group_by(GeoUID, GeoName, trans_period, trans_period_label, PRUID, PRNAME) %>%
+    dplyr::summarise_if(is.numeric, mean, na.rm = TRUE) %>%
     dplyr::filter(row_number() == 1) %>%
     dplyr::ungroup()
 

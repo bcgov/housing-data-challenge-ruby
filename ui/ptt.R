@@ -83,7 +83,7 @@ tabPanel(
           tabPanel(
             "Average FMV",
             icon = icon("calculator"),
-            tags$p("Average fair market value by month."),
+            tags$p("Mean and Median fair market value by month, total and foreign."),
             conditionalPanel(
               condition = "input.pt_location != ''",
               plotlyOutput("pt_mothly_mnd_fmv", height = chartHeight) %>% withSpinner(color="#0dc5c1")
