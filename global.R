@@ -52,15 +52,6 @@ options(stringsAsFactors = F)
 Sys.setenv(TZ = "America/Vancouver")
 
 # Read data objects ----
-# Property transfer tax
-# ptRegDis <- readRDS(here::here("data", "ptt-regional-district.rds"))
-# ptMun <- readRDS(here::here("data", "ptt-municipality.rds"))
-# ptDevReg <- readRDS(here::here("data", "ptt-development-region.rds"))
-# ptProv <- readRDS(here::here("data", "ptt-province.rds"))
-
-ptRegDis <- bchousing:: ptt_rd_sf
-ptMun <- ptt_mun_sf
-ptDevReg <- ptt_dr_sf
 
 # boundaries shapefiles
 bcCensusDivs <- readRDS("./data/bc2011CensusDivisions.rds")
@@ -172,8 +163,9 @@ selectionMetricsDF <- data.frame(
       "Additional Tax Paid", "Average FMV", "Average Foreign FMV")
 )
 
+# Initialize variables
 maxTransPeriod <- ptt_prov_dash$max_trans_period
-propertyTax <- ptRegDis
+propertyTax <- ptt_rd_sf
 chartHeight <- 600
 mapHeightPtt <- 600
 mapHeightCensus <- 800

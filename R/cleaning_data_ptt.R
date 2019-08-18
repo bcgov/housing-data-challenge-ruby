@@ -197,7 +197,13 @@ JoinPttShapes <- function(ptt_data, shapes, geo_name) {
     dplyr::group_by(GeoUID, GeoName, trans_period, trans_period_label, PRUID, PRNAME) %>%
     dplyr::summarise_if(is.numeric, mean, na.rm = TRUE) %>%
     dplyr::filter(row_number() == 1) %>%
-    dplyr::ungroup()
+    dplyr::ungroup() %>%
+    dplyr::mutate(
+      GeoUID = as_factor(GeoUID),
+      GeoName = as_factor(GeoName),
+      PRUID = as_factor(PRUID),
+      PRNAME = as_factor(PRNAME)
+    )
 
   # https://github.com/r-spatial/mapview/issues/72
   ptt_sf <- ptt_sf %>%

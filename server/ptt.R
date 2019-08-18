@@ -1,25 +1,53 @@
-createAlert(session, "pt_location_alert_fmv", alertId = "pt_location_alert_fmv_id", title = NULL, style = "alert", dismiss = FALSE, append = TRUE,
-            content = "Click location on the map to draw a time series chart showing monthly total sales values for that location.")
-createAlert(session, "pt_location_alert_fmv_avg", alertId = "pt_location_alert_fmv_avg_id", title = NULL, style = NULL, dismiss = FALSE, append = TRUE,
-            content = "Click location on the map to draw a time series chart showing monthly average sales values for that location.")
-createAlert(session, "pt_location_alert_tax", alertId = "pt_location_alert_tax_id", title = NULL, style = NULL, dismiss = FALSE, append = TRUE,
-            content = "Click location on the map to draw a time series chart showing monthly property transfer tax paid for that location.")
-createAlert(session, "pt_location_alert_types", alertId = "pt_location_alert_types_id", title = NULL, style = NULL, dismiss = FALSE, append = TRUE,
-            content = "Click location on the map to draw a time series chart showing monthly numbers of transactions for
-            different property types for that location.")
-createAlert(session, "pt_location_alert_res", alertId = "pt_location_alert_res_id", title = NULL, style = NULL, dismiss = FALSE, append = TRUE,
-            content = "Click location on the map to draw a time series chart showing monthly number of transactions
-            for residential properties for that location.")
-createAlert(session, "pt_location_alert_comm", alertId = "pt_location_alert_comm_id", title = NULL, style = NULL, dismiss = FALSE, append = TRUE,
-            content = "Click location on the map to draw a time series chart showing monthly number of transactions
-            for commerction properties for that location.")
+createAlert(
+  session,
+  anchorId = "pt_location_alert_fmv",
+  alertId = "pt_location_alert_fmv_id",
+  style = "alert",
+  dismiss = FALSE,
+  content = "Click location on the map to draw a time series chart showing monthly total sales values for that location."
+)
+createAlert(
+  session,
+  anchorId = "pt_location_alert_fmv_avg",
+  alertId = "pt_location_alert_fmv_avg_id",
+  dismiss = FALSE,
+  content = "Click location on the map to draw a time series chart showing monthly average sales values for that location."
+)
+createAlert(
+  session,
+  anchorId = "pt_location_alert_tax",
+  alertId = "pt_location_alert_tax_id",
+  dismiss = FALSE,
+  content = "Click location on the map to draw a time series chart showing monthly property transfer tax paid for that location."
+)
+createAlert(
+  session,
+  anchorId = "pt_location_alert_types",
+  alertId = "pt_location_alert_types_id",
+  dismiss = FALSE,
+  content = "Click location on the map to draw a time series chart showing monthly numbers of transactions for different property types for that location."
+)
+createAlert(
+  session,
+  anchorId = "pt_location_alert_res",
+  alertId = "pt_location_alert_res_id",
+  dismiss = FALSE,
+  content = "Click location on the map to draw a time series chart showing monthly number of transactions for residential properties for that location."
+)
+createAlert(
+  session,
+  anchorId = "pt_location_alert_comm",
+  alertId = "pt_location_alert_comm_id",
+  dismiss = FALSE,
+  content = "Click location on the map to draw a time series chart showing monthly number of transactions for commerction properties for that location."
+)
 
 ptData <- reactive({
   ptData <- switch(
     input$pt_view,
-    "regdis" = ptRegDis,
-    "devreg" = ptDevReg,
-    "mun" = ptMun
+    "regdis" = ptt_rd_sf,
+    "devreg" = ptt_dr_sf,
+    "mun" = ptt_mun_sf
   )
 
   ptData <- ptData %>% arrange(trans_period)
@@ -31,6 +59,13 @@ ptDataPeriod <- reactive({
   ptDataPeriod <- ptData() %>%
     filter(trans_period == input$pt_trans_period)
   return(ptDataPeriod)
+})
+
+ptt_data_location <- reactive({
+  ptt_data_location <- ptData() %>%
+    filter(GeoUID == input$pt_location)
+
+  return(ptt_data_location)
 })
 
 ptRegionOptions <- reactive({
@@ -96,11 +131,9 @@ observe({
           "</td></tr><tr><td>Value % by foreign purchasers</td><td>",
           format(ptDataPeriod()$sum_FMV_foreign_perc, big.mark = ",", scientific=FALSE),
           "</td></tr><tr><td>PTT Paid</td><td>",
-          paste0("$",
-                format(ptDataPeriod()$sum_PPT_paid, big.mark = ",", scientific=FALSE)),
+          paste0("$", format(ptDataPeriod()$sum_PPT_paid, big.mark = ",", scientific=FALSE)),
           "</td></tr><tr><td>Additional Tax Paid</td><td>",
-          paste0("$",
-                format(ptDataPeriod()$add_tax_paid, big.mark = ",", scientific=FALSE)),
+          paste0("$", format(ptDataPeriod()$add_tax_paid, big.mark = ",", scientific=FALSE)),
           "</td></tr></table>"
         ),
         highlight = highlightOptions(
@@ -117,34 +150,12 @@ observe({
         opacity = 0.8
       )
   })
-
-
-  # Interactive based on user input
-  output$interactive <- renderPlotly({
-    plot_ly(
-      ptDataPeriod(),
-      x = ~ ptDataPeriod()[[pt_metric]],
-      y = ~ GeoName,
-      type = "bar",
-      orientation = "h"
-    ) %>%
-      layout(
-        title = selectionMetricsDF %>% filter(value == rlang::sym(pt_metric)) %>% pull(label),
-        xaxis = axisFormat,
-        yaxis = axisFormat,
-        margin = marginFormatMonthly,
-        barmode = 'group',
-        legend = legendFormat
-      ) %>%
-      config(displayModeBar = F)
-  })
-
 })
 
 # Monthly Overview - FMV (Fair Market Value)
 output$pt_mothly_fmv <- renderPlotly({
   plot_ly(
-    ptData() %>% filter(GeoUID == input$pt_location),
+    ptt_data_location(),
     x = ~ trans_period,
     y = ~ sum_FMV,
     name = "Total FMV",
@@ -167,7 +178,7 @@ output$pt_mothly_fmv <- renderPlotly({
       )
     ) %>%
     layout(
-      title = paste("FMV (Fair Market Value) in", ptGeoNameLabel()),
+      title = PlotlyChartTitle(title_text = paste("FMV (Fair Market Value) in", ptGeoNameLabel())),
       xaxis = axisFormat,
       yaxis = axisFormat,
       yaxis2 = list(
@@ -177,7 +188,8 @@ output$pt_mothly_fmv <- renderPlotly({
         title = "Foreign %"
       ),
       margin = marginFormat,
-      legend = legendFormat
+      legend = legendFormat#,
+      # annotations = PlotlyChartAnnotation(annotation_text = 'Total fair market value by month.')
     ) %>%
     config(displayModeBar = F)
 })
@@ -185,7 +197,7 @@ output$pt_mothly_fmv <- renderPlotly({
 # Monthly Overview - Average and Median FMV
 output$pt_mothly_mnd_fmv <- renderPlotly({
   plot_ly(
-    ptData() %>% filter(GeoUID == input$pt_location),
+    ptt_data_location(),
     x = ~ trans_period,
     y = ~ md_FMV,
     name = "Median FMV",
@@ -215,7 +227,7 @@ output$pt_mothly_mnd_fmv <- renderPlotly({
       )
     ) %>%
     layout(
-      title = paste("Average FMV in", ptGeoNameLabel()),
+      title = PlotlyChartTitle(title_text = paste("Average FMV in", ptGeoNameLabel())),
       xaxis = axisFormat,
       yaxis = axisFormat,
       margin = marginFormat,
@@ -227,7 +239,7 @@ output$pt_mothly_mnd_fmv <- renderPlotly({
 # Monthly Overview - Property Transfer Tax
 output$pt_mothly_ptt <- renderPlotly({
   plot_ly(
-    ptData() %>% filter(GeoUID == input$pt_location),
+    ptt_data_location(),
     x = ~ trans_period,
     y = ~ sum_PPT_paid,
     name = "PTT",
@@ -241,7 +253,7 @@ output$pt_mothly_ptt <- renderPlotly({
       line = list(color = colForeign)
     ) %>%
     layout(
-      title = paste("Property Transfer Tax Paid in", ptGeoNameLabel()),
+      title = PlotlyChartTitle(title_text = paste("Property Transfer Tax Paid in", ptGeoNameLabel())),
       xaxis = axisFormat,
       yaxis = axisFormat,
       margin = marginFormat,
@@ -253,7 +265,7 @@ output$pt_mothly_ptt <- renderPlotly({
 # Monthly Overview - Number of market transactions
 output$pt_mothly <- renderPlotly({
   plot_ly(
-    ptData() %>% filter(GeoUID == input$pt_location),
+    ptt_data_location(),
     x = ~ trans_period,
     y = ~ no_res_trans,
     name = "Residential",
@@ -282,7 +294,7 @@ output$pt_mothly <- renderPlotly({
       marker = list(color = colUnknown)
     ) %>%
     layout(
-      title = paste("Number of Transactions in", ptGeoNameLabel()),
+      title = PlotlyChartTitle(title_text = paste("Number of Transactions in", ptGeoNameLabel())),
       xaxis = axisFormat,
       yaxis = axisFormat,
       margin = marginFormat,
@@ -295,7 +307,7 @@ output$pt_mothly <- renderPlotly({
 # Monthly Overview - Number of market transactions - Residential
 output$pt_mothly_res <- renderPlotly({
   plot_ly(
-    ptData() %>% filter(GeoUID == input$pt_location),
+    ptt_data_location(),
     x = ~ trans_period,
     y = ~ n_res_1fam_dwelling,
     name = "Single Family",
@@ -324,7 +336,7 @@ output$pt_mothly_res <- renderPlotly({
       marker = list(color = colUnknown)
     ) %>%
     layout(
-      title = paste("Number of Transactions (Residential) in", ptGeoNameLabel()),
+      title = PlotlyChartTitle(title_text = paste("Number of Transactions (Residential) in", ptGeoNameLabel())),
       xaxis = axisFormat,
       yaxis = axisFormat,
       margin = marginFormat,
@@ -337,7 +349,7 @@ output$pt_mothly_res <- renderPlotly({
 # Monthly Overview - Number of market transactions - Commercial
 output$pt_mothly_comm <- renderPlotly({
   plot_ly(
-    ptData() %>% filter(GeoUID == input$pt_location),
+    ptt_data_location(),
     x = ~ trans_period,
     y = ~ n_comm_comm,
     name = "Commerce",
@@ -356,7 +368,7 @@ output$pt_mothly_comm <- renderPlotly({
       marker = list(color = colUnknown)
     ) %>%
     layout(
-      title = paste("Number of transactions (Commercial) in", ptGeoNameLabel()),
+      title = PlotlyChartTitle(title_text = paste("Number of transactions (Commercial) in", ptGeoNameLabel())),
       xaxis = axisFormat,
       yaxis = axisFormat,
       margin = marginFormat,

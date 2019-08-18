@@ -21,8 +21,10 @@ legendFormat <- list(
   ),
   bordercolor = "#e6e6e6",
   borderwidth = 1,
-  x = 1.05,
-  bgcolor = "rgba(255, 255, 255, 0.5)"
+  bgcolor = "rgba(255, 255, 255, 0.5)",
+  orientation = 'h',
+  # xanchor = "center",  # use center of legend as anchor
+  x = 0
 )
 
 marginFormat <- list(
@@ -40,6 +42,55 @@ marginFormatMonthly <- list(
   t = 50,
   pad = 4
 )
+
+#' Format title for plotly charts
+#'
+#' @param title_text
+#' @param x
+#' @param font_family
+#' @param font_color
+#' @param font_size
+#'
+#' @return
+#' @export
+#'
+#' @examples
+PlotlyChartTitle <- function(title_text = "Chart title", x = 0, font_family = "Arial", font_color = "#393939", font_size = 16) {
+  plotly_title <- list(
+    text = title_text,
+    x = 0,
+    font = list(
+      family = font_family,
+      color = font_color,
+      size = font_size
+    )
+  )
+  return(plotly_title)
+}
+
+#' Add annotation for Plotly charts
+#'
+#' @param annotation_text
+#'
+#' @return
+#' @export
+#'
+#' @examples
+PlotlyChartAnnotation <- function(annotation_text) {
+  annotations = list(
+    text = annotation_text,
+    font = list(size = 12, color = '#393939'),
+    showarrow = FALSE,
+    xref = 'paper', x = -0.0075,
+    yref = 'paper', y = 1.075,
+    xanchor = 'left',
+    yanchor = 'auto',
+    xshift = 0.5,
+    yshift = 0.5
+  )
+
+  return(annotations)
+}
 
 # color schema
 colResidential <- "#80b1d3"

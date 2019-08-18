@@ -145,12 +145,6 @@ tabPanel(
               condition = "input.pt_location == ''",
               bsAlert("pt_location_alert_comm")
             )
-          ),
-          tabPanel(
-            "All Locations",
-            icon = icon("map"),
-            tags$p("Selected variable for each location available in selected geographical level."),
-            plotlyOutput("interactive", height = mapHeightPtt)
           )
         )
       )
