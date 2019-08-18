@@ -371,16 +371,16 @@ jumbotron <- function(header, popPerc = 0, popInc = TRUE, dwellPerc = 0, dwellIn
               boxStir,"
               </div>
               <div class=\"splash-text\">
-                <a href=\"#\" class=\"btn btn-bcgov explore-mobility\">
-                  <i class=\"fa fa-truck\"></i>&nbsp;Explore mobility
+                <a href=\"#\" class=\"btn btn-bcgov explore-stir\">
+                  <i class=\"fa fa-bullhorn\"></i>&nbsp;Explore shelter cost
                 </a>
               </div>
               <div class=\"splash-text\">",
               boxMobility,"
               </div>
               <div class=\"splash-text\">
-                <a href=\"#\" class=\"btn btn-bcgov explore-stir\">
-                  <i class=\"fa fa-bullhorn\"></i>&nbsp;Explore shelter cost
+                <a href=\"#\" class=\"btn btn-bcgov explore-mobility\">
+                  <i class=\"fa fa-truck\"></i>&nbsp;Explore mobility
                 </a>
               </div>
             </div>
