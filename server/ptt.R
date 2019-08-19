@@ -2,7 +2,6 @@ createAlert(
   session,
   anchorId = "pt_location_alert_fmv",
   alertId = "pt_location_alert_fmv_id",
-  style = "alert",
   dismiss = FALSE,
   content = "Click location on the map to draw a time series chart showing monthly total sales values for that location."
 )

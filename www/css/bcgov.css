@@ -96,7 +96,21 @@ body {
 }
 
 .nav-tabs {
-    margin: 20px 0;
+    margin: 0 0 10px;
+}
+
+.nav-tabs>li>a {
+  margin-right: 2px;
+  padding: 7px 11px;
+  line-height: 1.42857143;
+  border: 1px solid #eee;
+  background-color: #eee;
+  border-color: #eee #eee #ddd;
+}
+
+.nav-tabs>li>a:focus, .nav-tabs>li>a:hover {
+  border-color: #dbdbdb;
+  background-color: #e0e0e0;
 }
 
 .tab-content p {
@@ -161,11 +175,13 @@ hr {
     font-size: 11px;
 }
 
+/*
 .alert {
     background-color: #f5f5f5;
     color: #393939;
     border: 1px solid #e3e3e3;
 }
+*/
 
 #housingTypeTreemap.shiny-output-error:before {
   content: "";

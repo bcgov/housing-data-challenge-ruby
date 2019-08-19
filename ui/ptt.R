@@ -24,7 +24,7 @@ tabPanel(
       ),
       fluidRow(
         column(
-          2,
+          3,
           selectInput(
             "pt_view",
             label = HTML('View <i id="pt_geo_level_help" class="fa fa-question-circle-o"></i>'),
@@ -36,7 +36,7 @@ tabPanel(
           )
         ),
         column(
-          2,
+          3,
           selectizeInput(
             "pt_trans_period",
             label = HTML('Period <i id="pt_trans_period_help" class="fa fa-question-circle-o"></i>'),
@@ -46,7 +46,7 @@ tabPanel(
           )
         ),
         column(
-          2,
+          3,
           selectInput("pt_metric", label = HTML('Variable <i id="pt_metric_help" class="fa fa-question-circle-o"></i>'),
                       choices = selectionMetrics)
         ),
@@ -69,7 +69,7 @@ tabPanel(
         tabsetPanel(
           tabPanel(
             "FMV",
-            icon = icon("briefcase"),
+            # icon = icon("briefcase"),
             tags$p("Total fair market value by month."),
             conditionalPanel(
               condition = "input.pt_location != ''",
@@ -81,8 +81,8 @@ tabPanel(
             )
           ),
           tabPanel(
-            "Average FMV",
-            icon = icon("calculator"),
+            "Mean FMV",
+            # icon = icon("calculator"),
             tags$p("Mean and Median fair market value by month, total and foreign."),
             conditionalPanel(
               condition = "input.pt_location != ''",
@@ -95,7 +95,7 @@ tabPanel(
           ),
           tabPanel(
             "Tax Paid",
-            icon = icon("money"),
+            # icon = icon("money"),
             tags$p("Total property transfer tax paid by month."),
             conditionalPanel(
               condition = "input.pt_location != ''",
@@ -108,7 +108,7 @@ tabPanel(
           ),
           tabPanel(
             "Property Types",
-            icon = icon("building-o"),
+            # icon = icon("building-o"),
             tags$p("Number of market transactions for different
                    property types (residential, commercial, farms, etc) by month."),
             conditionalPanel(
@@ -122,7 +122,7 @@ tabPanel(
           ),
           tabPanel(
             "Residential",
-            icon = icon("home"),
+            # icon = icon("home"),
             tags$p("Number of market transactions for residential properties by month."),
             conditionalPanel(
               condition = "input.pt_location != ''",
@@ -135,7 +135,7 @@ tabPanel(
           ),
           tabPanel(
             "Commercial",
-            icon = icon("building"),
+            # icon = icon("building"),
             tags$p("Number of market transactions for commercial properties by month."),
             conditionalPanel(
               condition = "input.pt_location != ''",

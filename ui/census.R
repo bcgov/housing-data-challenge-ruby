@@ -69,24 +69,23 @@ tabPanel(
           tabPanel(
             "Housing Type",
             value = "Housing",
-            icon = icon("home"),
+            # icon = icon("home"),
+            conditionalPanel(
+              condition = "input.c_location != ''",
+              column(12, plotOutput("housingTypeTreemap", height = chartHeight) %>% withSpinner(color="#0dc5c1"))
+            ),
+            conditionalPanel(
+              condition = "input.c_location == ''",
+              bsAlert("c_location_alert_ht")
+            ),
             tags$p("For the purpose of the Census, housing type is defined by \"structural type\",
                    which includes single detached house, semi-detached and row houses, and a variety of apartment categories."),
             tags$p("This report gives insights into diversity of the housing types in an area."),
-            fluidRow(
-              selectizeInput('c_housing_types', choices = housingTypesList,
-                             label = HTML('Housing Type <i id="c_housing_types_help" class="fa fa-question-circle-o"></i>'))
-            ),
-            fluidRow(
-              conditionalPanel(
-                condition = "input.c_location != ''",
-                column(12, plotOutput("housingTypeTreemap", height = chartHeight) %>% withSpinner(color="#0dc5c1"))
-              ),
-              conditionalPanel(
-                condition = "input.c_location == ''",
-                bsAlert("c_location_alert_ht")
-              )
-
+            tags$p("Select different housing types options below to redraw the map and highlight regions by the selected housing type ratios in that region."),
+            selectizeInput(
+              'c_housing_types',
+              choices = housingTypesList,
+              label = HTML('Housing Type <i id="c_housing_types_help" class="fa fa-question-circle-o"></i>')
             )
           ),
 
@@ -94,90 +93,74 @@ tabPanel(
           tabPanel(
             "Population Age & Sex",
             value = "Population",
-            icon = icon("venus-mars"),
-            tags$p("The age profile of an area has a significant impact on the type of housing that is required.
-                   An abundance of children suggests a need for family housing, while a greater proportion of seniors
-                   may indicate a need for \"downsized\" housing."),
-            fluidRow(
-              conditionalPanel(
-                condition = "input.c_location != ''",
-                column(
-                  12,
-                  fluidRow(
-                    column(
-                      3,
-                      tags$div(
-                        align = 'left',
-                        class = 'multicol',
-                        checkboxInput("c_pp_compare_2011", label = HTML('Census 2011 <i id="c_pp_compare_2011_help" class="fa fa-question-circle-o"></i>'), value = FALSE),
-                        checkboxInput("c_pp_compare_2006", label = HTML('Census 2006 <i id="c_pp_compare_2006_help" class="fa fa-question-circle-o"></i>'), value = FALSE)
-                      )
-                    ),
-                    column(
-                      4,
-                      selectizeInput(
-                        "c_location_pp_compare",
-                        label = HTML('Compare with <i id="c_location_pp_compare_help" class="fa fa-question-circle-o"></i>'),
-                        choices = NULL,
-                        options = list(
-                          placeholder = "Select a location",
-                          onInitialize = I('function() { this.setValue(""); }')
-                        )
-                      )
+            # icon = icon("venus-mars"),
+            conditionalPanel(
+              condition = "input.c_location != ''",
+              column(
+                12,
+                fluidRow(
+                  plotlyOutput("popPyr", height = chartHeight, width = "100%") %>% withSpinner(color="#0dc5c1")
+                ),
+                fluidRow(
+                  column(
+                    3,
+                    tags$div(
+                      align = 'left',
+                      class = 'multicol',
+                      checkboxInput("c_pp_compare_2011", label = HTML('Census 2011 <i id="c_pp_compare_2011_help" class="fa fa-question-circle-o"></i>'), value = FALSE),
+                      checkboxInput("c_pp_compare_2006", label = HTML('Census 2006 <i id="c_pp_compare_2006_help" class="fa fa-question-circle-o"></i>'), value = FALSE)
                     )
                   ),
-                  fluidRow(
-                    plotlyOutput("popPyr", height = chartHeight, width = "100%") %>% withSpinner(color="#0dc5c1")
+                  column(
+                    4,
+                    selectizeInput(
+                      "c_location_pp_compare",
+                      label = HTML('Compare with <i id="c_location_pp_compare_help" class="fa fa-question-circle-o"></i>'),
+                      choices = NULL,
+                      options = list(
+                        placeholder = "Select a location",
+                        onInitialize = I('function() { this.setValue(""); }')
+                      )
+                    )
                   )
                 )
-              ),
-              conditionalPanel(
-                condition = "input.c_location == ''",
-                bsAlert("c_location_alert_pp")
               )
-            )
+            ),
+            conditionalPanel(
+              condition = "input.c_location == ''",
+              bsAlert("c_location_alert_pp")
+            ),
+            tags$p("The age profile of an area has a significant impact on the type of housing that is required.
+             An abundance of children suggests a need for family housing, while a greater proportion of seniors
+             may indicate a need for \"downsized\" housing.")
           ),
 
           # Mobility
           tabPanel(
             "Mobility",
             value = "Mobility",
-            icon = icon("truck"),
-            tags$p("This report shows number of people who had moved to the current location in the previous year."),
-            fluidRow(
-              conditionalPanel(
-                condition = "input.c_location != ''",
-                column(
-                  12,
-                  textOutput("mobility_sunburst_title"),
-                  sunburstOutput("mobilitySunburst", height = chartHeight) %>% withSpinner(color="#0dc5c1")
-                )
-              ),
-              conditionalPanel(
-                condition = "input.c_location == ''",
-                bsAlert("c_location_alert_m")
-              )
-
-            )
+            # icon = icon("truck"),
+            conditionalPanel(
+              condition = "input.c_location != ''",
+              textOutput("mobility_sunburst_title"),
+              sunburstOutput("mobilitySunburst", height = chartHeight) %>% withSpinner(color="#0dc5c1")
+            ),
+            conditionalPanel(
+              condition = "input.c_location == ''",
+              bsAlert("c_location_alert_m")
+            ),
+            tags$p("This report shows number of people who had moved to the current location in the previous year.")
           ),
 
           # Shelter-to-Income Ratio
           tabPanel(
             "Shelter-to-Income Ratio",
             value = "STIR",
-            icon = icon("money"),
+            # icon = icon("money"),
+            plotlyOutput("stirStacked", height = chartHeight) %>% withSpinner(color="#0dc5c1"),
             tags$p("Housing is considered affordable when spending on all shelter costs is below 30% of pre-tax income
                    and measured through the Shelter-cost-To-Income Ratio (STIR)."),
-            tags$p("The reports shows proportion of households with greater than 30% of pre-tax income spent on shelter."),
-            fluidRow(
-              # column(12,
-              #   plotlyOutput("stirLollipop", height = chartHeight) %>% withSpinner(color="#0dc5c1")
-              # ),
-              column(
-                12,
-                plotlyOutput("stirStacked", height = chartHeight) %>% withSpinner(color="#0dc5c1")
-              )
-            )
+            tags$p("The reports shows proportion of households with greater than 30% of pre-tax income spent on shelter.")
           )
         )
       )

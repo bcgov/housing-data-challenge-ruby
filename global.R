@@ -168,7 +168,7 @@ maxTransPeriod <- ptt_prov_dash$max_trans_period
 propertyTax <- ptt_rd_sf
 chartHeight <- 600
 mapHeightPtt <- 600
-mapHeightCensus <- 800
+mapHeightCensus <- 600
 
 periodSelection <- as.data.frame(propertyTax) %>%
   select(trans_period) %>%
@@ -285,9 +285,9 @@ jumbotron <- function(header, popPerc = 0, popInc = TRUE, dwellPerc = 0, dwellIn
   <h1> ", header, "</h1>
   <div class=\"container-fluid\">
     <div class=\"row\">
-      <div class=\"col-sm-10 col-sm-offset-1\">
+      <div class=\"col-sm-12\">
         <div class=\"row quick-fact-container\">
-          <div class=\"col-sm-5\">
+          <div class=\"col-lg-4 col-lg-offset-1 col-md-5 col-md-offset-1 col-sm-6\">
             <div class=\"quick-fact\">
               <div class=\"splash-text\">
                 <h3><i class=\"fa fa-users\"></i>&nbsp;Population</h3>
@@ -308,7 +308,7 @@ jumbotron <- function(header, popPerc = 0, popInc = TRUE, dwellPerc = 0, dwellIn
               </div>
             </div>
           </div>
-          <div class=\"col-sm-5 col-sm-offset-2\">
+          <div class=\"col-lg-4 col-lg-offset-2 col-md-5 col-sm-6\">
             <div class=\"quick-fact\">
               <div class=\"splash-text\">
                 <h3><i class=\"fa fa-money\"></i>&nbsp;Property Sales</h3>
@@ -338,9 +338,9 @@ jumbotron <- function(header, popPerc = 0, popInc = TRUE, dwellPerc = 0, dwellIn
     </div>
 
     <div class=\"row\">
-      <div class=\"col-sm-10 col-sm-offset-1\">
+      <div class=\"col-sm-12\">
         <div class=\"row quick-fact-container\">
-          <div class=\"col-sm-5\">
+          <div class=\"col-lg-4 col-lg-offset-1 col-md-5 col-md-offset-1 col-sm-6\">
             <div class=\"quick-fact\">
               <div class=\"splash-text\">
                 <h3><i class=\"fa fa-home\"></i>&nbsp;Housing</h3>
@@ -362,7 +362,7 @@ jumbotron <- function(header, popPerc = 0, popInc = TRUE, dwellPerc = 0, dwellIn
               </div>
             </div>
           </div>
-          <div class=\"col-sm-5 col-sm-offset-2\">
+          <div class=\"col-lg-4 col-lg-offset-2 col-md-5 col-sm-6\">
             <div class=\"quick-fact\">
               <div class=\"splash-text\">
                 <h3><i class=\"fa fa-truck\"></i>&nbsp;Shelter Cost and Mobility</h3>

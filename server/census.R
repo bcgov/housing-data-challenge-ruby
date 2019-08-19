@@ -1,9 +1,24 @@
-createAlert(session, "c_location_alert_pp", alertId = "c_location_alert_pp_id", title = NULL, style = "alert", dismiss = FALSE, append = TRUE,
-            content = "Click location on the map to draw a population distribution by age and sex for that location.")
-createAlert(session, "c_location_alert_m", alertId = "c_location_alert_m_id", title = NULL, style = NULL, dismiss = FALSE, append = TRUE,
-            content = "Click location on the map to draw a chart showing ratios of different population mobility categories for that location.")
-createAlert(session, "c_location_alert_ht", alertId = "c_location_alert_ht_id", title = NULL, style = NULL, dismiss = FALSE, append = TRUE,
-            content = "Click location on the map to draw a chart showing ratio of different housing types for that location.")
+createAlert(
+  session,
+  anchorId = "c_location_alert_pp",
+  alertId = "c_location_alert_pp_id",
+  dismiss = FALSE,
+  content = "Click location on the map to draw a population distribution by age and sex for that location."
+)
+createAlert(
+  session,
+  anchorId = "c_location_alert_m",
+  alertId = "c_location_alert_m_id",
+  dismiss = FALSE,
+  content = "Click location on the map to draw a chart showing ratios of different population mobility categories for that location."
+)
+createAlert(
+  session,
+  anchorId = "c_location_alert_ht",
+  alertId = "c_location_alert_ht_id",
+  append = TRUE,
+  content = "Click location on the map to draw a chart showing ratio of different housing types for that location."
+)
 
 c_year <- reactive({
   c_y <- input$c_year
@@ -405,9 +420,10 @@ observe({
       housingTypesDf %>% filter(GeoUID == input$c_location) %>% mutate(ratioFormat = paste0(gsub(" ratio", "", HousingType), " - ", ratio, "%")),
       index = c("ratioFormat"),
       vSize = "ratio",
-      type = "index",
+      type = "value",
       vColor = "ratio",
-      palette = c(colMultiFam, colStrata, colNonStrataRental, colForeign, colAcreage, colResidential, colCommercial, colSingleFam),
+      # palette = c(colMultiFam, colStrata, colNonStrataRental, colForeign, colAcreage, colResidential, colCommercial, colSingleFam),
+      palette = RColorBrewer::brewer.pal(8, "Spectral"),
       algorithm = "pivotSize",
       # sortID = "HousingType",
       fontsize.title = c(14),
@@ -421,8 +437,8 @@ observe({
       border.lwds = c(1),
       force.print.labels = FALSE,
       # title.legend = "Housing Types",
-      position.legend = "right",
-      fontsize.legend = 10,
+      position.legend = "bottom",
+      fontsize.legend = 11,
       format.legend = list(scientific = FALSE, big.mark = " "),
       drop.unused.levels = TRUE,
       inflate.labels = F
@@ -489,7 +505,6 @@ observe({
                 text = ~paste('Census 2006</br>', Region, abs(percentage_2006), '%'))
     }
 
-    ppTitle <- paste('Population Pyramid for', locationLabel(), '- Census year 2016')
     if (input$c_location_pp_compare != "") {
       p %<>% add_trace(x = ~percentage_compare, y = ~age, name = ~ paste(Region_compare, '2016', sex), type = "scatter", mode = 'lines+markers',
                             line = list(color = '#cc222299', shape = "spline"),
@@ -514,7 +529,9 @@ observe({
                )
              ),
              yaxis = list(title = ""),
-             title = ppTitle,
+             title = PlotlyChartTitle(
+               title_text = paste('Population Pyramid for', locationLabel(), '- Census year 2016')
+             ),
              legend = list(orientation = 'h')) %>%
       config(displayModeBar = F)
   })
