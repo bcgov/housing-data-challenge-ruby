@@ -1,7 +1,11 @@
 Package: bchousing
 Title: BC Housing Data Visualization
-Version: 0.0.0.9000
-Authors@R: person('Sasha', 'Bogdanovic', email = 'sasha@rubyind.com', role = c('cre', 'aut'))
+Version: 0.0.0.9001
+Authors@R: c(
+    person('Sasha', 'Bogdanovic', email = 'sasha@rubyind.com', role = c('cre', 'aut')),
+    person("Martin", "Monkman", email = 'Martin.Monkman@gov.bc.ca', role = "ctb"),
+    person("Province of British Columbia", role = c("cph", "fnd"))
+    )
 Description: A shiny application that provides data visualization of various housing-related open data.
 License: Apache-2.0
 Encoding: UTF-8
@@ -21,10 +25,11 @@ Imports:
     htmlwidgets,
     DT,
     tidyr,
-    plotly
+    plotly,
+    markdown,
+    bsplus
 Remotes: 
     mountainmath/cancensus,
-    ebailey78/shinyBS,
     andrewsali/shinycssloaders,
     mtennekes/treemap,
     timelyportfolio/sunburstR
@@ -32,4 +37,7 @@ RoxygenNote: 6.1.1
 URL: https://github.com/bcgov/housing-data-challenge-ruby
 BugReports: https://github.com/bcgov/housing-data-challenge-ruby/issues
 Suggests: 
-    testthat
+    testthat,
+    knitr,
+    rmarkdown
+VignetteBuilder: knitr

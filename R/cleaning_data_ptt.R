@@ -11,6 +11,18 @@
 #'
 #' @export
 AddTransactionPeriodColumns <- function(data) {
+
+  # Rename year and month columns if needed
+  cols <- colnames(data)
+  if ('Year' %in% cols) {
+    data <- data %>%
+      rename(year = Year)
+  }
+  if ('Month' %in% cols) {
+    data <- data %>%
+      rename(month = Month)
+  }
+
   data <- data %>%
     dplyr::mutate(
 
@@ -50,34 +62,64 @@ AddTransactionPeriodColumns <- function(data) {
 #' @import stringr
 #'
 #' @param data data frame
+#' @param calculate_percentages Whether to calculate percentage columns for foreign transactions
 #' @return modified data frame
 #'
 #' @export
-WranglePttData <- function(data) {
+WranglePttData <- function(data, calculate_percentages = FALSE) {
+
+  cols <- colnames(data)
+  if ('DevelopmentRegion' %in% cols) {
+    data <- data %>%
+      mutate(
+        DevelopmentRegion = as_factor(as.character(DevelopmentRegion))
+      ) %>%
+      filter(
+        !DevelopmentRegion %in% c('REST OF PROVINCE', 'UNKNOWN', 'UNKNOWN/RURAL') & !is.na(DevelopmentRegion)
+      ) %>%
+      dplyr::mutate(
+        # Transform region names to Title Case
+        DevelopmentRegion = stringr::str_to_title(DevelopmentRegion)
+      )
+  }
+
+  if ('RegionalDistrict' %in% cols) {
+    data <- data %>%
+      mutate(
+        RegionalDistrict = as_factor(as.character(RegionalDistrict))
+      ) %>%
+      dplyr::mutate(
+        RegionalDistrict = stringr::str_to_title(RegionalDistrict)
+      )
+  }
+
+  if ('Municipality' %in% cols) {
+    data <- data %>%
+      mutate(
+        Municipality = as_factor(as.character(Municipality))
+      ) %>%
+      dplyr::mutate(
+        Municipality = stringr::str_to_title(Municipality),
+        Municipality = stringr::str_replace(Municipality, 'City Of ', ''),
+        Municipality = stringr::str_replace(Municipality, 'District Of ', ''),
+        Municipality = stringr::str_replace(Municipality, 'Town Of ', ''),
+        Municipality = stringr::str_replace(Municipality, 'Village Of ', '')
+      )
+  }
+
   data <- data %>%
-    mutate(
-      DevelopmentRegion = as_factor(as.character(DevelopmentRegion)),
-      RegionalDistrict = as_factor(as.character(RegionalDistrict)),
-      Municipality = as_factor(as.character(Municipality))
-    ) %>%
-    filter(
-      !DevelopmentRegion %in% c('REST OF PROVINCE', 'UNKNOWN', 'UNKNOWN/RURAL') & !is.na(DevelopmentRegion)
-    ) %>%
-    AddTransactionPeriodColumns() %>%
-    dplyr::mutate(
-      # Transform regions' names to Title Case
-      DevelopmentRegion = stringr::str_to_title(DevelopmentRegion),
-      RegionalDistrict = stringr::str_to_title(RegionalDistrict),
-      Municipality = stringr::str_to_title(Municipality),
-      Municipality = stringr::str_replace(Municipality, 'City Of ', ''),
-      Municipality = stringr::str_replace(Municipality, 'District Of ', ''),
-      Municipality = stringr::str_replace(Municipality, 'Town Of ', ''),
-      Municipality = stringr::str_replace(Municipality, 'Village Of ', ''),
-      n_foreign_tran_nona = as.numeric(replace_na(n_foreign_tran, 0)),
-      sum_FMV_foreign_nona = as.numeric(replace_na(sum_FMV_foreign, 0)),
-      no_foreign_perc = round(n_foreign_tran_nona / tot_mkt_trans * 100, 2),
-      sum_FMV_foreign_perc = round(sum_FMV_foreign_nona / sum_FMV * 100, 2)
-    )
+    AddTransactionPeriodColumns()
+
+  if (calculate_percentages) {
+    data <- data %>%
+      dplyr::mutate(
+        n_foreign_tran_nona = as.numeric(replace_na(n_foreign_tran, 0)),
+        sum_FMV_foreign_nona = as.numeric(replace_na(sum_FMV_foreign, 0)),
+        no_foreign_perc = round(n_foreign_tran_nona / tot_mkt_trans * 100, 2),
+        sum_FMV_foreign_perc = round(sum_FMV_foreign_nona / sum_FMV * 100, 2)
+      ) %>%
+      select(-c(n_foreign_tran_nona, sum_FMV_foreign_nona))
+  }
 
   return(data)
 }

@@ -1,0 +1,541 @@
+#' @title Shiny UI function
+#'
+#' @import shiny
+#' @import shinyjs
+#' @import sf
+#' @import leaflet
+#' @import leaflet.extras
+#' @import readr
+#' @import stringr
+#' @import magrittr
+#' @import lubridate
+#' @import dplyr
+#' @import htmlwidgets
+#' @import DT
+#' @import tidyr
+#' @import plotly
+#' @import sunburstR
+#' @import treemap
+#' @import shinycssloaders
+#' @import bsplus
+#'
+#' @export
+app_ui <- function() {
+  data("ptt_prov_dash", package = "bchousing")
+  data("ptt_dr_sf", package = "bchousing")
+  data("ptt_rd_sf", package = "bchousing")
+  data("ptt_mun_sf", package = "bchousing")
+
+  # Selection of metrics, variables and options ----
+  selectionMetrics <- c(
+    "Average FMV" = "mn_FMV",
+    "Average Foreign FMV" = "mn_FMV_foreign",
+    "% of Foreign Transactions" = "no_foreign_perc"
+  )
+
+  # Initialize variables
+  maxTransPeriod <- ptt_prov_dash$max_trans_period
+  propertyTax <- ptt_rd_sf
+  chartHeight <- 600
+  mapHeightPtt <- 600
+  mapHeightCensus <- 600
+
+  periodSelection <- as.data.frame(propertyTax) %>%
+    select(trans_period) %>%
+    distinct() %>%
+    mutate(label = paste(lubridate::year(trans_period), lubridate::month(trans_period, label = TRUE))) %>%
+    rename(value = trans_period) %>%
+    arrange(desc(value))
+  periodSelection <- setNames(periodSelection$value, periodSelection$label)
+
+  geoLevels <- c(
+    "Census Division" = "CD",
+    "Census Subdivision" = "CSD",
+    "Census Metropolitan Area" = "CMA",
+    "Census Tract" = "CT"#,
+    # "Census Dissimination Area" = "DA"
+  )
+
+  housingTypesList <- c(
+    "Single detached house ratio",
+    "Semi detached house ratio",
+    "Apartment in duplex ratio",
+    "Row house ratio",
+    "Apartment in small building ratio",
+    "Apartment in tall building ratio",
+    "Other single attached house ratio",
+    "Movable dwelling ratio"
+  )
+
+  ui <- navbarPage(
+    theme = "css/bcgov.css",
+    title = "BC Housing Market",
+
+    # 01. Home page ----
+    tabPanel(
+      "Home",
+      fluidPage(
+        Jumbotron(
+          header = "BC Housing Market",
+          popPerc = c16Prov$Population.Change,
+          popInc = TRUE,
+          dwellPerc = c16Prov$Total.Private.Dwellings.Change,
+          dwellInc = TRUE,
+          trans_period = maxTransPeriod,
+          no_mkt_trans = no_mkt_trans,
+          no_foreign_perc = no_foreign_perc,
+          sum_FMV = sum_FMV,
+          sum_FMV_foreign_perc = sum_FMV_foreign_perc
+        ),
+        fluidRow(
+          id = "splash-intro",
+          tags$div(
+            id = "splash-intro-text",
+            HTML(
+              paste0(
+                "This platform is the result of the ",
+                tags$strong("Data Visualization Challenge"),
+                " launched by the ",
+                tags$a(href="http://www.bcic.com", "BC Innovation Council"),
+                " in partnership with ",
+                tags$a(href = "https://www2.gov.bc.ca/gov/content/data/about-data-management/bc-stats", "BC Stats"),
+                " in December 2016. The challenge aimed to develop a tool to visualize
+            BC Stats housing data in a more meaningful and impactful way. It provides BC Stats with an innovative tool
+            for better use of their data and, and at the same time, offers interested BC residents, government agencies,
+            and non-profits the opportunity to interact with, understand and make decisions based on community growth
+            and housing data. The platform is currently in its beta-version, users are invited to provide ",
+                tags$a("feedback"),
+                " on their use of this iteration including ideas as to how it could be advanced
+            to further fulfill its role."
+              )
+            )
+          ),
+          tags$hr(),
+          tags$div(
+            id = "splash-intro-credit",
+            HTML(
+              paste("Photo by", tags$a(
+                href = "https://unsplash.com/photos/596V9_X_naI?utm_source=unsplash&utm_medium=referral&utm_content=creditCopyText",
+                "Spencer Watson"), "on", tags$a(
+                  href = "https://unsplash.com/search/photos/vancouver?utm_source=unsplash&utm_medium=referral&utm_content=creditCopyText", "Unsplash.")
+              )
+            )
+          )
+        )
+      )
+    ),
+
+    # 02. Census ----
+    tabPanel(
+      'Census Topics',
+      fluidPage(
+        titlePanel("Census Data Visualization"),
+        shinyjs::useShinyjs(),
+
+        # bsCollapsePanel(title = paste("Introduction >"),
+        tags$p(
+          "The 2016 Census and National Household Survey present a wealth of granular and
+        detailed information about the socio-demographic characteristics of households in Canada.
+        Because the Census is conducted every five years, it is possible to compare these measures over time.
+        Relevant to housing are a number of measures captured by the Census and National Household Survey 2011."
+        ),
+        # ),
+        wellPanel(
+          # shinyBS::bsTooltip(
+          #   "c_view_help", placement = "right", trigger = "hover", options = NULL,
+          #   title = "Changing geographical level will redraw the map and all charts to populate them with data relevant for the selected geographical level."
+          # ),
+          # shinyBS::bsTooltip(
+          #   "c_housing_types_help", placement = "right", trigger = "hover", options = NULL,
+          #   title = "Changing a housing type selection will redraw the map and shade the areas based on the ratio of selected housing type compared to all types."
+          # ),
+          # shinyBS::bsTooltip(
+          #   "c_location_pp_compare_help", placement = "right", trigger = "hover", options = NULL,
+          #   title = "Selecting a location in this drop-down will draw a trace on the population pyramid chart based on the data for selected location, to allow comparison between primary location clicked on the map and this selected location."
+          # ),
+          # shinyBS::bsTooltip(
+          #   "c_pp_compare_2011_help", placement = "right", trigger = "hover", options = NULL,
+          #   title = "Check this box to draw a population pyramid trace based on data from 2011 census."
+          # ),
+          # shinyBS::bsTooltip(
+          #   "c_pp_compare_2006_help", placement = "right", trigger = "hover", options = NULL,
+          #   title = "Check this box to draw a population pyramid trace based on data from 2006 census."
+          # ),
+          fluidRow(
+            column(
+              2,
+              selectizeInput(
+                'c_view',
+                choices = geoLevels,
+                label = HTML('Geographical Level <i id="c_view_help" class="fa fa-question-circle-o"></i>')
+              ) %>%
+                bsplus::shinyInput_label_embed(
+                  shiny::icon('info') %>%
+                    bsplus::bs_embed_popover(
+                      title = "Letter",
+                      content = "Changing geographical level will redraw the map and all charts to populate them with data relevant for the selected geographical level.",
+                      placement = "left"
+                    )
+                )
+            ),
+            column(
+              3,
+              shinyjs::disabled(
+                textInput("c_location_name", label = "Location", placeholder = "Click map region to select location")
+              ),
+              tags$div(
+                class = "hidden",
+                textInput("c_location", label = "Location")
+              )
+            )
+          )
+        ),
+
+        fluidRow(
+          column(
+            5,
+            leaflet::leafletOutput("mapCensus", height = mapHeightCensus) %>% shinycssloaders::withSpinner(color="#0dc5c1")
+          ),
+          column(
+            7,
+            tabsetPanel(
+              id = "censusTopicsTabs",
+
+              # Housing Type
+              tabPanel(
+                "Housing Type",
+                value = "Housing",
+                # icon = icon("home"),
+                conditionalPanel(
+                  condition = "input.c_location != ''",
+                  column(12, plotOutput("housingTypeTreemap", height = chartHeight) %>% shinycssloaders::withSpinner(color = "#0dc5c1"))
+                ),
+                conditionalPanel(
+                  condition = "input.c_location == ''",
+                  tags$div(
+                    "Click location on the map to draw a chart showing ratio of different housing types for that location.",
+                    class = 'alert alert-info'
+                  )
+                ),
+                tags$p("For the purpose of the Census, housing type is defined by \"structural type\",
+                   which includes single detached house, semi-detached and row houses, and a variety of apartment categories."),
+                tags$p("This report gives insights into diversity of the housing types in an area."),
+                tags$p("Select different housing types options below to redraw the map and highlight regions by the selected housing type ratios in that region."),
+                selectizeInput(
+                  'c_housing_types',
+                  choices = housingTypesList,
+                  label = HTML('Housing Type <i id="c_housing_types_help" class="fa fa-question-circle-o"></i>')
+                )
+              ),
+
+              # Population pyramid
+              tabPanel(
+                "Population Age & Sex",
+                value = "Population",
+                # icon = icon("venus-mars"),
+                conditionalPanel(
+                  condition = "input.c_location != ''",
+                  column(
+                    12,
+                    fluidRow(
+                      plotly::plotlyOutput("popPyr", height = chartHeight, width = "100%") %>% shinycssloaders::withSpinner(color="#0dc5c1")
+                    ),
+                    fluidRow(
+                      column(
+                        3,
+                        tags$div(
+                          align = 'left',
+                          class = 'multicol',
+                          checkboxInput("c_pp_compare_2011", label = HTML('Census 2011 <i id="c_pp_compare_2011_help" class="fa fa-question-circle-o"></i>'), value = FALSE),
+                          checkboxInput("c_pp_compare_2006", label = HTML('Census 2006 <i id="c_pp_compare_2006_help" class="fa fa-question-circle-o"></i>'), value = FALSE)
+                        )
+                      ),
+                      column(
+                        4,
+                        selectizeInput(
+                          "c_location_pp_compare",
+                          label = HTML('Compare with <i id="c_location_pp_compare_help" class="fa fa-question-circle-o"></i>'),
+                          choices = NULL,
+                          options = list(
+                            placeholder = "Select a location",
+                            onInitialize = I('function() { this.setValue(""); }')
+                          )
+                        )
+                      )
+                    )
+                  )
+                ),
+                conditionalPanel(
+                  condition = "input.c_location == ''",
+                  tags$div(
+                    "Click location on the map to draw a population distribution by age and sex for that location.",
+                    class = 'alert alert-info'
+                  )
+                ),
+                tags$p("The age profile of an area has a significant impact on the type of housing that is required.
+             An abundance of children suggests a need for family housing, while a greater proportion of seniors
+             may indicate a need for \"downsized\" housing.")
+              ),
+
+              # Mobility
+              tabPanel(
+                "Mobility",
+                value = "Mobility",
+                # icon = icon("truck"),
+                conditionalPanel(
+                  condition = "input.c_location != ''",
+                  textOutput("mobility_sunburst_title"),
+                  sunburstR::sunburstOutput("mobilitySunburst", height = chartHeight) %>% shinycssloaders::withSpinner(color="#0dc5c1")
+                ),
+                conditionalPanel(
+                  condition = "input.c_location == ''",
+                  tags$div(
+                    "Click location on the map to draw a chart showing ratios of different population mobility categories for that location.",
+                    class = 'alert alert-info'
+                  )
+                ),
+                tags$p("This report shows number of people who had moved to the current location in the previous year.")
+              ),
+
+              # Shelter-to-Income Ratio
+              tabPanel(
+                "Shelter-to-Income Ratio",
+                value = "STIR",
+                # icon = icon("money"),
+                plotly::plotlyOutput("stirStacked", height = chartHeight) %>% shinycssloaders::withSpinner(color="#0dc5c1"),
+                tags$p("Housing is considered affordable when spending on all shelter costs is below 30% of pre-tax income
+                   and measured through the Shelter-cost-To-Income Ratio (STIR)."),
+                tags$p("The reports shows proportion of households with greater than 30% of pre-tax income spent on shelter.")
+              )
+            )
+          )
+        ),
+        tags$p("Data source: Statistics Canada (Statistics Canada Open Data Licence)")
+      )
+    ),
+
+    # 03. PTT ----
+    tabPanel(
+      'Property Transfer Tax',
+      fluidPage(
+        titlePanel("Property Sales Monthly Overview"),
+        tags$p("Property Transfer Tax data gives accurate measures of the total number of
+           market transactions and changes in time, by a variety of levels
+           of geography (e.g. municipality and regional district),
+           property types (residential, commercial, farm, etc.),
+           the average prices and tax amount paid, and the proportion of
+           foreign participation in those transactions."),
+
+        wellPanel(
+          # shinyBS::bsTooltip(
+          #   "pt_trans_period_help", placement = "right", trigger = "hover", options = NULL,
+          #   title = "Changing transaction period will redraw the map and all charts to populate them with data relevant for the selected transaction period."
+          # ),
+          # shinyBS::bsTooltip(
+          #   "pt_geo_level_help", placement = "right", trigger = "hover", options = NULL,
+          #   title = "Changing geographical level will redraw the map and all charts to populate them with data relevant for the selected geographical level."
+          # ),
+          # shinyBS::bsTooltip(
+          #   "pt_metric_help", placement = "right", trigger = "hover", options = NULL,
+          #   title = "Selecting a different variable in this drop-down will redraw the map and selected charts to highlight selectec variable."
+          # ),
+          fluidRow(
+            column(
+              3,
+              selectInput(
+                "pt_view",
+                label = HTML('View <i id="pt_geo_level_help" class="fa fa-question-circle-o"></i>'),
+                c(
+                  "Regional District" = "regdis",
+                  "Development Region" = "devreg",
+                  "Municipality" = "mun"
+                )
+              )
+            ),
+            column(
+              3,
+              selectizeInput(
+                "pt_trans_period",
+                label = HTML('Period <i id="pt_trans_period_help" class="fa fa-question-circle-o"></i>'),
+                choices = periodSelection,
+                multiple = FALSE,
+                selected = maxTransPeriod
+              )
+            ),
+            column(
+              3,
+              selectInput("pt_metric", label = HTML('Variable <i id="pt_metric_help" class="fa fa-question-circle-o"></i>'),
+                          choices = selectionMetrics)
+            ),
+            column(
+              3,
+              shinyjs::disabled(
+                textInput("pt_location_name", label = "Location", placeholder = "Click map region to select location")
+              ),
+              tags$div(
+                class = "hidden",
+                textInput("pt_location", label = "Location")
+              )
+            )
+          )
+        ),
+
+        fluidRow(
+          column(5, leaflet::leafletOutput("mapPtt", height = mapHeightPtt)),
+          column(7,
+                 tabsetPanel(
+                   tabPanel(
+                     "FMV",
+                     # icon = icon("briefcase"),
+                     tags$p("Total fair market value by month."),
+                     conditionalPanel(
+                       condition = "input.pt_location != ''",
+                       plotly::plotlyOutput("pt_mothly_fmv", height = chartHeight) %>% shinycssloaders::withSpinner(color="#0dc5c1")
+                     ),
+                     conditionalPanel(
+                       condition = "input.pt_location == ''",
+                       tags$div(
+                         "Click location on the map to draw a time series chart showing monthly total sales values for that location.",
+                         class = 'alert alert-info'
+                       )
+
+                     )
+                   ),
+                   tabPanel(
+                     "Mean FMV",
+                     # icon = icon("calculator"),
+                     tags$p("Mean and Median fair market value by month, total and foreign."),
+                     # tags$p(cat(getwd())),
+                     conditionalPanel(
+                       condition = "input.pt_location != ''",
+                       plotly::plotlyOutput("pt_mothly_mnd_fmv", height = chartHeight) %>% shinycssloaders::withSpinner(color="#0dc5c1")
+                     ),
+                     conditionalPanel(
+                       condition = "input.pt_location == ''",
+                       tags$div(
+                         "Click location on the map to draw a time series chart showing monthly average sales values for that location.",
+                         class = 'alert alert-info'
+                       )
+                     )
+                   ),
+                   tabPanel(
+                     "Tax Paid",
+                     # icon = icon("money"),
+                     tags$p("Total property transfer tax paid by month."),
+                     conditionalPanel(
+                       condition = "input.pt_location != ''",
+                       plotly::plotlyOutput("pt_mothly_ptt", height = chartHeight) %>% shinycssloaders::withSpinner(color="#0dc5c1")
+                     ),
+                     conditionalPanel(
+                       condition = "input.pt_location == ''",
+                       tags$div(
+                         "Click location on the map to draw a time series chart showing monthly property transfer tax paid for that location.",
+                         class = 'alert alert-info'
+                       )
+                     )
+                   ),
+                   tabPanel(
+                     "Property Types",
+                     # icon = icon("building-o"),
+                     tags$p("Number of market transactions for different
+                   property types (residential, commercial, farms, etc) by month."),
+                     conditionalPanel(
+                       condition = "input.pt_location != ''",
+                       plotly::plotlyOutput("pt_mothly", height = chartHeight) %>% shinycssloaders::withSpinner(color="#0dc5c1")
+                     ),
+                     conditionalPanel(
+                       condition = "input.pt_location == ''",
+                       tags$div(
+                         "Click location on the map to draw a time series chart showing monthly numbers of transactions for different property types for that location.",
+                         class = 'alert alert-info'
+                       )
+                     )
+                   ),
+                   tabPanel(
+                     "Residential",
+                     # icon = icon("home"),
+                     tags$p("Number of market transactions for residential properties by month."),
+                     conditionalPanel(
+                       condition = "input.pt_location != ''",
+                       plotly::plotlyOutput("pt_mothly_res", height = chartHeight) %>% shinycssloaders::withSpinner(color="#0dc5c1")
+                     ),
+                     conditionalPanel(
+                       condition = "input.pt_location == ''",
+                       tags$div(
+                         "Click location on the map to draw a time series chart showing monthly number of transactions for residential properties for that location.",
+                         class = 'alert alert-info'
+                       )
+                     )
+                   ),
+                   tabPanel(
+                     "Commercial",
+                     # icon = icon("building"),
+                     tags$p("Number of market transactions for commercial properties by month."),
+                     conditionalPanel(
+                       condition = "input.pt_location != ''",
+                       plotly::plotlyOutput("pt_mothly_comm", height = chartHeight) %>% shinycssloaders::withSpinner(color="#0dc5c1")
+                     ),
+                     conditionalPanel(
+                       condition = "input.pt_location == ''",
+                       tags$div(
+                         "Click location on the map to draw a time series chart showing monthly number of transactions for commerction properties for that location.",
+                         class = 'alert alert-info'
+                       )
+                     )
+                   )
+                 )
+          )
+        )
+      )
+    ),
+
+    # 04. About ----
+    navbarMenu(
+      "About",
+      tabPanel("Project background", includeMarkdown("about/project_background.Rmd")),
+      tabPanel("Data sources", includeMarkdown("about/data_sources.Rmd")),
+      tabPanel("Code repository", includeMarkdown("about/code_repository.Rmd")),
+      tabPanel("Glossary", includeMarkdown("about/glossary.Rmd"))
+    ),
+
+    #
+    tabPanel("Feedback", id = "feedback"),
+    footer = HTML('
+<div id="footer">
+  <img src="/images/back-to-top.png" alt="Back to top" title="Back to top" class="back-to-top footer-overlap" style="bottom: 10px; display: inline;">
+  <div id="footerWrapper">
+    <div id="footerAdminSection">
+      <div id="footerAdminLinksContainer" class="container">
+        <div id="footerAdminLinks" class="row">
+          <ul class="inline">
+            <li data-order="0">
+              <a href="/" target="_self">Home</a>
+            </li>
+            <li data-order="1">
+              <a href="#tab-3898-1" target="_self" class="about-project">About</a>
+            </li>
+            <li data-order="2">
+              <a href="//www2.gov.bc.ca/gov/content/home/disclaimer" target="_self">Disclaimer</a>
+            </li>
+            <li data-order="3">
+              <a href="//www2.gov.bc.ca/gov/content/home/privacy" target="_self">Privacy</a>
+            </li>
+            <li data-order="4">
+              <a href="//www2.gov.bc.ca/gov/content/home/accessibility" target="_self">Accessibility</a>
+            </li>
+            <li data-order="5">
+              <a href="//www2.gov.bc.ca/gov/content/home/copyright" target="_self">Copyright</a>
+            </li>
+            <li data-order="6">
+              <a href="//www2.gov.bc.ca/gov/content/home/contact-us" target="_self">Contact Us</a>
+            </li>
+          </ul>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>'),
+    includeScript("www/srcjs/bcgov.js"),
+    tags$head(tags$link(rel = "shortcut icon", href = "/images/favicon.ico"))
+  )
+}

@@ -4,10 +4,12 @@
 \alias{WranglePttData}
 \title{Wrangles PTT data}
 \usage{
-WranglePttData(data)
+WranglePttData(data, calculate_percentages = FALSE)
 }
 \arguments{
 \item{data}{data frame}
+
+\item{calculate_percentages}{Whether to calculate percentage columns for foreign transactions}
 }
 \value{
 modified data frame
