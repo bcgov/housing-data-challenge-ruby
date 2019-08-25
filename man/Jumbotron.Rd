@@ -30,7 +30,7 @@ Jumbotron(header, popPerc = 0, popInc = TRUE, dwellPerc = 0,
 \item{sum_FMV_foreign_perc}{Percentage of foreign Fair Market Value}
 }
 \value{
-HTML Code
+HTML Code for the home page quick facts story board
 }
 \description{
 BC Housing home page jumbotron

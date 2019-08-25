@@ -7,9 +7,11 @@
 app_server(input, output, session)
 }
 \arguments{
-\item{input}{}
+\item{input}{Input variables}
 
-\item{session}{}
+\item{output}{Output variables}
+
+\item{session}{Session data}
 }
 \description{
 Shiny server function

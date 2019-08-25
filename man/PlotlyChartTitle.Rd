@@ -19,8 +19,11 @@ PlotlyChartTitle(title_text = "Chart title", x = 0,
 \item{font_size}{Font size}
 }
 \value{
-Formatted chart title
+Formatted chart title for Plotly charts
 }
 \description{
 Format title for plotly charts
+}
+\examples{
+PlotlyChartTitle('My chart title', x = 0.5, font_family = "Arial", font_color = '#e6e6e6', font-size = 18)
 }

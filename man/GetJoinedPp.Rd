@@ -7,14 +7,14 @@
 GetJoinedPp(c16, c11, c06)
 }
 \arguments{
-\item{c16}{Census 2016 data}
+\item{c16}{Census 2016 population data}
 
-\item{c11}{Census 2011 data}
+\item{c11}{Census 2011 population data}
 
-\item{c06}{Census 2006 data}
+\item{c06}{Census 2006 population data}
 }
 \value{
-Census population pyramid data
+Data properly shaped to be used for creating the population pyramid chart
 }
 \description{
 Population Pyramid data

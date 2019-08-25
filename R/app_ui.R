@@ -1,22 +1,16 @@
 #' @title Shiny UI function
 #'
 #' @import shiny
-#' @import shinyjs
-#' @import sf
-#' @import leaflet
-#' @import leaflet.extras
-#' @import readr
-#' @import stringr
+#' @importFrom shinyjs useShinyjs
+#' @importFrom shinyjs disabled
+#' @importFrom leaflet leafletOutput
 #' @import magrittr
-#' @import lubridate
-#' @import dplyr
+#' @importFrom lubridate year
+#' @importFrom lubridate month
 #' @import htmlwidgets
-#' @import DT
-#' @import tidyr
-#' @import plotly
-#' @import sunburstR
-#' @import treemap
-#' @import shinycssloaders
+#' @importFrom plotly plotlyOutput
+#' @importFrom sunburstR sunburstOutput
+#' @importFrom shinycssloaders withSpinner
 #' @import bsplus
 #'
 #' @export
@@ -492,10 +486,10 @@ app_ui <- function() {
     # 04. About ----
     navbarMenu(
       "About",
-      tabPanel("Project background", includeMarkdown("about/project_background.Rmd")),
-      tabPanel("Data sources", includeMarkdown("about/data_sources.Rmd")),
-      tabPanel("Code repository", includeMarkdown("about/code_repository.Rmd")),
-      tabPanel("Glossary", includeMarkdown("about/glossary.Rmd"))
+      tabPanel("Project background", shiny::includeMarkdown("about/project_background.Rmd")),
+      tabPanel("Data sources", shiny::includeMarkdown("about/data_sources.Rmd")),
+      tabPanel("Code repository", shiny::includeMarkdown("about/code_repository.Rmd")),
+      tabPanel("Glossary", shiny::includeMarkdown("about/glossary.Rmd"))
     ),
 
     #

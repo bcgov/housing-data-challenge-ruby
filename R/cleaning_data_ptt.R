@@ -1,10 +1,14 @@
 #' @title Add Transaction Period Columns
 #' @description  Add transaction period and transaction period label columns to be used for charts
 #'
-#' @import dplyr
-#' @import stringr
-#' @import forcats
-#' @import lubridate
+#' @importFrom dplyr mutate
+#' @importFrom dplyr rename
+#' @importFrom dplyr select
+#' @importFrom forcats as_factor
+#' @importFrom lubridate month
+#' @importFrom stringr str_c
+#' @importFrom stringr str_pad
+
 #'
 #' @param data data frame
 #' @return modified data frame
@@ -16,11 +20,11 @@ AddTransactionPeriodColumns <- function(data) {
   cols <- colnames(data)
   if ('Year' %in% cols) {
     data <- data %>%
-      rename(year = Year)
+      dplyr::rename(year = Year)
   }
   if ('Month' %in% cols) {
     data <- data %>%
-      rename(month = Month)
+      dplyr::rename(month = Month)
   }
 
   data <- data %>%
@@ -58,52 +62,88 @@ AddTransactionPeriodColumns <- function(data) {
 #'              adding transaciton period columnns function call, changing the case
 #'              of region names, etc.
 #'
-#' @import dplyr
-#' @import stringr
+#' @importFrom dplyr mutate
+#' @importFrom dplyr select
+#' @importFrom forcats as_factor
+#' @importFrom stringr str_to_title
+#' @importFrom stringr str_to_upper
 #'
 #' @param data data frame
 #' @param calculate_percentages Whether to calculate percentage columns for foreign transactions
 #' @return modified data frame
 #'
 #' @export
-WranglePttData <- function(data, calculate_percentages = FALSE) {
+WranglePttData <- function(data, calculate_percentages = FALSE, region_name_split = FALSE) {
 
   cols <- colnames(data)
+
   if ('DevelopmentRegion' %in% cols) {
     data <- data %>%
-      mutate(
-        DevelopmentRegion = as_factor(as.character(DevelopmentRegion))
+      dplyr::mutate(
+        # Transform region names to UPPER CASE so we can safely do the filtering
+        DevelopmentRegion = stringr::str_to_upper(DevelopmentRegion)
       ) %>%
       filter(
+        # Filter out the observations that we can't join to polygon regions
         !DevelopmentRegion %in% c('REST OF PROVINCE', 'UNKNOWN', 'UNKNOWN/RURAL') & !is.na(DevelopmentRegion)
       ) %>%
       dplyr::mutate(
         # Transform region names to Title Case
         DevelopmentRegion = stringr::str_to_title(DevelopmentRegion)
+      ) %>%
+      dplyr::mutate(
+        # Convert to factor
+        DevelopmentRegion = forcats::as_factor(DevelopmentRegion)
       )
   }
 
   if ('RegionalDistrict' %in% cols) {
+
+    # RegionalDistrict is prefixed with the sequence number and dash separator, e.g. "04 - Cariboo". We keep only the name
+    if (region_name_split) {
+      data <- data %>%
+        dplyr::mutate(
+          RegionalDistrict = SplitBySeparator(RegionalDistrict, sep = ' - ', export_part = 2)
+        )
+    }
+
+    # Convert to Title Case
     data <- data %>%
-      mutate(
-        RegionalDistrict = as_factor(as.character(RegionalDistrict))
-      ) %>%
       dplyr::mutate(
         RegionalDistrict = stringr::str_to_title(RegionalDistrict)
+      )
+
+    # Convert to factor
+    data <- data %>%
+      dplyr::mutate(
+        RegionalDistrict = forcats::as_factor(RegionalDistrict)
       )
   }
 
   if ('Municipality' %in% cols) {
+
+    data <- data %>%
+      dplyr::mutate(
+        Municipality = stringr::str_to_upper(Municipality),
+        Municipality = stringr::str_replace(Municipality, 'CITY OF ', ''),
+        Municipality = stringr::str_replace(Municipality, 'DISTRICT OF ', ''),
+        Municipality = stringr::str_replace(Municipality, 'TOWN OF ', ''),
+        Municipality = stringr::str_replace(Municipality, 'VILALGE OF ', ''),
+        Municipality = stringr::str_to_title(Municipality)
+      )
+
+    # Municipality is prefixed with the sequence number and dash separator, e.g. "391 - District of Wells". We keep only the name
+    if (region_name_split) {
+      data <- data %>%
+        dplyr::mutate(
+          Municipality = SplitBySeparator(Municipality, sep = ' - ', export_part = 2)
+        )
+    }
+
+    # Convert to factor
     data <- data %>%
       mutate(
-        Municipality = as_factor(as.character(Municipality))
-      ) %>%
-      dplyr::mutate(
-        Municipality = stringr::str_to_title(Municipality),
-        Municipality = stringr::str_replace(Municipality, 'City Of ', ''),
-        Municipality = stringr::str_replace(Municipality, 'District Of ', ''),
-        Municipality = stringr::str_replace(Municipality, 'Town Of ', ''),
-        Municipality = stringr::str_replace(Municipality, 'Village Of ', '')
+        Municipality = as_factor(Municipality)
       )
   }
 
@@ -125,17 +165,20 @@ WranglePttData <- function(data, calculate_percentages = FALSE) {
 }
 
 #' @title Split string by a separator
-#' @description  Function to split string by separator and return the first part
+#' @description  Function to split string by separator and return one part
 #'
-#' @import stringr
+#' @importFrom stringr str_split
+#' @importFrom stringr str_trim
 #'
 #' @param v String to be split
 #' @param sep Separtor
 #' @param trim_ws Trim whitespace or not
+#' @param export_part The part of string to extract
 #' @return First part of the split string
-SplitBySeparator <- function(v, sep, trim_ws = TRUE) {
+#' @export
+SplitBySeparator <- function(v, sep, trim_ws = TRUE, export_part = 1) {
   splitV <- stringr::str_split(v, sep, simplify = TRUE)
-  part <- splitV[, 1]
+  part <- splitV[, export_part]
   if (trim_ws) {
     part <- stringr::str_trim(part, side = "both")
   }
@@ -146,9 +189,15 @@ SplitBySeparator <- function(v, sep, trim_ws = TRUE) {
 #' @title Wrangle Shape files
 #' @description  Add transaction period and transaction period label columns to be used for charts
 #'
-#' @import dplyr
-#' @import sf
-#' @import rmapshaper
+#' @importFrom dplyr filter
+#' @importFrom dplyr if_else
+#' @importFrom dplyr mutate
+#' @importFrom dplyr rename
+#' @importFrom dplyr select
+#' @importFrom sf st_as_sf
+#' @importFrom sf st_read
+#' @importFrom stringr str_replace
+#' @importFrom rmapshaper ms_simplify
 #'
 #' @param data sp object with shapes for the particular geographic level
 #' @param id_column Column which identifies the ID of the record (e.g. CSDUID)
@@ -171,8 +220,8 @@ WrangleShapeFiles <- function(data, id_column, name_column, pr_uid = 59) {
     dplyr::rename("GeoUID" = id_column) %>%
     dplyr::mutate(
       # Preserve location names in English
-      GeoName = SplitBySeparator({{ name_column }}, "/"),
-      PRNAME = SplitBySeparator(PRNAME, "/")
+      GeoName = bchousing:::SplitBySeparator({{ name_column }}, "/"),
+      PRNAME = bchousing:::SplitBySeparator(PRNAME, "/")
     )
 
     # Development Region fixes
@@ -225,8 +274,13 @@ WrangleShapeFiles <- function(data, id_column, name_column, pr_uid = 59) {
 #' @param shapes  Shapes sf object
 #' @param geo_name Column to join on
 #'
-#' @import dplyr
-#' @import sf
+#' @importFrom dplyr filter
+#' @importFrom dplyr group_by
+#' @importFrom dplyr inner_join
+#' @importFrom dplyr mutate
+#' @importFrom dplyr summarise_if
+#' @importFrom dplyr ungroup
+#' @importFrom sf st_transform
 #'
 #' @return sf data frame
 #' @export

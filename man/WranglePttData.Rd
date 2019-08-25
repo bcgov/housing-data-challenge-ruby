@@ -4,7 +4,8 @@
 \alias{WranglePttData}
 \title{Wrangles PTT data}
 \usage{
-WranglePttData(data, calculate_percentages = FALSE)
+WranglePttData(data, calculate_percentages = FALSE,
+  region_name_split = FALSE)
 }
 \arguments{
 \item{data}{data frame}

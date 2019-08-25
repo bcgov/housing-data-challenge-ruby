@@ -11,20 +11,32 @@
 #' @param sum_FMV Total Fair Market Value
 #' @param sum_FMV_foreign_perc Percentage of foreign Fair Market Value
 #'
-#' @return HTML Code
-#' @export
+#' @return HTML Code for the home page quick facts story board
 #'
-#' @examples
+#' @importFrom dplyr arrange
+#' @importFrom dplyr filter
+#' @importFrom dplyr group_by
+#' @importFrom dplyr mutate
+#' @importFrom dplyr select
+#' @importFrom dplyr summarise
+#' @importFrom dplyr as_tibble
+#' @importFrom dplyr top_n
+#' @importFrom dplyr ungroup
+#' @importFrom lubridate month
+#' @importFrom lubridate year
+#' @importFrom lubridate ymd
+#'
+#' @export
 Jumbotron <- function(header, popPerc = 0, popInc = TRUE, dwellPerc = 0, dwellInc = TRUE,
                       trans_period, no_mkt_trans = 0, no_foreign_perc = 0,
                       sum_FMV = 0, sum_FMV_foreign_perc = 0) {
 
   maxTransPeriod <- ptt_prov_dash$max_trans_period
 
-  htSummary <- as_tibble(housingTypesCd) %>%
-    mutate("PRUID" = "59") %>%
-    group_by(`PRUID`) %>%
-    summarise(
+  htSummary <- dplyr::as_tibble(bchousing:::housingTypesCd) %>%
+    dplyr::mutate("PRUID" = "59") %>%
+    dplyr::group_by(`PRUID`) %>%
+    dplyr::summarise(
       "Single detached house" = sum(`Single detached house`),
       "Apartment in tall building" = sum(`Apartment in tall building`),
       "Semi detached house" = sum(`Semi detached house`),
@@ -34,7 +46,8 @@ Jumbotron <- function(header, popPerc = 0, popInc = TRUE, dwellPerc = 0, dwellIn
       "Other single attached house" = sum(`Other single attached house`),
       "Movable dwelling" = sum(`Movable dwelling`)
     ) %>%
-    mutate("Single detached house ratio" = round(`Single detached house` * 100 / (
+    dplyr::ungroup() %>%
+    dplyr::mutate("Single detached house ratio" = round(`Single detached house` * 100 / (
       `Single detached house` +
         `Apartment in tall building` +
         `Semi detached house` +
@@ -44,36 +57,36 @@ Jumbotron <- function(header, popPerc = 0, popInc = TRUE, dwellPerc = 0, dwellIn
         `Other single attached house` +
         `Movable dwelling`
     ), digits = 2)) %>%
-    select("Single detached house ratio")
+    dplyr::select("Single detached house ratio")
 
-  mSummary <- as_tibble(censusMobilityCsd) %>%
-    mutate("PRUID" = "59") %>%
-    group_by(`PRUID`, `Region`) %>%
-    summarise("Movers Ratio" = max(`Movers Ratio`)) %>%
-    ungroup() %>%
-    arrange(desc(`Movers Ratio`)) %>%
-    top_n(1) %>%
-    select(`Region`, `Movers Ratio`)
+  mSummary <- dplyr::as_tibble(censusMobilityCsd) %>%
+    dplyr::mutate("PRUID" = "59") %>%
+    dplyr::group_by(`PRUID`, `Region`) %>%
+    dplyr::summarise("Movers Ratio" = max(`Movers Ratio`)) %>%
+    dplyr::ungroup() %>%
+    dplyr::arrange(desc(`Movers Ratio`)) %>%
+    dplyr::top_n(1) %>%
+    dplyr::select(`Region`, `Movers Ratio`)
 
-  ageSummary <- as_tibble(census2016aaCsd) %>%
-    mutate("PRUID" = "59") %>%
-    group_by(`PRUID`, `Region`) %>%
-    summarise("Average Age" = max(`Average Age`)) %>%
-    filter(!str_detect(`Region`, 'IRI')) %>%
-    ungroup() %>%
-    arrange(`Average Age`) %>%
-    top_n(1) %>%
-    select(`Region`, `Average Age`)
+  ageSummary <- dplyr::as_tibble(census2016aaCsd) %>%
+    dplyr::mutate("PRUID" = "59") %>%
+    dplyr::group_by(`PRUID`, `Region`) %>%
+    dplyr::summarise("Average Age" = max(`Average Age`)) %>%
+    dplyr::filter(!str_detect(`Region`, 'IRI')) %>%
+    dplyr::ungroup() %>%
+    dplyr::arrange(`Average Age`) %>%
+    dplyr::top_n(1) %>%
+    dplyr::select(`Region`, `Average Age`)
 
-  stirSummary <- as_tibble(census2016CsdStir) %>%
-    mutate("PRUID" = "59") %>%
-    group_by(`PRUID`, `Region`) %>%
-    summarise("percent_more_than_30" = max(`percent_more_than_30`)) %>%
-    filter(!str_detect(`Region`, 'IRI')) %>%
-    ungroup() %>%
-    arrange(`percent_more_than_30`) %>%
-    top_n(1) %>%
-    select(`Region`, `percent_more_than_30`)
+  stirSummary <- dplyr::as_tibble(census2016CsdStir) %>%
+    dplyr::mutate("PRUID" = "59") %>%
+    dplyr::group_by(`PRUID`, `Region`) %>%
+    dplyr::summarise("percent_more_than_30" = max(`percent_more_than_30`)) %>%
+    dplyr::filter(!str_detect(`Region`, 'IRI')) %>%
+    dplyr::ungroup() %>%
+    dplyr::arrange(`percent_more_than_30`) %>%
+    dplyr::top_n(1) %>%
+    dplyr::select(`Region`, `percent_more_than_30`)
 
   popChange <- "increased"
   if (popInc == FALSE) {
@@ -133,7 +146,7 @@ Jumbotron <- function(header, popPerc = 0, popInc = TRUE, dwellPerc = 0, dwellIn
                 <h3><i class=\"fa fa-money\"></i>&nbsp;Property Sales</h3>
               </div>
               <div class=\"splash-text\">
-                In ", paste(lubridate::month(ymd(maxTransPeriod), label = TRUE, abbr = FALSE),
+                In ", paste(lubridate::month(lubridate::ymd(maxTransPeriod), label = TRUE, abbr = FALSE),
                             lubridate::year(maxTransPeriod)), ", there were <strong>",
     format(no_mkt_trans, big.mark=","),
     "</strong> housing market transactions, <strong>",
@@ -216,23 +229,24 @@ Jumbotron <- function(header, popPerc = 0, popInc = TRUE, dwellPerc = 0, dwellIn
 
 #' @title Population Pyramid data
 #'
-#' @param c16 Census 2016 data
-#' @param c11 Census 2011 data
-#' @param c06 Census 2006 data
+#' @param c16 Census 2016 population data
+#' @param c11 Census 2011 population data
+#' @param c06 Census 2006 population data
 #'
-#' @return Census population pyramid data
+#' @importFrom dplyr left_join
+#' @importFrom dplyr rename
+#'
+#' @return Data properly shaped to be used for creating the population pyramid chart
 #' @export
-#'
-#' @examples
 GetJoinedPp <- function(c16, c11, c06) {
   censusPp <-
     dplyr::left_join(c16, c11, by = c("GeoUID", "Region", "sex", "age")) %>%
-    rename(
+    dplyr::rename(
       "percentage_2016" = "percentage.x",
       "percentage_2011" = "percentage.y"
     ) %>%
-    left_join(c06, by = c("GeoUID", "Region", "sex", "age")) %>%
-    rename(
+    dplyr::left_join(c06, by = c("GeoUID", "Region", "sex", "age")) %>%
+    dplyr::rename(
       "percentage_2006" = "percentage"
     )
   return(censusPp)
@@ -246,11 +260,12 @@ GetJoinedPp <- function(c16, c11, c06) {
 #' @param font_color Font color
 #' @param font_size Font size
 #'
-#' @return Formatted chart title
+#' @return Formatted chart title for Plotly charts
 #' @export
 #'
 #' @examples
-PlotlyChartTitle <- function(title_text = "Chart title", x = 0, font_family = "Arial", font_color = "#393939", font_size = 16) {
+#' PlotlyChartTitle('My chart title', x = 0.5, font_family = "Arial", font_color = '#e6e6e6', font-size = 18)
+PlotlyChartTitle <- function(title_text = 'Chart title', x = 0, font_family = 'Arial', font_color = '#393939', font_size = 16) {
   plotly_title <- list(
     text = title_text,
     x = 0,
@@ -267,10 +282,11 @@ PlotlyChartTitle <- function(title_text = "Chart title", x = 0, font_family = "A
 #'
 #' @param annotation_text Annotation text
 #'
-#' @return Formatted annotation
+#' @return Formatted annotation for plotly chart
 #' @export
 #'
 #' @examples
+#' PlotlyChartAnnotation('My chart annotation')
 PlotlyChartAnnotation <- function(annotation_text) {
   annotations = list(
     text = annotation_text,
@@ -286,4 +302,3 @@ PlotlyChartAnnotation <- function(annotation_text) {
 
   return(annotations)
 }
-

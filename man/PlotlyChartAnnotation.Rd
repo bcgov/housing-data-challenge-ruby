@@ -10,8 +10,11 @@ PlotlyChartAnnotation(annotation_text)
 \item{annotation_text}{Annotation text}
 }
 \value{
-Formatted annotation
+Formatted annotation for plotly chart
 }
 \description{
 Add annotation for Plotly charts
+}
+\examples{
+PlotlyChartAnnotation('My chart annotation')
 }

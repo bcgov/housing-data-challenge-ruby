@@ -4,7 +4,7 @@
 \alias{SplitBySeparator}
 \title{Split string by a separator}
 \usage{
-SplitBySeparator(v, sep, trim_ws = TRUE)
+SplitBySeparator(v, sep, trim_ws = TRUE, export_part = 1)
 }
 \arguments{
 \item{v}{String to be split}
@@ -12,10 +12,12 @@ SplitBySeparator(v, sep, trim_ws = TRUE)
 \item{sep}{Separtor}
 
 \item{trim_ws}{Trim whitespace or not}
+
+\item{export_part}{The part of string to extract}
 }
 \value{
 First part of the split string
 }
 \description{
-Function to split string by separator and return the first part
+Function to split string by separator and return one part
 }

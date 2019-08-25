@@ -1,27 +1,28 @@
 #' @title Shiny server function
 #'
-#' @param input
-#'
-#' @param output
-#' @param session
+#' @param input Input variables
+#' @param output Output variables
+#' @param session Session data
 #'
 #' @import shiny
-#' @import shinyjs
-#' @import sf
+#' @importFrom sf st_as_sf
+#' @importFrom sf st_geometry
 #' @import leaflet
-#' @import leaflet.extras
-#' @import readr
 #' @import stringr
 #' @import magrittr
-#' @import lubridate
-#' @import dplyr
+#' @importFrom dplyr distinct
+#' @importFrom dplyr everything
+#' @importFrom dplyr filter
+#' @importFrom dplyr mutate
+#' @importFrom dplyr pull
+#' @importFrom dplyr select
+#' @importFrom dplyr ungroup
+#' @importFrom tidyr gather
 #' @import htmlwidgets
-#' @import DT
-#' @import tidyr
 #' @import plotly
-#' @import sunburstR
-#' @import treemap
-#' @import shinycssloaders
+#' @importFrom sunburstR sunburst
+#' @importFrom sunburstR renderSunburst
+#' @importFrom treemap treemap
 #'
 #' @export
 app_server <- function(input, output, session) {
@@ -129,18 +130,18 @@ app_server <- function(input, output, session) {
 
   ptRegionOptions <- reactive({
     ptRegionOptions <- ptDataPeriod() %>%
-      mutate(label = ptDataPeriod()$GeoName) %>%
-      select(label, value = GeoUID)
-    st_geometry(ptRegionOptions) <- NULL
+      dplyr::mutate(label = ptDataPeriod()$GeoName) %>%
+      dplyr::select(label, value = GeoUID)
+    sf::st_geometry(ptRegionOptions) <- NULL
 
     return(ptRegionOptions %>% distinct())
   })
 
   ptGeoNameLabel <- reactive({
     locationLabel <- as.data.frame(ptRegionOptions()) %>%
-      filter(value == input$pt_location) %>%
-      select(label) %>%
-      distinct()
+      dplyr::filter(value == input$pt_location) %>%
+      dplyr::select(label) %>%
+      dplyr::distinct()
     return(locationLabel)
   })
 
@@ -205,7 +206,9 @@ app_server <- function(input, output, session) {
           "bottomleft",
           pal = pal,
           values = ptDataPeriod()[[pt_metric]],
-          title = selectionMetricsDF %>% filter(value == rlang::sym(pt_metric)) %>% pull(label),
+          title = selectionMetricsDF %>%
+            dplyr::filter(value == rlang::sym(pt_metric)) %>%
+            dplyr::pull(label),
           opacity = 0.8
         )
     })
@@ -445,10 +448,10 @@ app_server <- function(input, output, session) {
       updateTextInput(session, "pt_location", value = m$id)
 
       locationLabel <- as.data.frame(ptDataPeriod()) %>%
-        filter(GeoUID == m$id) %>%
-        mutate(label = GeoName) %>%
-        select(label) %>%
-        distinct()
+        dplyr::filter(GeoUID == m$id) %>%
+        dplyr::mutate(label = GeoName) %>%
+        dplyr::select(label) %>%
+        dplyr::distinct()
       updateTextInput(session, "pt_location_name", value = locationLabel$label)
     }
   })
@@ -540,9 +543,9 @@ app_server <- function(input, output, session) {
   #
   regionOptions <- reactive({
     regionOptions <- censusMobility() %>%
-      mutate(label = paste0(censusMobility()$`Region`, " (", censusMobility()$GeoUID, ")")) %>%
-      select(label, value = GeoUID)
-    st_geometry(regionOptions) <- NULL
+      dplyr::mutate(label = paste0(censusMobility()$`Region`, " (", censusMobility()$GeoUID, ")")) %>%
+      dplyr::select(label, value = GeoUID)
+    sf::st_geometry(regionOptions) <- NULL
 
     updateSelectizeInput(session, 'c_location_pp_compare', choices = regionOptions, server = TRUE, selected = "")
 
@@ -557,16 +560,16 @@ app_server <- function(input, output, session) {
     locationB <- input$c_location_pp_compare
 
     censusPp2016CompareA <- censusPp2016() %>%
-      filter(GeoUID == locationA)
+      dplyr::filter(GeoUID == locationA)
 
     if (locationB == "") {
       locationB = locationA
     }
 
     censusPp2016CompareB <- censusPp2016() %>%
-      filter(GeoUID == locationB) %>%
-      ungroup() %>%
-      select(Region_compare = Region, age, sex, percentage_compare = percentage_2016)
+      dplyr::filter(GeoUID == locationB) %>%
+      dplyr::ungroup() %>%
+      dplyr::select(Region_compare = Region, age, sex, percentage_compare = percentage_2016)
 
     censusPp2016Compare <- inner_join(
       censusPp2016CompareA,
@@ -579,17 +582,17 @@ app_server <- function(input, output, session) {
   # Reactive location label
   locationLabel <- reactive({
     locationLabel <- as.data.frame(regionOptions()) %>%
-      filter(value == input$c_location) %>%
-      pull(label)
+      dplyr::filter(value == input$c_location) %>%
+      dplyr::pull(label)
     return(locationLabel)
   })
 
   # Reactive PP compare location label
   locationCompareLabel <- reactive({
     locationCompareLabel <- as.data.frame(censusMobility()) %>%
-      filter(GeoUID == input$c_location_pp_compare) %>%
-      mutate(label = paste0(Region, " (", GeoUID, ")")) %>%
-      pull(label)
+      dplyr::filter(GeoUID == input$c_location_pp_compare) %>%
+      dplyr::mutate(label = paste0(Region, " (", GeoUID, ")")) %>%
+      dplyr::pull(label)
     return(locationCompareLabel)
   })
 
@@ -609,8 +612,8 @@ app_server <- function(input, output, session) {
   # Reactive housing types depending on selected type
   housingTypeMapData <- reactive({
     htMapData <- housingTypes() %>%
-      select(typewatch = input$c_housing_types, everything()) %>%
-      mutate(typewatch2 = as.numeric(input$c_housing_types))
+      dplyr::select(typewatch = input$c_housing_types, dplyr::everything()) %>%
+      dplyr::mutate(typewatch2 = as.numeric(input$c_housing_types))
     return(htMapData)
   })
 
@@ -693,8 +696,8 @@ app_server <- function(input, output, session) {
     # STIR observer
     #
     # SHELTER-COST-TO-INCOME RATIO
-    censusStir <- st_as_sf(
-      censusStir() %>% select(everything())
+    censusStir <- sf::st_as_sf(
+      censusStir() %>% dplyr::select(dplyr::everything())
     )
 
     # STIR palette
@@ -834,10 +837,10 @@ app_server <- function(input, output, session) {
     # Housing Types treemap
     # Have to drop geometry, i.e. convert sf to df to use in treemap
     housingTypesDf <- housingTypes
-    st_geometry(housingTypesDf) <- NULL
+    sf::st_geometry(housingTypesDf) <- NULL
 
-    housingTypesDf %<>%
-      gather(
+    housingTypesDf <- housingTypesDf %>%
+      tidyr::gather(
         "Single detached house ratio",
         "Apartment in tall building ratio",
         "Semi detached house ratio",
@@ -851,7 +854,9 @@ app_server <- function(input, output, session) {
     output$housingTypeTreemap <- renderPlot({
       treemap::treemap(
         title = paste("Distribution of Housing Types in ", locationLabel()),
-        housingTypesDf %>% filter(GeoUID == input$c_location) %>% mutate(ratioFormat = paste0(gsub(" ratio", "", HousingType), " - ", ratio, "%")),
+        housingTypesDf %>%
+          dplyr::filter(GeoUID == input$c_location) %>%
+          dplyr::mutate(ratioFormat = paste0(gsub(" ratio", "", HousingType), " - ", ratio, "%")),
         index = c("ratioFormat"),
         vSize = "ratio",
         type = "value",
@@ -884,13 +889,15 @@ app_server <- function(input, output, session) {
     #
     # Have to drop geometry, i.e. convert sf to df to use in treemap
     censusMobilityDf <- censusMobilityGathered
-    st_geometry(censusMobilityDf) <- NULL
+    sf::st_geometry(censusMobilityDf) <- NULL
 
     output$mobility_sunburst_title <- renderText(paste("Mobility Distribution for ", locationLabel()))
     sequenceColors = c(palLighterBlue, palLightRed, "steelblue", palDarkBlue, "#009900", palOther, "palegreen", palLightBlue)
     output$mobilitySunburst <- sunburstR::renderSunburst({
       sb <- sunburstR::sunburst(
-        censusMobilitySeq %>% filter(GeoUID == input$c_location) %>% select(sequence, count),
+        censusMobilitySeq %>%
+          dplyr::filter(GeoUID == input$c_location) %>%
+          dplyr::select(sequence, count),
         colors = sequenceColors,
         percent = TRUE,
         count = TRUE,
@@ -925,7 +932,7 @@ app_server <- function(input, output, session) {
                         showarrow = FALSE)
 
       if (input$c_pp_compare_2011 == TRUE) {
-        p %<>% add_trace(x = ~percentage_2011, y = ~age, name = ~paste(Region, '2011', sex), type = "scatter", mode = 'lines+markers',
+        p <- p  %>% add_trace(x = ~percentage_2011, y = ~age, name = ~paste(Region, '2011', sex), type = "scatter", mode = 'lines+markers',
                          line = list(color = '#22229999', shape = "spline"),
                          hoverinfo = "x+y+text",
                          text = ~paste('Census 2011</br>', Region, abs(percentage_2011), '%')
@@ -933,14 +940,14 @@ app_server <- function(input, output, session) {
       }
 
       if (input$c_pp_compare_2006 == TRUE) {
-        p %<>% add_trace(x = ~percentage_2006, y = ~age, name = ~paste(Region, '2006', sex), type = "scatter", mode = 'lines+markers',
+        p <- p  %>% add_trace(x = ~percentage_2006, y = ~age, name = ~paste(Region, '2006', sex), type = "scatter", mode = 'lines+markers',
                          line = list(color = '#22992299', shape = "spline"),
                          hoverinfo = "x+y+text",
                          text = ~paste('Census 2006</br>', Region, abs(percentage_2006), '%'))
       }
 
       if (input$c_location_pp_compare != "") {
-        p %<>% add_trace(x = ~percentage_compare, y = ~age, name = ~ paste(Region_compare, '2016', sex), type = "scatter", mode = 'lines+markers',
+        p <- p  %>% add_trace(x = ~percentage_compare, y = ~age, name = ~ paste(Region_compare, '2016', sex), type = "scatter", mode = 'lines+markers',
                          line = list(color = '#cc222299', shape = "spline"),
                          hoverinfo = "x+y+text",
                          text = ~paste('Census 2016</br>', Region_compare, abs(percentage_compare), '%')) %>%
@@ -1039,9 +1046,9 @@ app_server <- function(input, output, session) {
       updateTextInput(session, "c_location", value = locationId)
 
       locationLabel <- as.data.frame(censusMobility()) %>%
-        filter(GeoUID == locationId) %>%
-        mutate(label = paste0(Region, " (", GeoUID, ")")) %>%
-        pull(label)
+        dplyr::filter(GeoUID == locationId) %>%
+        dplyr::mutate(label = paste0(Region, " (", GeoUID, ")")) %>%
+        dplyr::pull(label)
       updateTextInput(session, "c_location_name", value = locationLabel)
     }
     freezeReactiveValue(input, "mapCensus_click")
