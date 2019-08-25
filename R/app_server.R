@@ -253,7 +253,10 @@ app_server <- function(input, output, session) {
         legend = legendFormat#,
         # annotations = PlotlyChartAnnotation(annotation_text = 'Total fair market value by month.')
       ) %>%
-      config(displayModeBar = F)
+      config(
+        displaylogo = FALSE,
+        modeBarButtonsToRemove = c("zoomIn3d", "zoomOut3d", "resetScale2d", "toggleSpikelines")
+      )
   })
 
   # Monthly Overview - Average and Median FMV
@@ -295,7 +298,10 @@ app_server <- function(input, output, session) {
         margin = marginFormat,
         legend = legendFormat
       ) %>%
-      config(displayModeBar = F)
+      config(
+        displaylogo = FALSE,
+        modeBarButtonsToRemove = c("zoomIn3d", "zoomOut3d", "resetScale2d", "toggleSpikelines")
+      )
   })
 
   # Monthly Overview - Property Transfer Tax
@@ -321,7 +327,10 @@ app_server <- function(input, output, session) {
         margin = marginFormat,
         legend = legendFormat
       ) %>%
-      config(displayModeBar = F)
+      config(
+        displaylogo = FALSE,
+        modeBarButtonsToRemove = c("zoomIn3d", "zoomOut3d", "resetScale2d", "toggleSpikelines")
+      )
   })
 
   # Monthly Overview - Number of market transactions
@@ -363,7 +372,10 @@ app_server <- function(input, output, session) {
         barmode = 'stack',
         legend = legendFormat
       ) %>%
-      config(displayModeBar = F)
+      config(
+        displaylogo = FALSE,
+        modeBarButtonsToRemove = c("zoomIn3d", "zoomOut3d", "resetScale2d", "toggleSpikelines")
+      )
   })
 
   # Monthly Overview - Number of market transactions - Residential
@@ -405,7 +417,10 @@ app_server <- function(input, output, session) {
         barmode = 'stack',
         legend = legendFormat
       ) %>%
-      config(displayModeBar = F)
+      config(
+        displaylogo = FALSE,
+        modeBarButtonsToRemove = c("zoomIn3d", "zoomOut3d", "resetScale2d", "toggleSpikelines")
+      )
   })
 
   # Monthly Overview - Number of market transactions - Commercial
@@ -437,7 +452,10 @@ app_server <- function(input, output, session) {
         barmode = 'stack',
         legend = legendFormat
       ) %>%
-      config(displayModeBar = F)
+      config(
+        displaylogo = FALSE,
+        modeBarButtonsToRemove = c("zoomIn3d", "zoomOut3d", "resetScale2d", "toggleSpikelines")
+      )
   })
 
   # Map region click observer
@@ -974,7 +992,10 @@ app_server <- function(input, output, session) {
                  title_text = paste('Population Pyramid for', locationLabel(), '- Census year 2016')
                ),
                legend = list(orientation = 'h')) %>%
-        config(displayModeBar = F)
+        config(
+          displaylogo = FALSE,
+          modeBarButtonsToRemove = c("zoomIn3d", "zoomOut3d", "resetScale2d", "toggleSpikelines")
+        )
     })
 
     # STIR Stacked Bar
@@ -1032,7 +1053,10 @@ app_server <- function(input, output, session) {
                         font = list(family = 'Arial', size = 12,
                                     color = 'rgb(67, 67, 67)'),
                         showarrow = FALSE) %>%
-        config(displayModeBar = F)
+        config(
+          displaylogo = FALSE,
+          modeBarButtonsToRemove = c("zoomIn3d", "zoomOut3d", "resetScale2d", "toggleSpikelines")
+        )
     )
   })
 
