@@ -83,13 +83,16 @@ app_server <- function(input, output, session) {
   colMultiFam <- "#9ecae1"
   colStrata <- "#abdda4"
   colNonStrataRental <- "#c7eae5"
-  colCommercial <- "#fdae61"
+  # colCommercial <- "#fdae61"
+  colCommercial <- "#E39398"
   colRecreational <- "#80cdc1"
   colFarms <- "#fee08b"
   colUnknown <- "#d9d9d9"
   colAcreage <- "#dfc27d"
-  colC16 <- colCanadian <- "#c40c0c"
-  colC11 <- colForeign <- "#3eb4f0"
+  # colC16 <- colCanadian <- "#c40c0c"
+  # colC11 <- colForeign <- "#3eb4f0"
+  colC16 <- colCanadian <- "#E39398"
+  colC11 <- colForeign <- "#9ecae1"
 
   # Selection of metrics, variables and options ----
   selectionMetricsDF <- data.frame(
@@ -156,7 +159,7 @@ app_server <- function(input, output, session) {
     updateTextInput(session, "pt_location", value = "")
     updateTextInput(session, "pt_location_name", value = "")
 
-    pal <- colorNumeric("viridis", ptDataPeriod()[[pt_metric]])
+    pal <- colorNumeric("GnBu", ptDataPeriod()[[pt_metric]])
 
     output$mapPtt <- leaflet::renderLeaflet({
       leaflet::leaflet() %>%
@@ -653,7 +656,7 @@ app_server <- function(input, output, session) {
   # Mobility palette
   #
   palHousingTypes <- colorNumeric(
-    palette = "viridis",
+    palette = "GnBu",
     domain = housingTypesCma$`Single detached house ratio`,
     na.color = "#e6e6e6"
   )
@@ -675,7 +678,7 @@ app_server <- function(input, output, session) {
     # Housing Types map palette
     #
     palHousingTypes <- colorNumeric(
-      palette = "viridis",
+      palette = "GnBu",
       domain = housingTypeMapData()$typewatch,
       na.color = "#e6e6e6"
     )
@@ -698,7 +701,7 @@ app_server <- function(input, output, session) {
 
     # Mobility palette
     palMobility <- colorNumeric(
-      palette = "viridis",
+      palette = "GnBu",
       domain = censusMobility$`Movers Ratio`,
       na.color = "#e6e6e6"
     )
@@ -719,7 +722,7 @@ app_server <- function(input, output, session) {
 
     # AvgAge palette
     palAvgAge <- colorNumeric(
-      palette = "viridis",
+      palette = "GnBu",
       domain = censusAvgAge$`Average Age`,
       na.color = "#e6e6e6"
     )
@@ -734,7 +737,7 @@ app_server <- function(input, output, session) {
 
     # STIR palette
     palStir <- colorBin(
-      palette = "viridis",
+      palette = "GnBu",
       domain = censusStir$percent_more_than_30, n = 10
     )
 
@@ -905,7 +908,7 @@ app_server <- function(input, output, session) {
         type = "value",
         vColor = "ratio",
         # palette = c(colMultiFam, colStrata, colNonStrataRental, colForeign, colAcreage, colResidential, colCommercial, colSingleFam),
-        palette = RColorBrewer::brewer.pal(8, "Spectral"),
+        palette = RColorBrewer::brewer.pal(8, "RdYlBu"),
         algorithm = "pivotSize",
         # sortID = "HousingType",
         fontsize.title = c(14),
@@ -935,7 +938,8 @@ app_server <- function(input, output, session) {
     sf::st_geometry(censusMobilityDf) <- NULL
 
     output$mobility_sunburst_title <- renderText(paste("Mobility Distribution for ", locationLabel()))
-    sequenceColors = c(palLighterBlue, palLightRed, "steelblue", palDarkBlue, "#009900", palOther, "palegreen", palLightBlue)
+    # sequenceColors = c(palLighterBlue, colCommercial, "steelblue", palDarkBlue, "#009900", palOther, "palegreen", palLightBlue)
+    sequenceColors = c('#08306b', colCommercial, '#c6dbef', '#9ecae1', '#6baed6', '#4292c6', '#2171b5', '#08519c')
     output$mobilitySunburst <- sunburstR::renderSunburst({
       sb <- sunburstR::sunburst(
         censusMobilitySeq %>%
