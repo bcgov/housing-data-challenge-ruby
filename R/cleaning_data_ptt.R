@@ -62,10 +62,12 @@ AddTransactionPeriodColumns <- function(data) {
 #'              adding transaciton period columnns function call, changing the case
 #'              of region names, etc.
 #'
+#' @importFrom dplyr filter
 #' @importFrom dplyr mutate
 #' @importFrom dplyr select
 #' @importFrom forcats as_factor
 #' @importFrom stringr str_to_title
+#' @importFrom stringr str_replace
 #' @importFrom stringr str_to_upper
 #'
 #' @param data data frame
@@ -83,7 +85,7 @@ WranglePttData <- function(data, calculate_percentages = FALSE, region_name_spli
         # Transform region names to UPPER CASE so we can safely do the filtering
         DevelopmentRegion = stringr::str_to_upper(DevelopmentRegion)
       ) %>%
-      filter(
+      dplyr::filter(
         # Filter out the observations that we can't join to polygon regions
         !DevelopmentRegion %in% c('REST OF PROVINCE', 'UNKNOWN', 'UNKNOWN/RURAL') & !is.na(DevelopmentRegion)
       ) %>%
@@ -142,8 +144,8 @@ WranglePttData <- function(data, calculate_percentages = FALSE, region_name_spli
 
     # Convert to factor
     data <- data %>%
-      mutate(
-        Municipality = as_factor(Municipality)
+      dplyr::mutate(
+        Municipality = forcats::as_factor(Municipality)
       )
   }
 
@@ -153,12 +155,12 @@ WranglePttData <- function(data, calculate_percentages = FALSE, region_name_spli
   if (calculate_percentages) {
     data <- data %>%
       dplyr::mutate(
-        n_foreign_tran_nona = as.numeric(replace_na(n_foreign_tran, 0)),
-        sum_FMV_foreign_nona = as.numeric(replace_na(sum_FMV_foreign, 0)),
+        n_foreign_tran_nona = as.numeric(replace_na(n_foreign_res, 0)),
+        sum_FMV_foreign_nona = as.numeric(replace_na(sum_FMV_foreign_res, 0)),
         no_foreign_perc = round(n_foreign_tran_nona / tot_mkt_trans * 100, 2),
         sum_FMV_foreign_perc = round(sum_FMV_foreign_nona / sum_FMV * 100, 2)
       ) %>%
-      select(-c(n_foreign_tran_nona, sum_FMV_foreign_nona))
+      dplyr::select(-c(n_foreign_tran_nona, sum_FMV_foreign_nona))
   }
 
   return(data)
@@ -174,7 +176,9 @@ WranglePttData <- function(data, calculate_percentages = FALSE, region_name_spli
 #' @param sep Separtor
 #' @param trim_ws Trim whitespace or not
 #' @param export_part The part of string to extract
+#'
 #' @return First part of the split string
+#'
 #' @export
 SplitBySeparator <- function(v, sep, trim_ws = TRUE, export_part = 1) {
   splitV <- stringr::str_split(v, sep, simplify = TRUE)
@@ -280,6 +284,7 @@ WrangleShapeFiles <- function(data, id_column, name_column, pr_uid = 59) {
 #' @importFrom dplyr mutate
 #' @importFrom dplyr summarise_if
 #' @importFrom dplyr ungroup
+#' @importFrom forcats as_factor
 #' @importFrom sf st_transform
 #'
 #' @return sf data frame
@@ -295,10 +300,10 @@ JoinPttShapes <- function(ptt_data, shapes, geo_name) {
     dplyr::filter(row_number() == 1) %>%
     dplyr::ungroup() %>%
     dplyr::mutate(
-      GeoUID = as_factor(GeoUID),
-      GeoName = as_factor(GeoName),
-      PRUID = as_factor(PRUID),
-      PRNAME = as_factor(PRNAME)
+      GeoUID = forcats::as_factor(GeoUID),
+      GeoName = forcats::as_factor(GeoName),
+      PRUID = forcats::as_factor(PRUID),
+      PRNAME = forcats::as_factor(PRNAME)
     )
 
   # https://github.com/r-spatial/mapview/issues/72
