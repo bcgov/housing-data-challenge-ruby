@@ -16,6 +16,7 @@
 #' @importFrom dplyr mutate
 #' @importFrom dplyr pull
 #' @importFrom dplyr select
+#' @importFrom dplyr top_n
 #' @importFrom dplyr ungroup
 #' @importFrom tidyr gather
 #' @import htmlwidgets
@@ -635,6 +636,19 @@ app_server <- function(input, output, session) {
     return(htMapData)
   })
 
+  # Reactive STIR data
+  dataStir <- reactive({
+    data <- censusStir()
+    if (input$c_location == '') {
+      dataStir <- censusStir() %>%
+        dplyr::top_n(25, percent_more_than_30)
+    } else {
+      dataStir <- censusStir() %>%
+        dplyr::filter(GeoUID == input$c_location)
+    }
+    return(dataStir)
+  })
+
   #
   # Mobility palette
   #
@@ -727,85 +741,96 @@ app_server <- function(input, output, session) {
     # Redraw polygons when geo-level or housing type selection changes
     output$mapCensus <- leaflet::renderLeaflet({
       leaflet::leaflet() %>%
-        addProviderTiles(provider = "CartoDB.Positron", options = providerTileOptions(minZoom = 5, maxZoom = 12)) %>%
+        addProviderTiles(
+          provider = "CartoDB.Positron",
+          options = providerTileOptions(
+            minZoom = 5,
+            maxZoom = 12
+          )
+        ) %>%
         setView(lng = -123.12, lat = 52.78, zoom = 6) %>%
-        addPolygons(data = housingTypeMapData(),
-                    label = ~ `Region`, color = '#333',
-                    fillColor = ~ palHousingTypes(housingTypeMapData()$typewatch),
-                    stroke = TRUE, weight = 1, fillOpacity = 0.5, smoothFactor = 0.2,
-                    layerId = ~ paste0("ht-", GeoUID), group = "Housing",
-                    popup = paste0(
-                      "<strong>", paste0(housingTypeMapData()$`Region`, " (", housingTypeMapData()$GeoUID), ")</strong>",
-                      "<table class=\"leaflet-popup-table\"><tr><td>Census Year</td><td>2016</td></tr>",
-                      "<tr><td>Single family homes ratio</td><td><strong>",
-                      format(housingTypeMapData()$`Single detached house ratio`, big.mark = ","), "</strong></td></tr>",
-                      "<tr><td>Semi detached house ratio</strong></td><td>",
-                      format(housingTypeMapData()$`Semi detached house ratio`, big.mark = ","), "</strong></td></tr>",
-                      "<tr><td>Apartment in duplex ratio</strong></td><td>",
-                      format(housingTypeMapData()$`Apartment in duplex ratio`, big.mark = ","), "</strong></td></tr>",
-                      "<tr><td>Row house ratio</strong></td><td>",
-                      format(housingTypeMapData()$`Row house ratio`, big.mark = ","), "</strong></td></tr>",
-                      "<tr><td>Apartment in small building ratio</strong></td><td>",
-                      format(housingTypeMapData()$`Apartment in small building ratio`, big.mark = ","), "</strong></td></tr>",
-                      "<tr><td>Apartment in tall building ratio</strong></td><td>",
-                      format(housingTypeMapData()$`Apartment in tall building ratio`, big.mark = ","), "</strong></td></tr>",
-                      "<tr><td>Other single attached house ratio</strong></td><td>",
-                      format(housingTypeMapData()$`Other single attached house ratio`, big.mark = ","), "</strong></td></tr>",
-                      "<tr><td>Movable dwelling ratio</strong></td><td>",
-                      format(housingTypeMapData()$`Movable dwelling ratio`, big.mark = ","), "</strong></td></tr>",
-                      "</table>"
-                    ),
-                    highlight = highlightOptions(
-                      weight = 5, color = "#696969", fillOpacity = 0.75, bringToFront = TRUE)
+        addPolygons(
+          data = housingTypeMapData(),
+          label = ~ `Region`, color = '#333',
+          fillColor = ~ palHousingTypes(housingTypeMapData()$typewatch),
+          stroke = TRUE, weight = 1, fillOpacity = 0.5, smoothFactor = 0.2,
+          layerId = ~ paste0("ht-", GeoUID), group = "Housing",
+          popup = paste0(
+            "<strong>", paste0(housingTypeMapData()$`Region`, " (", housingTypeMapData()$GeoUID), ")</strong>",
+            "<table class=\"leaflet-popup-table\"><tr><td>Census Year</td><td>2016</td></tr>",
+            "<tr><td>Single family homes ratio</td><td><strong>",
+            format(housingTypeMapData()$`Single detached house ratio`, big.mark = ","), "</strong></td></tr>",
+            "<tr><td>Semi detached house ratio</strong></td><td>",
+            format(housingTypeMapData()$`Semi detached house ratio`, big.mark = ","), "</strong></td></tr>",
+            "<tr><td>Apartment in duplex ratio</strong></td><td>",
+            format(housingTypeMapData()$`Apartment in duplex ratio`, big.mark = ","), "</strong></td></tr>",
+            "<tr><td>Row house ratio</strong></td><td>",
+            format(housingTypeMapData()$`Row house ratio`, big.mark = ","), "</strong></td></tr>",
+            "<tr><td>Apartment in small building ratio</strong></td><td>",
+            format(housingTypeMapData()$`Apartment in small building ratio`, big.mark = ","), "</strong></td></tr>",
+            "<tr><td>Apartment in tall building ratio</strong></td><td>",
+            format(housingTypeMapData()$`Apartment in tall building ratio`, big.mark = ","), "</strong></td></tr>",
+            "<tr><td>Other single attached house ratio</strong></td><td>",
+            format(housingTypeMapData()$`Other single attached house ratio`, big.mark = ","), "</strong></td></tr>",
+            "<tr><td>Movable dwelling ratio</strong></td><td>",
+            format(housingTypeMapData()$`Movable dwelling ratio`, big.mark = ","), "</strong></td></tr>",
+            "</table>"
+          ),
+          highlight = highlightOptions(
+            weight = 5, color = "#696969", fillOpacity = 0.75, bringToFront = TRUE
+          )
         ) %>%
-        addPolygons(data = censusAvgAge,
-                    label = ~ `Region`, color = '#333', fillColor = ~ palAvgAge(censusAvgAge$`Average Age`),
-                    stroke = TRUE, weight = 1, fillOpacity = 0.5, smoothFactor = 0.2,
-                    layerId = ~ paste0("p-", GeoUID), group = "Population",
-                    popup = paste0(
-                      "<strong>", paste0(censusAvgAge$`Region`, " (", censusAvgAge$GeoUID), ")</strong>",
-                      "<table class=\"leaflet-popup-table\"><tr><td>Census Year</td><td>2016</td></tr>",
-                      "<tr><td>Population</td><td>", format(censusAvgAge$Population, big.mark = ","),
-                      "</td></tr><tr><td>Dwellings</td><td>", format(censusAvgAge$Dwellings, big.mark = ","),
-                      "</td></tr><tr><td>Households</td><td>", format(censusAvgAge$Households, big.mark = ","),
-                      "</td></tr><tr><td><strong>Average Age</strong></td><td><strong>",
-                      format(censusAvgAge$`Average Age`, big.mark = ","), "</strong></td></tr></table>"
-                    ),
-                    highlight = highlightOptions(
-                      weight = 5, color = "#696969", fillOpacity = 0.75, bringToFront = TRUE)
+        addPolygons(
+          data = censusAvgAge,
+          label = ~ `Region`, color = '#333', fillColor = ~ palAvgAge(censusAvgAge$`Average Age`),
+          stroke = TRUE, weight = 1, fillOpacity = 0.5, smoothFactor = 0.2,
+          layerId = ~ paste0("p-", GeoUID), group = "Population",
+          popup = paste0(
+            "<strong>", paste0(censusAvgAge$`Region`, " (", censusAvgAge$GeoUID), ")</strong>",
+            "<table class=\"leaflet-popup-table\"><tr><td>Census Year</td><td>2016</td></tr>",
+            "<tr><td>Population</td><td>", format(censusAvgAge$Population, big.mark = ","),
+            "</td></tr><tr><td>Dwellings</td><td>", format(censusAvgAge$Dwellings, big.mark = ","),
+            "</td></tr><tr><td>Households</td><td>", format(censusAvgAge$Households, big.mark = ","),
+            "</td></tr><tr><td><strong>Average Age</strong></td><td><strong>",
+            format(censusAvgAge$`Average Age`, big.mark = ","), "</strong></td></tr></table>"
+          ),
+          highlight = highlightOptions(
+          weight = 5, color = "#696969", fillOpacity = 0.75, bringToFront = TRUE)
         ) %>%
-        addPolygons(data = censusMobility,
-                    label = ~ `Region`, color = '#333', fillColor = ~ palMobility(censusMobility$`Movers Ratio`),
-                    stroke = TRUE, weight = 1, fillOpacity = 0.5, smoothFactor = 0.2,
-                    layerId = ~ paste0("m-", GeoUID), group = "Mobility",
-                    popup = paste0(
-                      "<strong>", paste0(censusMobility$`Region`, " (", censusMobility$GeoUID), ")</strong>",
-                      "<table class=\"leaflet-popup-table\"><tr><td>Census Year</td><td>2016</td></tr>",
-                      "<tr><td>Population</td><td>", format(censusMobility$Population, big.mark = ","),
-                      "</td></tr><tr><td>Dwellings</td><td>", format(censusMobility$Dwellings, big.mark = ","),
-                      "</td></tr><tr><td>Households</td><td>", format(censusMobility$Households, big.mark = ","),
-                      "</td></tr><tr><td><strong>Movers Ratio</strong></td><td><strong>",
-                      format(censusMobility$`Movers Ratio`, big.mark = ","), "</strong></td></tr></table>"
-                    ),
-                    highlight = highlightOptions(
-                      weight = 5, color = "#696969", fillOpacity = 0.75, bringToFront = TRUE)
+        addPolygons(
+          data = censusMobility,
+          label = ~ `Region`, color = '#333', fillColor = ~ palMobility(censusMobility$`Movers Ratio`),
+          stroke = TRUE, weight = 1, fillOpacity = 0.5, smoothFactor = 0.2,
+          layerId = ~ paste0("m-", GeoUID), group = "Mobility",
+          popup = paste0(
+            "<strong>", paste0(censusMobility$`Region`, " (", censusMobility$GeoUID), ")</strong>",
+            "<table class=\"leaflet-popup-table\"><tr><td>Census Year</td><td>2016</td></tr>",
+            "<tr><td>Population</td><td>", format(censusMobility$Population, big.mark = ","),
+            "</td></tr><tr><td>Dwellings</td><td>", format(censusMobility$Dwellings, big.mark = ","),
+            "</td></tr><tr><td>Households</td><td>", format(censusMobility$Households, big.mark = ","),
+            "</td></tr><tr><td><strong>Movers Ratio</strong></td><td><strong>",
+            format(censusMobility$`Movers Ratio`, big.mark = ","), "</strong></td></tr></table>"
+          ),
+          highlight = highlightOptions(
+          weight = 5, color = "#696969", fillOpacity = 0.75, bringToFront = TRUE)
         ) %>%
-        addPolygons(data = censusStir,
-                    label = ~ `Region`, color = '#333', fillColor = ~ palStir(censusStir$percent_more_than_30),
-                    stroke = TRUE, weight = 1, fillOpacity = 0.5, smoothFactor = 0.2,
-                    layerId = ~ paste0("s-", GeoUID), group = "STIR",
-                    popup = paste0(
-                      "<strong>", paste(censusStir$`Region`), "</strong>",
-                      "<table class=\"leaflet-popup-table\"><tr><td>Census Year</td><td>2016</td></tr>",
-                      "<tr><td>Population</td><td>", format(censusStir$Population, big.mark = ","),
-                      "</td></tr><tr><td>Dwellings</td><td>", format(censusStir$Dwellings, big.mark = ","),
-                      "</td></tr><tr><td>Households</td><td>", format(censusStir$Households, big.mark = ","),
-                      "</td></tr><tr><td>STIR < 30%</td><td>", format(censusStir$percent_less_than_30, big.mark = ","),
-                      "</td></tr><tr><td><strong>STIR > 30%</strong></td><td><strong>",
-                      format(censusStir$percent_more_than_30, big.mark = ","), "</strong></td></tr></table>"
-                    ),
-                    highlight = highlightOptions(
-                      weight = 5, color = "#696969", fillOpacity = 0.5, bringToFront = TRUE)
+        addPolygons(
+          data = censusStir,
+          label = ~ `Region`, color = '#333', fillColor = ~ palStir(censusStir$percent_more_than_30),
+          stroke = TRUE, weight = 1, fillOpacity = 0.5, smoothFactor = 0.2,
+          layerId = ~ paste0("s-", GeoUID), group = "STIR",
+          popup = paste0(
+            "<strong>", paste(censusStir$`Region`), "</strong>",
+            "<table class=\"leaflet-popup-table\"><tr><td>Census Year</td><td>2016</td></tr>",
+            "<tr><td>Population</td><td>", format(censusStir$Population, big.mark = ","),
+            "</td></tr><tr><td>Dwellings</td><td>", format(censusStir$Dwellings, big.mark = ","),
+            "</td></tr><tr><td>Households</td><td>", format(censusStir$Households, big.mark = ","),
+            "</td></tr><tr><td>STIR < 30%</td><td>", format(censusStir$percent_less_than_30, big.mark = ","),
+            "</td></tr><tr><td><strong>STIR > 30%</strong></td><td><strong>",
+            format(censusStir$percent_more_than_30, big.mark = ","), "</strong></td></tr></table>"
+          ),
+          highlight = highlightOptions(
+          weight = 5, color = "#696969", fillOpacity = 0.5, bringToFront = TRUE)
         ) %>%
         # Layers control
         addLayersControl(
@@ -939,9 +964,14 @@ app_server <- function(input, output, session) {
     # Population Pyramid
     #
     output$popPyr <- plotly::renderPlotly({
-      p <- plotly::plot_ly(censusPp2016LocationCompare(),
-                   x = ~percentage_2016, y = ~age, name = ~paste(Region, '2016', sex), color = ~sex, type = 'bar', orientation = 'h',
-                   hoverinfo = 'y+text+name', text = ~paste('Census 2016</br>', Region, abs(percentage_2016), '%'), colors = c(colCommercial, colMultiFam)) %>%
+      p <- plotly::plot_ly(
+        censusPp2016LocationCompare(),
+        x = ~percentage_2016, y = ~age,
+        name = ~paste(Region, '2016', sex),
+        color = ~sex, type = 'bar', orientation = 'h',
+        hoverinfo = 'y+text+name',
+        text = ~paste('Census 2016</br>', Region, abs(percentage_2016), '%'),
+        colors = c(colCommercial, colMultiFam)) %>%
         add_annotations(xref = 'x', yref = 'y',
                         x = ~(percentage_2016 / abs(percentage_2016) / 2), y = ~age,
                         text = ~paste(abs(percentage_2016), '%'),
@@ -1006,11 +1036,21 @@ app_server <- function(input, output, session) {
         censusStir()[1,"percent_less_than_30"]$percent_less_than_30 / 2
     )
     output$stirStacked <- renderPlotly(
-      plotly::plot_ly(censusStir() %>% top_n(25, percent_more_than_30), x = ~percent_more_than_30, name = "More than 30%",
-              y = ~`GeoUID`, type = 'bar', orientation = 'h',
-              marker = list(color = "lightsalmon",
-                            line = list(color = 'rgb(248, 248, 249)', width = 1), hoverinfo="x+y+name")) %>%
-        add_trace(x = ~percent_less_than_30, name = "Less than 30%", marker = list(color = colMultiFam)) %>%
+      plotly::plot_ly(
+        dataStir(),
+        x = ~percent_more_than_30, name = "More than 30%",
+        y = ~`GeoUID`, type = 'bar', orientation = 'h',
+        marker = list(
+          color = colCommercial,
+          line = list(color = 'rgb(248, 248, 249)', width = 1),
+          hoverinfo="x+y+name"
+        )
+      ) %>%
+        add_trace(
+          x = ~percent_less_than_30,
+          name = "Less than 30%",
+          marker = list(color = colMultiFam)
+        ) %>%
         plotly::layout(xaxis = list(title = "",
                             showgrid = FALSE,
                             showline = FALSE,
