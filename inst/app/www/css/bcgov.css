@@ -213,6 +213,18 @@ hr {
     color: #fff;
 }
 
+#housingTypeTreemap img {
+  opacity: 0.85;
+}
+
+#mobilitySunburst-container {
+  opacity: 0.75;
+}
+
+.tooltip-inner {
+    max-width: 250px;
+    width: 250px;
+}
 
 /* BCGOV guidelines */
 #footer #footerWrapper {

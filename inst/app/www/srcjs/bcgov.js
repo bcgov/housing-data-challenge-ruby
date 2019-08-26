@@ -38,6 +38,9 @@ $(document).ready(function() {
 		e.preventDefault();
     $('html,body').animate({ scrollTop: 0 }, 'slow');
 	});
+
+	// Tooltips
+	$(function () { $('[data-toggle="tooltip"]').tooltip(); });
 });
 
 function findSpan(spanLabel) {

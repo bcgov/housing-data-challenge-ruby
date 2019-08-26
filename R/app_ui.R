@@ -161,14 +161,13 @@ app_ui <- function() {
               selectizeInput(
                 'c_view',
                 choices = geoLevels,
-                label = HTML('Geographical Level <i id="c_view_help" class="fa fa-question-circle-o"></i>')
+                label = HTML('Geographical Level')
               ) %>%
                 bsplus::shinyInput_label_embed(
-                  shiny::icon('info') %>%
-                    bsplus::bs_embed_popover(
-                      title = "Letter",
-                      content = "Changing geographical level will redraw the map and all charts to populate them with data relevant for the selected geographical level.",
-                      placement = "left"
+                  shiny::icon('question-circle-o') %>%
+                    bsplus::bs_embed_tooltip(
+                      title = "Changing geographical level will redraw the map and all charts to populate them with data relevant for the selected geographical level.",
+                      placement = "right"
                     )
                 )
             ),
@@ -211,15 +210,22 @@ app_ui <- function() {
                     class = 'alert alert-info'
                   )
                 ),
-                tags$p("For the purpose of the Census, housing type is defined by \"structural type\",
-                   which includes single detached house, semi-detached and row houses, and a variety of apartment categories."),
-                tags$p("This report gives insights into diversity of the housing types in an area."),
-                tags$p("Select different housing types options below to redraw the map and highlight regions by the selected housing type ratios in that region."),
                 selectizeInput(
                   'c_housing_types',
                   choices = housingTypesList,
-                  label = HTML('Housing Type <i id="c_housing_types_help" class="fa fa-question-circle-o"></i>')
-                )
+                  label = HTML('Housing Type')
+                ) %>%
+                  bsplus::shinyInput_label_embed(
+                    shiny::icon('question-circle-o') %>%
+                      bsplus::bs_embed_tooltip(
+                        title = "Changing a housing type selection will redraw the map and shade the areas based on the ratio of selected housing type compared to all types.",
+                        placement = "right"
+                      )
+                  ),
+                tags$p("For the purpose of the Census, housing type is defined by \"structural type\",
+                   which includes single detached house, semi-detached and row houses, and a variety of apartment categories."),
+                tags$p("This report gives insights into diversity of the housing types in an area."),
+                tags$p("Select different housing types options below to redraw the map and highlight regions by the selected housing type ratios in that region.")
               ),
 
               # Population pyramid
@@ -240,21 +246,50 @@ app_ui <- function() {
                         tags$div(
                           align = 'left',
                           class = 'multicol',
-                          checkboxInput("c_pp_compare_2011", label = HTML('Census 2011 <i id="c_pp_compare_2011_help" class="fa fa-question-circle-o"></i>'), value = FALSE),
-                          checkboxInput("c_pp_compare_2006", label = HTML('Census 2006 <i id="c_pp_compare_2006_help" class="fa fa-question-circle-o"></i>'), value = FALSE)
+                          checkboxInput(
+                            "c_pp_compare_2011",
+                            label = HTML('Census 2011'),
+                            value = FALSE
+                          ) %>%
+                            bsplus::shinyInput_label_embed(
+                              shiny::icon('question-circle-o') %>%
+                                bsplus::bs_embed_tooltip(
+                                  title = "Check this box to draw a population pyramid trace based on data from 2011 census.",
+                                  placement = "right"
+                                )
+                            ),
+                          checkboxInput(
+                            "c_pp_compare_2006",
+                            label = HTML('Census 2006'),
+                            value = FALSE
+                          ) %>%
+                            bsplus::shinyInput_label_embed(
+                              shiny::icon('question-circle-o') %>%
+                                bsplus::bs_embed_tooltip(
+                                  title = "Check this box to draw a population pyramid trace based on data from 2006 census.",
+                                  placement = "right"
+                                )
+                            )
                         )
                       ),
                       column(
                         4,
                         selectizeInput(
                           "c_location_pp_compare",
-                          label = HTML('Compare with <i id="c_location_pp_compare_help" class="fa fa-question-circle-o"></i>'),
+                          label = HTML('Compare with'),
                           choices = NULL,
                           options = list(
                             placeholder = "Select a location",
                             onInitialize = I('function() { this.setValue(""); }')
                           )
-                        )
+                        ) %>%
+                          bsplus::shinyInput_label_embed(
+                            shiny::icon('question-circle-o') %>%
+                              bsplus::bs_embed_tooltip(
+                                title = "Selecting a location in this drop-down will draw a trace on the population pyramid chart based on the data for selected location, to allow comparison between primary location clicked on the map and this selected location.",
+                                placement = "right"
+                              )
+                          )
                       )
                     )
                   )

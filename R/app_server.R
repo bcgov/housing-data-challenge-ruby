@@ -226,7 +226,7 @@ app_server <- function(input, output, session) {
       y = ~ sum_FMV,
       name = "Total FMV",
       type = 'scatter',
-      mode = 'lines',
+      mode = 'markers+lines',
       line = list(color = colCanadian)
     ) %>%
       add_lines(
@@ -271,7 +271,7 @@ app_server <- function(input, output, session) {
       y = ~ md_FMV,
       name = "Median FMV",
       type = 'scatter',
-      mode = 'lines',
+      mode = 'lines+markers',
       line = list(color = colCanadian)
     ) %>%
       add_lines(
@@ -316,7 +316,7 @@ app_server <- function(input, output, session) {
       y = ~ sum_PPT_paid,
       name = "PTT",
       type = 'scatter',
-      mode = 'lines',
+      mode = 'lines+markers',
       line = list(color = colCanadian)
     ) %>%
       add_lines(
@@ -950,7 +950,7 @@ app_server <- function(input, output, session) {
         count = TRUE,
         height = 400,
         legend = list(w = 200, h = 25, s = 2, t = 10),
-        withD3 = T
+        withD3 = TRUE
       )
       htmlwidgets::onRender(
         sb,
@@ -975,6 +975,7 @@ app_server <- function(input, output, session) {
         color = ~sex, type = 'bar', orientation = 'h',
         hoverinfo = 'y+text+name',
         text = ~paste('Census 2016</br>', Region, abs(percentage_2016), '%'),
+        opacity = 0.75,
         colors = c(colCommercial, colMultiFam)) %>%
         add_annotations(xref = 'x', yref = 'y',
                         x = ~(percentage_2016 / abs(percentage_2016) / 2), y = ~age,
@@ -1044,6 +1045,7 @@ app_server <- function(input, output, session) {
         dataStir(),
         x = ~percent_more_than_30, name = "More than 30%",
         y = ~`GeoUID`, type = 'bar', orientation = 'h',
+        opacity = 0.75,
         marker = list(
           color = colCommercial,
           line = list(color = 'rgb(248, 248, 249)', width = 1),
