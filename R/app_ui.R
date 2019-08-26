@@ -135,26 +135,6 @@ app_ui <- function() {
         ),
         # ),
         wellPanel(
-          # shinyBS::bsTooltip(
-          #   "c_view_help", placement = "right", trigger = "hover", options = NULL,
-          #   title = "Changing geographical level will redraw the map and all charts to populate them with data relevant for the selected geographical level."
-          # ),
-          # shinyBS::bsTooltip(
-          #   "c_housing_types_help", placement = "right", trigger = "hover", options = NULL,
-          #   title = "Changing a housing type selection will redraw the map and shade the areas based on the ratio of selected housing type compared to all types."
-          # ),
-          # shinyBS::bsTooltip(
-          #   "c_location_pp_compare_help", placement = "right", trigger = "hover", options = NULL,
-          #   title = "Selecting a location in this drop-down will draw a trace on the population pyramid chart based on the data for selected location, to allow comparison between primary location clicked on the map and this selected location."
-          # ),
-          # shinyBS::bsTooltip(
-          #   "c_pp_compare_2011_help", placement = "right", trigger = "hover", options = NULL,
-          #   title = "Check this box to draw a population pyramid trace based on data from 2011 census."
-          # ),
-          # shinyBS::bsTooltip(
-          #   "c_pp_compare_2006_help", placement = "right", trigger = "hover", options = NULL,
-          #   title = "Check this box to draw a population pyramid trace based on data from 2006 census."
-          # ),
           fluidRow(
             column(
               2,
@@ -356,18 +336,6 @@ app_ui <- function() {
            foreign participation in those transactions."),
 
         wellPanel(
-          # shinyBS::bsTooltip(
-          #   "pt_trans_period_help", placement = "right", trigger = "hover", options = NULL,
-          #   title = "Changing transaction period will redraw the map and all charts to populate them with data relevant for the selected transaction period."
-          # ),
-          # shinyBS::bsTooltip(
-          #   "pt_geo_level_help", placement = "right", trigger = "hover", options = NULL,
-          #   title = "Changing geographical level will redraw the map and all charts to populate them with data relevant for the selected geographical level."
-          # ),
-          # shinyBS::bsTooltip(
-          #   "pt_metric_help", placement = "right", trigger = "hover", options = NULL,
-          #   title = "Selecting a different variable in this drop-down will redraw the map and selected charts to highlight selectec variable."
-          # ),
           fluidRow(
             column(
               3,
@@ -379,7 +347,14 @@ app_ui <- function() {
                   "Development Region" = "devreg",
                   "Municipality" = "mun"
                 )
-              )
+              ) %>%
+                bsplus::shinyInput_label_embed(
+                  shiny::icon('question-circle-o') %>%
+                    bsplus::bs_embed_tooltip(
+                      title = "Changing transaction period will redraw the map and all charts to populate them with data relevant for the selected transaction period.",
+                      placement = "right"
+                    )
+                )
             ),
             column(
               3,
@@ -389,12 +364,29 @@ app_ui <- function() {
                 choices = periodSelection,
                 multiple = FALSE,
                 selected = maxTransPeriod
-              )
+              ) %>%
+                bsplus::shinyInput_label_embed(
+                  shiny::icon('question-circle-o') %>%
+                    bsplus::bs_embed_tooltip(
+                      title = "Changing geographical level will redraw the map and all charts to populate them with data relevant for the selected geographical level.",
+                      placement = "right"
+                    )
+                )
             ),
             column(
               3,
-              selectInput("pt_metric", label = HTML('Variable <i id="pt_metric_help" class="fa fa-question-circle-o"></i>'),
-                          choices = selectionMetrics)
+              selectInput(
+                "pt_metric",
+                label = HTML('Variable <i id="pt_metric_help" class="fa fa-question-circle-o"></i>'),
+                choices = selectionMetrics
+              ) %>%
+                bsplus::shinyInput_label_embed(
+                  shiny::icon('question-circle-o') %>%
+                    bsplus::bs_embed_tooltip(
+                      title = "Selecting a different variable in this drop-down will redraw the map and selected charts to highlight selectec variable.",
+                      placement = "right"
+                    )
+                )
             ),
             column(
               3,
