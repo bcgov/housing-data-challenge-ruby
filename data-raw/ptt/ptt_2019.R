@@ -4,11 +4,12 @@ library(here)
 library(usethis)
 library(bcdata)
 library(bchousing)
+library(sf)
 
 # 02. Discover data in Open Data Catalogue
-bcdata::bcdc_search("property transfer tax 2019")
+# bcdata::bcdc_search("property transfer tax 2019")
 ptt2019_record_id <- 'b35d45d1-e468-4aec-b8af-e1c1cb24bc07'
-bcdata::bcdc_get_data(ptt2019_record_id)
+# bcdata::bcdc_get_data(ptt2019_record_id)
 
 # 7) PROVINCIAL_MONTHLY_2019
 # format: csv
@@ -35,28 +36,74 @@ bcdata::bcdc_get_data(ptt2019_record_id)
 # code: bcdc_get_data(record = 'b35d45d1-e468-4aec-b8af-e1c1cb24bc07', resource = '75ed8fec-f7ff-4d74-9257-fe36f697de8f')
 
 # 02. Get data from Open Data Catalogue ----
-ptt_pr_bcdc <- bcdata::bcdc_get_data(
-  record = ptt2019_record_id,
-  resource = '622b9cf1-6278-419d-94a1-986da85b27fe'
-)
-ptt_dr_bcdc <- bcdata::bcdc_get_data(
-  record = ptt2019_record_id,
-  resource = '48a2b056-3a9f-4264-9bc7-73ae1835889d'
-)
-ptt_rd_bcdc <- bcdata::bcdc_get_data(
-  record = ptt2019_record_id,
-  resource = 'a9ed06f8-ab11-40f7-aa4f-748e45229566'
-)
-ptt_mn_bcdc <- bcdata::bcdc_get_data(
-  record = ptt2019_record_id,
-  resource = '75ed8fec-f7ff-4d74-9257-fe36f697de8f'
-)
+if (file.exists("data-raw/ptt_pr_2019.rds")) {
+  ptt_pr_bcdc <- readRDS("data-raw/ptt_pr_2019.rds")
+} else {
+  ptt_pr_bcdc <- bcdata::bcdc_get_data(
+    record = ptt2019_record_id,
+    resource = '622b9cf1-6278-419d-94a1-986da85b27fe',
+    na = c("", "NA", "nr")
+  )
+  saveRDS(ptt_pr_bcdc, "data-raw/ptt_pr_2019.rds")
+}
+
+if (file.exists("data-raw/ptt_dr_2019.rds")) {
+  ptt_dr_bcdc <- readRDS("data-raw/ptt_dr_2019.rds")
+} else {
+  ptt_dr_bcdc <- bcdata::bcdc_get_data(
+    record = ptt2019_record_id,
+    resource = '48a2b056-3a9f-4264-9bc7-73ae1835889d',
+    na = c("", "NA", "nr")
+  )
+  saveRDS(ptt_dr_bcdc, "data-raw/ptt_dr_2019.rds")
+}
+
+if (file.exists("data-raw/ptt_rd_2019.rds")) {
+  ptt_rd_bcdc <- readRDS("data-raw/ptt_rd_2019.rds")
+} else {
+  ptt_rd_bcdc <- bcdata::bcdc_get_data(
+    record = ptt2019_record_id,
+    resource = 'a9ed06f8-ab11-40f7-aa4f-748e45229566',
+    na = c("", "NA", "nr")
+  )
+  saveRDS(ptt_rd_bcdc, "data-raw/ptt_rd_2019.rds")
+}
+
+if (file.exists("data-raw/ptt_mn_2019.rds")) {
+  ptt_mn_bcdc <- readRDS("data-raw/ptt_mn_2019.rds")
+} else {
+  ptt_mn_bcdc <- bcdata::bcdc_get_data(
+    record = ptt2019_record_id,
+    resource = '75ed8fec-f7ff-4d74-9257-fe36f697de8f',
+    na = c("", "NA", "nr"),
+    guess_max = 10000
+  )
+  saveRDS(ptt_mn_bcdc, "data-raw/ptt_mn_2019.rds")
+}
 
 # 03. Wrangle PTT data ----
-ptt_pr <- ptt_pr_bcdc %>% bchousing::WranglePttData()
-ptt_dr <- ptt_dr_bcdc %>% bchousing::WranglePttData()
-ptt_rd <- ptt_rd_bcdc %>% bchousing::WranglePttData()
-ptt_mn <- ptt_mn_bcdc %>% bchousing::WranglePttData()
+ptt_pr_2019 <- ptt_pr_bcdc %>% bchousing::WranglePttData()
+ptt_dr_2019 <- ptt_dr_bcdc %>% bchousing::WranglePttData(calculate_percentages = FALSE)
+ptt_rd_2019 <- ptt_rd_bcdc %>% bchousing::WranglePttData(calculate_percentages = FALSE, region_name_split = TRUE)
+ptt_mn_2019 <- ptt_mn_bcdc %>% bchousing::WranglePttData(calculate_percentages = FALSE, region_name_split = TRUE)
+
+# 04. Add geometries to PTT data ----
+ptt_dr_sf_2019 <- bchousing::JoinPttShapes(
+  ptt_data = ptt_dr_2019,
+  shapes = shapes_dr,
+  geo_name = "DevelopmentRegion"
+)
+
+ptt_rd_sf_2019 <- bchousing::JoinPttShapes(
+  ptt_data = ptt_rd_2019,
+  shapes = shapes_rd,
+  geo_name = "RegionalDistrict")
+
+ptt_mn_sf_2019 <- bchousing::JoinPttShapes(
+  ptt_data = ptt_mn_2019,
+  shapes = shapes_mun,
+  geo_name = "Municipality"
+)
 
 
 # Examine values of Municipality name and shape Municipality for records that match and can be joined
@@ -80,30 +127,46 @@ ptt_mn <- ptt_mn_bcdc %>% bchousing::WranglePttData()
 # ptt_mun_ps <- ptt_mun_ps %>%
 #   distinct(DevelopmentRegion, RegionalDistrict, GeoName)
 
-# 04. Add geometries to PTT data ----
-ptt_dr_sf <- JoinPttShapes(ptt_data = ptt_dr, shapes = shapes_dr, geo_name = "DevelopmentRegion")
-ptt_rd_sf <- JoinPttShapes(ptt_data = ptt_rd, shapes = shapes_rd, geo_name = "RegionalDistrict")
-ptt_mn_sf <- JoinPttShapes(ptt_data = ptt_mn, shapes = shapes_mun, geo_name = "Municipality")
-
-# Remove unnecessary objects
-# rm(list = c(
-#     'ptt_dr', 'ptt_dr_raw', 'ptt_rd', 'ptt_rd_raw', 'ptt_mun', 'ptt_mun_raw', 'shapes_dr',
-#     'shapes_rd', 'shapes_mun', 'shapes_dr_raw', 'shapes_mun_raw', 'shapes_rd_raw'
-#   )
-# )
-
-# 05. Join 2019 data to previous data
-
-# 06. Set up dashboard data
+# 05. Set up dashboard data ----
 # Last month for which PTT data is available
-max_trans_period <- max(ptt_prov$trans_period)
+max_trans_period <- max(ptt_pr$trans_period)
 
-ptt_prov_dash <- ptt_prov %>%
+ptt_pr_dash <- ptt_pr %>%
   filter(trans_period == max_trans_period) %>%
-  select(tot_mkt_trans, no_foreign_perc, sum_FMV, sum_FMV_foreign_perc) %>%
-  mutate(max_trans_period = max_trans_period)
+  select(tot_mkt_trans, perc_n_foreign_res, sum_FMV, perc_FMV_foreign_res) %>%
+  mutate(max_trans_period = max_trans_period) # %>%
+  # rename(
+  #   no_foreign_perc = perc_n_foreign_res,
+  #   sum_FMV_foreign_perc = perc_FMV_foreign_res
+  # )
 
-# 08. Save .rda files into data directory ----
+# 05. Join 2019 data to previous data ----
+ptt_dr_past <- ptt_dr_sf
+st_geometry(ptt_dr_past) <- NULL
+st_geometry(ptt_dr_sf_2019) <- NULL
+
+ptt_dr_sf_2019 <- ptt_dr_sf_2019 %>%
+  rename(
+    'no_res_trans' = 'n_res_trans',
+    'n_res_1fam' = 'n_res_1fam_dwelling',
+
+  ) %>%
+  mutate(
+    n_res_other = n_res_strata_rental + n_res_unkn,
+    n_comm_other = n_comm_industry + n_comm_util + n_comm_unkn,
+    n_foreign_nonres = n_foreign_comm + n_foreign_oth_unk
+  )
+
+ptt_dr_j <- full_join(ptt_dr_past, ptt_dr_sf_2019)
+
+
+# 06. Add geometries back ----
+ptt_dr_sf_2019 <- JoinPttShapes(ptt_data = ptt_dr, shapes = shapes_dr, geo_name = "DevelopmentRegion")
+ptt_rd_sf_2019 <- JoinPttShapes(ptt_data = ptt_rd, shapes = shapes_rd, geo_name = "RegionalDistrict")
+ptt_mn_sf_2019 <- JoinPttShapes(ptt_data = ptt_mn, shapes = shapes_mun, geo_name = "Municipality")
+
+
+# 07. Save .rda files into data directory ----
 usethis::use_data(ptt_dr_sf, overwrite = TRUE, compress = "gzip")
 usethis::use_data(ptt_rd_sf, overwrite = TRUE, compress = "gzip")
 usethis::use_data(ptt_mun_sf, overwrite = TRUE, compress = "gzip")
