@@ -226,6 +226,22 @@ hr {
     width: 250px;
 }
 
+.panel.fmv_dash {
+  background-color: #fff;
+  color: #787878;
+  border-bottom: 1px solid #e6e6e6;
+  border-radius: 4px;
+  -moz-box-shadow: none;
+  -webkit-box-shadow: none;
+  box-shadow: none;
+}
+
+.panel-primary > .panel-heading {
+  color: #3182bd;
+  background-color: #f9f9f9;
+  border-color: #c9c9c9;
+}
+
 /* BCGOV guidelines */
 #footer #footerWrapper {
     width: 100%;

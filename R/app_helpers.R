@@ -302,3 +302,34 @@ PlotlyChartAnnotation <- function(annotation_text) {
 
   return(annotations)
 }
+
+
+#' Dashboard-style value box
+#'
+#' @param value value of the KPI
+#' @param subtitle box subtitle
+#' @param location box location
+#'
+#' @export
+#'
+valueBox <- function(value, subtitle = '', location = '') {
+  div(
+    class = "panel fmv_dash",
+    div(
+      class = "panel-heading",
+      div(
+        class = "row",
+        div(
+          class = ("col-xs-12 text-left"),
+          div(
+            style = ("font-size: 24px; font-weight: bold;"),
+            textOutput(value)
+          ),
+          div(subtitle),
+          div(textOutput(location))
+        )
+      )
+    ),
+    div(class = "clearfix")
+  )
+}

@@ -10,15 +10,18 @@
 #' @import leaflet
 #' @import stringr
 #' @import magrittr
+#' @importFrom dplyr arrange
 #' @importFrom dplyr distinct
 #' @importFrom dplyr everything
 #' @importFrom dplyr filter
+#' @importFrom dplyr if_else
 #' @importFrom dplyr mutate
 #' @importFrom dplyr pull
 #' @importFrom dplyr select
 #' @importFrom dplyr top_n
 #' @importFrom dplyr ungroup
 #' @importFrom tidyr gather
+#' @importFrom scales dollar_format
 #' @import htmlwidgets
 #' @import plotly
 #' @importFrom sunburstR sunburst
@@ -51,7 +54,7 @@ app_server <- function(input, output, session) {
     font = list(
       family = fontFamily,
       size = 11,
-      color = "#696969"
+      color = "#393939"
     ),
     bordercolor = "#e6e6e6",
     borderwidth = 1,
@@ -114,22 +117,47 @@ app_server <- function(input, output, session) {
       "mun" = ptt_mun_sf
     )
 
-    ptData <- ptData %>% arrange(trans_period)
+    ptData <- ptData %>% dplyr::arrange(trans_period)
 
     return(ptData)
   })
 
   ptDataPeriod <- reactive({
     ptDataPeriod <- ptData() %>%
-      filter(trans_period == input$pt_trans_period)
+      dplyr::filter(trans_period == input$pt_trans_period)
     return(ptDataPeriod)
   })
 
   ptt_data_location <- reactive({
     ptt_data_location <- ptData() %>%
-      filter(GeoUID == input$pt_location)
+      dplyr::filter(GeoUID == input$pt_location)
 
     return(ptt_data_location)
+  })
+
+  ptt_data_location_period <- reactive({
+    ptDataPeriod <- ptData() %>%
+      dplyr::filter(
+        trans_period == input$pt_trans_period & GeoUID == input$pt_location
+      ) %>%
+      dplyr::select(
+        trans_period_label, GeoName, sum_FMV, sum_FMV_foreign, sum_FMV_res, sum_FMV_foreign_res, mn_FMV, md_FMV,
+        sum_PPT_paid, md_PPT, add_tax_paid, tot_mkt_trans, no_res_trans, n_comm_tran,
+        n_res_1fam_dwelling, n_res_strata
+      ) %>%
+      dplyr::mutate(
+        trans_period_label = as.character(trans_period_label),
+        fmv_perc_res = dplyr::if_else(is.na(sum_FMV_res), 'NA', paste0(round(sum_FMV_res / sum_FMV * 100, 2), '%')),
+        fmv_perc_foreign = dplyr::if_else(is.na(sum_FMV_foreign), 'NA', paste0(round(sum_FMV_foreign / sum_FMV * 100, 2), '%')),
+        fmv_perc_foreign_res = dplyr::if_else(is.na(sum_FMV_foreign_res), 'NA', paste0(round(sum_FMV_foreign_res / sum_FMV_res * 100, 2), '%')),
+        mn_FMV = scales::dollar_format()(mn_FMV),
+        md_FMV = scales::dollar_format()(md_FMV),
+        sum_PPT_paid = scales::dollar_format()(sum_PPT_paid),
+        add_tax_paid = scales::dollar_format()(add_tax_paid),
+        md_PPT = scales::dollar_format()(md_PPT),
+        no_other_tran = tot_mkt_trans - no_res_trans - n_comm_tran,
+        no_other_res = no_res_trans - n_res_1fam_dwelling - n_res_strata
+      )
   })
 
   ptRegionOptions <- reactive({
@@ -163,7 +191,7 @@ app_server <- function(input, output, session) {
 
     output$mapPtt <- leaflet::renderLeaflet({
       leaflet::leaflet() %>%
-        setView(lng = -123.12, lat = 52.78, zoom = 6) %>%
+        setView(lng = -123.2, lat = 52.7, zoom = 5) %>%
         addProviderTiles(provider = "CartoDB.Positron", options = providerTileOptions(minZoom = 5, maxZoom = 12)) %>%
         addPolygons(
           data = ptDataPeriod(),
@@ -218,6 +246,81 @@ app_server <- function(input, output, session) {
     })
   })
 
+  output$fmv_perc_month <- renderText({
+    ptt_data_location_period() %>% dplyr::pull(trans_period_label)
+  })
+  output$fmv_perc_loc <- renderText({
+    ptt_data_location_period() %>% dplyr::pull(GeoName)
+  })
+  output$fmv_perc_month_mn <- renderText({
+    ptt_data_location_period() %>% dplyr::pull(trans_period_label)
+  })
+  output$fmv_perc_loc_mn <- renderText({
+    ptt_data_location_period() %>% dplyr::pull(GeoName)
+  })
+  output$fmv_perc_month_ptt <- renderText({
+    ptt_data_location_period() %>% dplyr::pull(trans_period_label)
+  })
+  output$fmv_perc_loc_ptt <- renderText({
+    ptt_data_location_period() %>% dplyr::pull(GeoName)
+  })
+  output$fmv_perc_month_n <- renderText({
+    ptt_data_location_period() %>% dplyr::pull(trans_period_label)
+  })
+  output$fmv_perc_loc_n <- renderText({
+    ptt_data_location_period() %>% dplyr::pull(GeoName)
+  })
+  output$fmv_perc_month_res <- renderText({
+    ptt_data_location_period() %>% dplyr::pull(trans_period_label)
+  })
+  output$fmv_perc_loc_res <- renderText({
+    ptt_data_location_period() %>% dplyr::pull(GeoName)
+  })
+  output$fmv_perc_res <- renderText({
+    ptt_data_location_period() %>% dplyr::pull(fmv_perc_res)
+  })
+  output$fmv_perc_foreign <- renderText({
+    ptt_data_location_period() %>% dplyr::pull(fmv_perc_foreign)
+  })
+  output$fmv_perc_foreign_res <- renderText({
+    ptt_data_location_period() %>% dplyr::pull(fmv_perc_foreign_res)
+  })
+  output$mn_fmv <- renderText({
+    ptt_data_location_period() %>% dplyr::pull(mn_FMV)
+  })
+  output$md_fmv <- renderText({
+    ptt_data_location_period() %>% dplyr::pull(md_FMV)
+  })
+  output$sum_ptt_paid <- renderText({
+    ptt_data_location_period() %>% dplyr::pull(sum_PPT_paid)
+  })
+  output$add_ptt_paid <- renderText({
+    ptt_data_location_period() %>% dplyr::pull(add_tax_paid)
+  })
+  output$md_ppt_paid <- renderText({
+    ptt_data_location_period() %>% dplyr::pull(md_PPT)
+  })
+
+
+  output$tot_mkt_trans <- renderText({
+    ptt_data_location_period() %>% dplyr::pull(tot_mkt_trans)
+  })
+  output$no_res_trans <- renderText({
+    ptt_data_location_period() %>% dplyr::pull(no_res_trans)
+  })
+  output$n_comm_tran <- renderText({
+    ptt_data_location_period() %>% dplyr::pull(n_comm_tran)
+  })
+  output$n_res_1fam_dwelling <- renderText({
+    ptt_data_location_period() %>% dplyr::pull(n_res_1fam_dwelling)
+  })
+  output$n_res_strata <- renderText({
+    ptt_data_location_period() %>% dplyr::pull(n_res_strata)
+  })
+  output$no_other_res <- renderText({
+    ptt_data_location_period() %>% dplyr::pull(no_other_res)
+  })
+
   # Monthly Overview - FMV (Fair Market Value)
   output$pt_mothly_fmv <- plotly::renderPlotly({
     plotly::plot_ly(
@@ -227,21 +330,64 @@ app_server <- function(input, output, session) {
       name = "Total FMV",
       type = 'scatter',
       mode = 'markers+lines',
-      line = list(color = colCanadian)
+      line = list(color = colCanadian),
+      marker = list(
+        opacity = 0.75,
+        size = 5,
+        color = colCanadian
+      ), fill = 'tozeroy', fillcolor = 'rgba(227, 147, 152, 0.5)'
     ) %>%
-      add_lines(
+      add_trace(
         y = ~ sum_FMV_foreign,
         name = "Total FMV Foreign",
-        line = list(color = colForeign)
-      ) %>%
-      add_lines(
-        y = ~ no_foreign_perc,
-        name = "Foreign %",
-        yaxis = "y2",
-        line = list(
-          color = colForeign,
-          dash = 'dot'
-        )
+        type = 'scatter',
+        mode = 'markers+lines',
+        line = list(color = colForeign),
+        marker = list(
+          opacity = 0.75,
+          size = 5,
+          color = colForeign
+        ), fill = 'tozeroy', fillcolor = 'rgba(158, 202, 225, 0.75)'
+    ) %>%
+      add_trace(
+        y = ~ sum_FMV_res,
+        name = "Residential FMV",
+        type = 'scatter',
+        mode = 'markers+lines',
+        line = list(color = colCanadian),
+        marker = list(
+          opacity = 0.75,
+          size = 5,
+          color = colForeign
+        ), fill = 'tozeroy', fillcolor = 'rgba(158, 202, 225, 0.25)'
+    ) %>%
+      add_trace(
+        y = ~ sum_FMV_foreign_res,
+        name = "Residential FMV Foreign",
+        type = 'scatter',
+        mode = 'markers+lines',
+        line = list(color = colForeign),
+        marker = list(
+          opacity = 0.75,
+          size = 5,
+          color = colForeign
+        ), fill = 'tozeroy', fillcolor = 'rgba(158, 202, 225, 0.25)'
+      # ) %>%
+      # add_trace(
+      #   y = ~ no_foreign_perc,
+      #   name = "Foreign %",
+      #   yaxis = "y2",
+      #   type = 'scatter',
+      #   mode = 'markers+lines',
+      #   line = list(
+      #     color = colForeign,
+      #     dash = 'dot'
+      #   ),
+      #   marker = list(
+      #     opacity = 0.75,
+      #     size = 5,
+      #     color = colForeign
+      #   ), fill = 'tozeroy'
       ) %>%
       plotly::layout(
         title = PlotlyChartTitle(title_text = paste("FMV (Fair Market Value) in", ptGeoNameLabel())),
@@ -272,27 +418,53 @@ app_server <- function(input, output, session) {
       name = "Median FMV",
       type = 'scatter',
       mode = 'lines+markers',
+      marker = list(
+        opacity = 0.75,
+        size = 5,
+        color = colForeign
+      ),
       line = list(color = colCanadian)
     ) %>%
-      add_lines(
+      add_trace(
         y = ~ md_FMV_foreign_res,
         name = "Median FMV Foreign",
-        line = list(color = colForeign)
+        line = list(color = colForeign),
+        type = 'scatter',
+        mode = 'markers+lines',
+        marker = list(
+          opacity = 0.75,
+          size = 5,
+          color = colForeign
+        )
       ) %>%
-      add_lines(
+      add_trace(
         y = ~ mn_FMV,
         name = "Mean FMV",
         line = list(
           color = colCanadian,
           dash = 'dot'
+        ),
+        type = 'scatter',
+        mode = 'markers+lines',
+        marker = list(
+          opacity = 0.75,
+          size = 5,
+          color = colCanadian
         )
       ) %>%
-      add_lines(
+      add_trace(
         y = ~ mn_FMV_foreign_res,
         name = "Mean FMV Foreign",
         line = list(
           color = colForeign,
           dash = 'dot'
+        ),
+        type = 'scatter',
+        mode = 'markers+lines',
+        marker = list(
+          opacity = 0.75,
+          size = 5,
+          color = colForeign
         )
       ) %>%
       plotly::layout(
@@ -317,12 +489,24 @@ app_server <- function(input, output, session) {
       name = "PTT",
       type = 'scatter',
       mode = 'lines+markers',
+      marker = list(
+        opacity = 0.75,
+        size = 5,
+        color = colCanadian
+      ),
       line = list(color = colCanadian)
     ) %>%
-      add_lines(
+      add_trace(
         y = ~ add_tax_paid,
         name = "Additional PTT",
-        line = list(color = colForeign)
+        line = list(color = colForeign),
+        type = 'scatter',
+        mode = 'markers+lines',
+        marker = list(
+          opacity = 0.75,
+          size = 5,
+          color = colForeign
+        )
       ) %>%
       plotly::layout(
         title = PlotlyChartTitle(title_text = paste("Property Transfer Tax Paid in", ptGeoNameLabel())),
@@ -345,8 +529,9 @@ app_server <- function(input, output, session) {
       y = ~ no_res_trans,
       name = "Residential",
       type = "bar",
-      marker = list(color = colResidential),
-      hoverinfo = "y+name"
+      marker = list(color = colMultiFam),
+      hoverinfo = "y+name",
+      opacity = 0.75
     ) %>%
       add_trace(
         y = ~ n_comm_tran,
@@ -391,7 +576,8 @@ app_server <- function(input, output, session) {
       name = "Single Family",
       type = "bar",
       marker = list(color = colSingleFam),
-      hoverinfo = "y+name"
+      hoverinfo = "y+name",
+      opacity = 0.75
     ) %>%
       add_trace(
         y = ~ n_res_fam,
@@ -436,7 +622,8 @@ app_server <- function(input, output, session) {
       name = "Commerce",
       type = "bar",
       marker = list(color = colCommercial),
-      hoverinfo = "y+name"
+      hoverinfo = "y+name",
+      opacity = 0.75
     ) %>%
       add_trace(
         y = ~ n_comm_strata_nores,
@@ -751,7 +938,7 @@ app_server <- function(input, output, session) {
             maxZoom = 12
           )
         ) %>%
-        setView(lng = -123.12, lat = 52.78, zoom = 6) %>%
+        setView(lng = -123.2, lat = 52.7, zoom = 5) %>%
         addPolygons(
           data = housingTypeMapData(),
           label = ~ `Region`, color = '#333',

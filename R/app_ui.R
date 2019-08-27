@@ -341,7 +341,7 @@ app_ui <- function() {
               3,
               selectInput(
                 "pt_view",
-                label = HTML('View <i id="pt_geo_level_help" class="fa fa-question-circle-o"></i>'),
+                label = HTML('View'),
                 c(
                   "Regional District" = "regdis",
                   "Development Region" = "devreg",
@@ -360,7 +360,7 @@ app_ui <- function() {
               3,
               selectizeInput(
                 "pt_trans_period",
-                label = HTML('Period <i id="pt_trans_period_help" class="fa fa-question-circle-o"></i>'),
+                label = HTML('Period'),
                 choices = periodSelection,
                 multiple = FALSE,
                 selected = maxTransPeriod
@@ -377,7 +377,7 @@ app_ui <- function() {
               3,
               selectInput(
                 "pt_metric",
-                label = HTML('Variable <i id="pt_metric_help" class="fa fa-question-circle-o"></i>'),
+                label = HTML('Variable'),
                 choices = selectionMetrics
               ) %>%
                 bsplus::shinyInput_label_embed(
@@ -402,109 +402,253 @@ app_ui <- function() {
         ),
 
         fluidRow(
-          column(5, leaflet::leafletOutput("mapPtt", height = mapHeightPtt)),
-          column(7,
-                 tabsetPanel(
-                   tabPanel(
-                     "FMV",
-                     # icon = icon("briefcase"),
-                     tags$p("Total fair market value by month."),
-                     conditionalPanel(
-                       condition = "input.pt_location != ''",
-                       plotly::plotlyOutput("pt_mothly_fmv", height = chartHeight) %>% shinycssloaders::withSpinner(color="#0dc5c1")
-                     ),
-                     conditionalPanel(
-                       condition = "input.pt_location == ''",
-                       tags$div(
-                         "Click location on the map to draw a time series chart showing monthly total sales values for that location.",
-                         class = 'alert alert-info'
-                       )
-
-                     )
-                   ),
-                   tabPanel(
-                     "Mean FMV",
-                     # icon = icon("calculator"),
-                     tags$p("Mean and Median fair market value by month, total and foreign."),
-                     # tags$p(cat(getwd())),
-                     conditionalPanel(
-                       condition = "input.pt_location != ''",
-                       plotly::plotlyOutput("pt_mothly_mnd_fmv", height = chartHeight) %>% shinycssloaders::withSpinner(color="#0dc5c1")
-                     ),
-                     conditionalPanel(
-                       condition = "input.pt_location == ''",
-                       tags$div(
-                         "Click location on the map to draw a time series chart showing monthly average sales values for that location.",
-                         class = 'alert alert-info'
-                       )
-                     )
-                   ),
-                   tabPanel(
-                     "Tax Paid",
-                     # icon = icon("money"),
-                     tags$p("Total property transfer tax paid by month."),
-                     conditionalPanel(
-                       condition = "input.pt_location != ''",
-                       plotly::plotlyOutput("pt_mothly_ptt", height = chartHeight) %>% shinycssloaders::withSpinner(color="#0dc5c1")
-                     ),
-                     conditionalPanel(
-                       condition = "input.pt_location == ''",
-                       tags$div(
-                         "Click location on the map to draw a time series chart showing monthly property transfer tax paid for that location.",
-                         class = 'alert alert-info'
-                       )
-                     )
-                   ),
-                   tabPanel(
-                     "Property Types",
-                     # icon = icon("building-o"),
-                     tags$p("Number of market transactions for different
-                   property types (residential, commercial, farms, etc) by month."),
-                     conditionalPanel(
-                       condition = "input.pt_location != ''",
-                       plotly::plotlyOutput("pt_mothly", height = chartHeight) %>% shinycssloaders::withSpinner(color="#0dc5c1")
-                     ),
-                     conditionalPanel(
-                       condition = "input.pt_location == ''",
-                       tags$div(
-                         "Click location on the map to draw a time series chart showing monthly numbers of transactions for different property types for that location.",
-                         class = 'alert alert-info'
-                       )
-                     )
-                   ),
-                   tabPanel(
-                     "Residential",
-                     # icon = icon("home"),
-                     tags$p("Number of market transactions for residential properties by month."),
-                     conditionalPanel(
-                       condition = "input.pt_location != ''",
-                       plotly::plotlyOutput("pt_mothly_res", height = chartHeight) %>% shinycssloaders::withSpinner(color="#0dc5c1")
-                     ),
-                     conditionalPanel(
-                       condition = "input.pt_location == ''",
-                       tags$div(
-                         "Click location on the map to draw a time series chart showing monthly number of transactions for residential properties for that location.",
-                         class = 'alert alert-info'
-                       )
-                     )
-                   ),
-                   tabPanel(
-                     "Commercial",
-                     # icon = icon("building"),
-                     tags$p("Number of market transactions for commercial properties by month."),
-                     conditionalPanel(
-                       condition = "input.pt_location != ''",
-                       plotly::plotlyOutput("pt_mothly_comm", height = chartHeight) %>% shinycssloaders::withSpinner(color="#0dc5c1")
-                     ),
-                     conditionalPanel(
-                       condition = "input.pt_location == ''",
-                       tags$div(
-                         "Click location on the map to draw a time series chart showing monthly number of transactions for commerction properties for that location.",
-                         class = 'alert alert-info'
-                       )
-                     )
-                   )
-                 )
+          column(
+            5, leaflet::leafletOutput("mapPtt", height = mapHeightPtt)
+          ),
+          column(
+            7,
+            tabsetPanel(
+              tabPanel(
+                "FMV",
+                # icon = icon("briefcase"),
+                conditionalPanel(
+                  condition = "input.pt_location != ''",
+                  fluidRow(
+                    column(
+                      3,
+                      bchousing:::valueBox(
+                        value = "fmv_perc_month",
+                        location = "fmv_perc_loc"
+                      )
+                    ),
+                    column(
+                      3,
+                      bchousing:::valueBox(
+                        value = "fmv_perc_res",
+                        subtitle = "Residential FMV"
+                      )
+                    ),
+                    column(
+                      3,
+                      bchousing:::valueBox(
+                        value = "fmv_perc_foreign",
+                        subtitle = "Foreign FMV"
+                      )
+                    ),
+                    column(
+                      3,
+                      bchousing:::valueBox(
+                        value = "fmv_perc_foreign_res",
+                        subtitle = "Foreign Residential FMV"
+                      )
+                    )
+                  ),
+                  plotly::plotlyOutput("pt_mothly_fmv", height = chartHeight) %>% shinycssloaders::withSpinner(color="#0dc5c1")
+                ),
+                conditionalPanel(
+                  condition = "input.pt_location == ''",
+                  tags$div(
+                    "Click location on the map to draw a time series chart showing monthly total sales values for that location.",
+                    class = 'alert alert-info'
+                  )
+                ),
+                tags$p("Total fair market value by month.")
+              ),
+              tabPanel(
+                "Mean FMV",
+                # icon = icon("calculator"),
+                # tags$p(cat(getwd())),
+                conditionalPanel(
+                  condition = "input.pt_location != ''",
+                  fluidRow(
+                    column(
+                      4,
+                      bchousing:::valueBox(
+                        value = "fmv_perc_month_mn",
+                        location = "fmv_perc_loc_mn"
+                      )
+                    ),
+                    column(
+                      4,
+                      bchousing:::valueBox(
+                        value = "mn_fmv",
+                        subtitle = "Mean FMV"
+                      )
+                    ),
+                    column(
+                      4,
+                      bchousing:::valueBox(
+                        value = "md_fmv",
+                        subtitle = "Median FMV"
+                      )
+                    )
+                  ),
+                  plotly::plotlyOutput("pt_mothly_mnd_fmv", height = chartHeight) %>% shinycssloaders::withSpinner(color="#0dc5c1")
+                ),
+                conditionalPanel(
+                  condition = "input.pt_location == ''",
+                  tags$div(
+                    "Click location on the map to draw a time series chart showing monthly average sales values for that location.",
+                    class = 'alert alert-info'
+                  )
+                ),
+                tags$p("Mean and Median fair market value by month, total and foreign.")
+              ),
+              tabPanel(
+                "Tax Paid",
+                # icon = icon("money"),
+                conditionalPanel(
+                  condition = "input.pt_location != ''",
+                  fluidRow(
+                    column(
+                      3,
+                      bchousing:::valueBox(
+                        value = "fmv_perc_month_ptt",
+                        location = "fmv_perc_loc_ptt"
+                      )
+                    ),
+                    column(
+                      3,
+                      bchousing:::valueBox(
+                        value = "sum_ptt_paid",
+                        subtitle = "Total PTT Paid"
+                      )
+                    ),
+                    column(
+                      3,
+                      bchousing:::valueBox(
+                        value = "add_ptt_paid",
+                        subtitle = "Additional PTT Paid"
+                      )
+                    ),
+                    column(
+                      3,
+                      bchousing:::valueBox(
+                        value = "md_ppt_paid",
+                        subtitle = "Median PPT Paid"
+                      )
+                    )
+                  ),
+                  plotly::plotlyOutput("pt_mothly_ptt", height = chartHeight) %>% shinycssloaders::withSpinner(color="#0dc5c1")
+                ),
+                conditionalPanel(
+                  condition = "input.pt_location == ''",
+                  tags$div(
+                    "Click location on the map to draw a time series chart showing monthly property transfer tax paid for that location.",
+                    class = 'alert alert-info'
+                  )
+                ),
+                tags$p("Total property transfer tax paid by month.")
+              ),
+              tabPanel(
+                "Property Types",
+                # icon = icon("building-o"),
+                conditionalPanel(
+                  condition = "input.pt_location != ''",
+                  fluidRow(
+                    column(
+                      3,
+                      bchousing:::valueBox(
+                        value = "fmv_perc_month_n",
+                        location = "fmv_perc_loc_n"
+                      )
+                    ),
+                    column(
+                      3,
+                      bchousing:::valueBox(
+                        value = "tot_mkt_trans",
+                        subtitle = "No. of Transactions"
+                      )
+                    ),
+                    column(
+                      3,
+                      bchousing:::valueBox(
+                        value = "no_res_trans",
+                        subtitle = "Residential Transactions"
+                      )
+                    ),
+                    column(
+                      3,
+                      bchousing:::valueBox(
+                        value = "n_comm_tran",
+                        subtitle = "Commercial Transactions"
+                      )
+                    )
+                  ),
+                  plotly::plotlyOutput("pt_mothly", height = chartHeight) %>% shinycssloaders::withSpinner(color="#0dc5c1")
+                ),
+                conditionalPanel(
+                  condition = "input.pt_location == ''",
+                  tags$div(
+                    "Click location on the map to draw a time series chart showing monthly numbers of transactions for different property types for that location.",
+                    class = 'alert alert-info'
+                  )
+                ),
+                tags$p("Number of market transactions for different property types (residential, commercial, farms, etc) by month.")
+              ),
+              tabPanel(
+                "Residential",
+                # icon = icon("home"),
+                conditionalPanel(
+                  condition = "input.pt_location != ''",
+                  fluidRow(
+                    column(
+                      3,
+                      bchousing:::valueBox(
+                        value = "fmv_perc_month_res",
+                        location = "fmv_perc_loc_res"
+                      )
+                    ),
+                    column(
+                      3,
+                      bchousing:::valueBox(
+                        value = "n_res_1fam_dwelling",
+                        subtitle = "Single Family Homes"
+                      )
+                    ),
+                    column(
+                      3,
+                      bchousing:::valueBox(
+                        value = "n_res_strata",
+                        subtitle = "Strata"
+                      )
+                    ),
+                    column(
+                      3,
+                      bchousing:::valueBox(
+                        value = "no_other_res",
+                        subtitle = "Other Transactions"
+                      )
+                    )
+                  ),
+                  plotly::plotlyOutput("pt_mothly_res", height = chartHeight) %>% shinycssloaders::withSpinner(color="#0dc5c1")
+                ),
+                conditionalPanel(
+                  condition = "input.pt_location == ''",
+                  tags$div(
+                    "Click location on the map to draw a time series chart showing monthly number of transactions for residential properties for that location.",
+                    class = 'alert alert-info'
+                  )
+                ),
+                tags$p("Number of market transactions for residential properties by month.")
+              ),
+              tabPanel(
+                "Commercial",
+                # icon = icon("building"),
+                conditionalPanel(
+                  condition = "input.pt_location != ''",
+                  plotly::plotlyOutput("pt_mothly_comm", height = chartHeight) %>% shinycssloaders::withSpinner(color="#0dc5c1")
+                ),
+                conditionalPanel(
+                  condition = "input.pt_location == ''",
+                  tags$div(
+                    "Click location on the map to draw a time series chart showing monthly number of transactions for commerction properties for that location.",
+                    class = 'alert alert-info'
+                  )
+                ),
+                tags$p("Number of market transactions for commercial properties by month.")
+              )
+            )
           )
         )
       )

@@ -3,7 +3,7 @@
 #' @export
 #' @importFrom shiny shinyApp
 #' @importFrom shiny runApp
-run_app <- function(..., host = '0.0.0.0', port = '80') {
+run_app <- function(..., host = '127.0.0.1', port = 8080) {
   shiny::runApp(system.file("app", package = "bchousing"), host = host, port = port, quiet = TRUE)
   # app = shiny::shinyApp(
   #   ui = app_ui(),

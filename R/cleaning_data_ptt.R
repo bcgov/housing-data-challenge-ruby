@@ -41,13 +41,10 @@ AddTransactionPeriodColumns <- function(data) {
       ),
 
       # Transaction period label yyyy-m
-      trans_period_label = forcats::as_factor(
-        stringr::str_c(
-          year,
-          '-',
-          lubridate::month(trans_period, label = TRUE)
-        ),
-
+      trans_period_label = stringr::str_c(
+        year,
+        '-',
+        lubridate::month(trans_period, label = TRUE)
       )
     ) %>%
     # Reorder columns and drop year and month columns
