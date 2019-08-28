@@ -11,3 +11,4 @@
 /data/housing/*2011*.rds
 /data/housing/*DA.rds
 inst/doc
+housing-data-challenge-ruby.dcf

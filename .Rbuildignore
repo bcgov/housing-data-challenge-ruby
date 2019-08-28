@@ -1,3 +1,5 @@
 ^.*\.Rproj$
 ^\.Rproj\.user$
 ^data-raw$
+^app\.R$
+^/Users/sasha/Documents/work/dev/housing-data-challenge-ruby/Dockerfile$

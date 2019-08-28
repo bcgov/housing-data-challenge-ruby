@@ -1,33 +1,25 @@
-FROM rocker/shiny:latest
-
-MAINTAINER Sasa Bogdanovic "sasha@rubyind.com"
-
-RUN apt-get update && apt-get install -y -t unstable \
-    sudo \
-    libgdal-dev \
-    libproj-dev \
-    libssl-dev \
-    git \
-    libxml2-dev \
-    libudunits2-dev \
-    libjq-dev \
-    libprotobuf-dev \
-    libv8-3.14-dev \
-    protobuf-compiler
-
-# Download and install shiny server
-RUN R -e "install.packages(c('here', 'shiny', 'sf', 'here', 'readr', 'stringr', 'magrittr', \
-    'rlang', 'rgdal', 'leaflet', 'maps', 'tidyverse', 'dplyr', 'ggplot2', 'htmlwidgets', \
-    'DT', 'rgeos', 'tidyr', 'crosstalk', 'plotly', 'devtools', 'shinyjs', 'feather', 'stringr', \
-    'htmltools', 'sunburstR', 'treemap', 'data.tree', 'RColorBrewer', 'shinycssloaders', \
-    'rmapshaper', 'shinyBS'), repos='https://cran.rstudio.com/'))" && \
-    devtools::install_github('mountainmath/cancensus') && \
-    devtools::install_github('gluc/data.tree') && \
-    cd /opt/shiny-server/samples/sample-apps/ && \
-    git clone https://github.com/bcgov/housing-data-challenge-ruby.git && \
-    ln -s /opt/shiny-server/samples/sample-apps/housing-data-challenge-ruby /srv/shiny-server/housing \
-    sudo echo "0 9 * * * Rscript /srv/shiny-server/housing/download_ptt.R" >> /etc/crontab
-
-EXPOSE 3838
-
-CMD ["/usr/bin/shiny-server.sh"]
+FROM rocker/tidyverse:3.5.1
+RUN R -e 'install.packages("remotes")'
+RUN R -e 'remotes::install_github("r-lib/remotes", ref = "97bbf81")'
+RUN R -e 'remotes::install_cran("here")'
+RUN R -e 'remotes::install_cran("shiny")'
+RUN R -e 'remotes::install_cran("shinyjs")'
+RUN R -e 'remotes::install_cran("sf")'
+RUN R -e 'remotes::install_cran("leaflet")'
+RUN R -e 'remotes::install_cran("leaflet.extras")'
+RUN R -e 'remotes::install_cran("readr")'
+RUN R -e 'remotes::install_cran("stringr")'
+RUN R -e 'remotes::install_cran("magrittr")'
+RUN R -e 'remotes::install_cran("lubridate")'
+RUN R -e 'remotes::install_cran("dplyr")'
+RUN R -e 'remotes::install_cran("htmlwidgets")'
+RUN R -e 'remotes::install_cran("DT")'
+RUN R -e 'remotes::install_cran("tidyr")'
+RUN R -e 'remotes::install_cran("plotly")'
+RUN R -e 'remotes::install_cran("markdown")'
+RUN R -e 'remotes::install_cran("bsplus")'
+RUN R -e 'remotes::install_cran("pkgload")'
+COPY bchousing_*.tar.gz /app.tar.gz
+RUN R -e 'remotes::install_local("/app.tar.gz")'
+EXPOSE 80
+CMD R -e "options('shiny.port'=80,shiny.host='0.0.0.0');bchousing::run_app()"

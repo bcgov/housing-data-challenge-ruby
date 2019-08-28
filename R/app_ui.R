@@ -5,6 +5,8 @@
 #' @importFrom shinyjs disabled
 #' @importFrom leaflet leafletOutput
 #' @import magrittr
+#' @import markdown
+#' @import rmarkdown
 #' @importFrom lubridate year
 #' @importFrom lubridate month
 #' @import htmlwidgets
@@ -61,8 +63,9 @@ app_ui <- function() {
     "Movable dwelling ratio"
   )
 
+
   ui <- navbarPage(
-    theme = "css/bcgov.css",
+    # theme = "css/bcgov.css",
     title = "BC Housing Market",
 
     # 01. Home page ----
@@ -657,10 +660,10 @@ app_ui <- function() {
     # 04. About ----
     navbarMenu(
       "About",
-      tabPanel("Project background", shiny::includeMarkdown("about/project_background.Rmd")),
-      tabPanel("Data sources", shiny::includeMarkdown("about/data_sources.Rmd")),
-      tabPanel("Code repository", shiny::includeMarkdown("about/code_repository.Rmd")),
-      tabPanel("Glossary", shiny::includeMarkdown("about/glossary.Rmd"))
+      tabPanel("Project background", shiny::includeMarkdown("inst/app/about/project_background.Rmd")),
+      tabPanel("Data sources", shiny::includeMarkdown("inst/app/about/data_sources.Rmd")),
+      tabPanel("Code repository", shiny::includeMarkdown("inst/app/about/code_repository.Rmd")),
+      tabPanel("Glossary", shiny::includeMarkdown("inst/app/about/glossary.Rmd"))
     ),
 
     #
@@ -700,7 +703,36 @@ app_ui <- function() {
     </div>
   </div>
 </div>'),
-    includeScript("www/srcjs/bcgov.js"),
-    tags$head(tags$link(rel = "shortcut icon", href = "/images/favicon.ico"))
+
+    golem_add_external_resources()
+  )
+
+
+}
+
+#' @import shiny
+golem_add_external_resources <- function(){
+
+  addResourcePath(
+    'www', system.file('app/www', package = 'bchousing')
+  )
+
+  addResourcePath(
+    'about', system.file('app/about', package = 'bchousing')
+  )
+
+  tags$head(
+
+    # golem::activate_js(),
+    # golem::favicon(),
+    # Add here all the external resources
+    # If you have a custom.css in the inst/app/www
+    # Or for example, you can add shinyalert::useShinyalert() here
+
+    tags$link(rel = "stylesheet", type = "text/css", href = "www/css/bcgov.css"),
+    shinyjs::useShinyjs(),
+    tags$script(src = "www/srcjs/bcgov.js"),
+    tags$head(tags$link(rel = "shortcut icon", href = "www/images/favicon.ico"))
   )
 }
+

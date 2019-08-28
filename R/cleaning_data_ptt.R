@@ -4,7 +4,6 @@
 #' @importFrom dplyr mutate
 #' @importFrom dplyr rename
 #' @importFrom dplyr select
-#' @importFrom forcats as_factor
 #' @importFrom lubridate month
 #' @importFrom stringr str_c
 #' @importFrom stringr str_pad
