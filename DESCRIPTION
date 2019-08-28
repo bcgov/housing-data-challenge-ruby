@@ -12,6 +12,7 @@ Encoding: UTF-8
 LazyData: true
 Imports: 
     bsplus,
+    cancensus,
     DT,
     dplyr,
     forcats,
@@ -32,12 +33,15 @@ Imports:
     sf,
     shiny,
     shinyjs,
+    shinycssloaders,
+    sunburstR,
     stringr,
     tidyr,
     treemap
 Remotes: 
-    mountainmath/cancensus,
     andrewsali/shinycssloaders,
+    mountainmath/cancensus,
+    mtennekes/treemap,
     timelyportfolio/sunburstR
 RoxygenNote: 6.1.1
 URL: https://github.com/bcgov/housing-data-challenge-ruby
