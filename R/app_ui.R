@@ -419,28 +419,28 @@ app_ui <- function() {
                   fluidRow(
                     column(
                       3,
-                      bchousing:::valueBox(
+                      bchousing:::ValueBox(
                         value = "fmv_perc_month",
                         location = "fmv_perc_loc"
                       )
                     ),
                     column(
                       3,
-                      bchousing:::valueBox(
+                      bchousing:::ValueBox(
                         value = "fmv_perc_res",
                         subtitle = "Residential FMV"
                       )
                     ),
                     column(
                       3,
-                      bchousing:::valueBox(
+                      bchousing:::ValueBox(
                         value = "fmv_perc_foreign",
                         subtitle = "Foreign FMV"
                       )
                     ),
                     column(
                       3,
-                      bchousing:::valueBox(
+                      bchousing:::ValueBox(
                         value = "fmv_perc_foreign_res",
                         subtitle = "Foreign Residential FMV"
                       )
@@ -466,21 +466,21 @@ app_ui <- function() {
                   fluidRow(
                     column(
                       4,
-                      bchousing:::valueBox(
+                      bchousing:::ValueBox(
                         value = "fmv_perc_month_mn",
                         location = "fmv_perc_loc_mn"
                       )
                     ),
                     column(
                       4,
-                      bchousing:::valueBox(
+                      bchousing:::ValueBox(
                         value = "mn_fmv",
                         subtitle = "Mean FMV"
                       )
                     ),
                     column(
                       4,
-                      bchousing:::valueBox(
+                      bchousing:::ValueBox(
                         value = "md_fmv",
                         subtitle = "Median FMV"
                       )
@@ -505,28 +505,28 @@ app_ui <- function() {
                   fluidRow(
                     column(
                       3,
-                      bchousing:::valueBox(
+                      bchousing:::ValueBox(
                         value = "fmv_perc_month_ptt",
                         location = "fmv_perc_loc_ptt"
                       )
                     ),
                     column(
                       3,
-                      bchousing:::valueBox(
+                      bchousing:::ValueBox(
                         value = "sum_ptt_paid",
                         subtitle = "Total PTT Paid"
                       )
                     ),
                     column(
                       3,
-                      bchousing:::valueBox(
+                      bchousing:::ValueBox(
                         value = "add_ptt_paid",
                         subtitle = "Additional PTT Paid"
                       )
                     ),
                     column(
                       3,
-                      bchousing:::valueBox(
+                      bchousing:::ValueBox(
                         value = "md_ppt_paid",
                         subtitle = "Median PPT Paid"
                       )
@@ -551,28 +551,28 @@ app_ui <- function() {
                   fluidRow(
                     column(
                       3,
-                      bchousing:::valueBox(
+                      bchousing:::ValueBox(
                         value = "fmv_perc_month_n",
                         location = "fmv_perc_loc_n"
                       )
                     ),
                     column(
                       3,
-                      bchousing:::valueBox(
+                      bchousing:::ValueBox(
                         value = "tot_mkt_trans",
                         subtitle = "No. of Transactions"
                       )
                     ),
                     column(
                       3,
-                      bchousing:::valueBox(
+                      bchousing:::ValueBox(
                         value = "no_res_trans",
                         subtitle = "Residential Transactions"
                       )
                     ),
                     column(
                       3,
-                      bchousing:::valueBox(
+                      bchousing:::ValueBox(
                         value = "n_comm_tran",
                         subtitle = "Commercial Transactions"
                       )
@@ -597,28 +597,28 @@ app_ui <- function() {
                   fluidRow(
                     column(
                       3,
-                      bchousing:::valueBox(
+                      bchousing:::ValueBox(
                         value = "fmv_perc_month_res",
                         location = "fmv_perc_loc_res"
                       )
                     ),
                     column(
                       3,
-                      bchousing:::valueBox(
+                      bchousing:::ValueBox(
                         value = "n_res_1fam_dwelling",
                         subtitle = "Single Family Homes"
                       )
                     ),
                     column(
                       3,
-                      bchousing:::valueBox(
+                      bchousing:::ValueBox(
                         value = "n_res_strata",
                         subtitle = "Strata"
                       )
                     ),
                     column(
                       3,
-                      bchousing:::valueBox(
+                      bchousing:::ValueBox(
                         value = "no_other_res",
                         subtitle = "Other Transactions"
                       )

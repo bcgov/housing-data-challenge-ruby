@@ -8,11 +8,13 @@
 
 <title>Add annotation for Plotly charts — PlotlyChartAnnotation • bchousing</title>
 
+
 <!-- jquery -->
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.3.1/jquery.min.js" integrity="sha256-FgpCb/KJQlLNfOu91ta32o/NMZxltwRo8QtmkMRdAu8=" crossorigin="anonymous"></script>
 <!-- Bootstrap -->
 
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/twitter-bootstrap/3.3.7/css/bootstrap.min.css" integrity="sha256-916EbMg70RQy9LHiGkXzG8hSg9EdNy97GazNG/aiY1w=" crossorigin="anonymous" />
+
 <script src="https://cdnjs.cloudflare.com/ajax/libs/twitter-bootstrap/3.3.7/js/bootstrap.min.js" integrity="sha256-U5ZEeKfGNOja007MMD3YBI0A3OSZOQbeG6z2f2Y0hu8=" crossorigin="anonymous"></script>
 
 <!-- Font Awesome icons -->
@@ -30,10 +32,11 @@
 
 
 
-<meta property="og:title" content="Add annotation for Plotly charts — PlotlyChartAnnotation" />
 
+<meta property="og:title" content="Add annotation for Plotly charts — PlotlyChartAnnotation" />
 <meta property="og:description" content="Add annotation for Plotly charts" />
 <meta name="twitter:card" content="summary" />
+
 
 
 
@@ -94,7 +97,6 @@
   </ul>
 </li>
       </ul>
-      
       <ul class="nav navbar-nav navbar-right">
         <li>
   <a href="https://github.com/bcgov/housing-data-challenge-ruby">
@@ -120,13 +122,11 @@
     </div>
 
     <div class="ref-description">
-    
     <p>Add annotation for Plotly charts</p>
-    
     </div>
 
     <pre class="usage"><span class='fu'>PlotlyChartAnnotation</span>(<span class='no'>annotation_text</span>)</pre>
-    
+
     <h2 class="hasAnchor" id="arguments"><a class="anchor" href="#arguments"></a>Arguments</h2>
     <table class="ref-arguments">
     <colgroup><col class="name" /><col class="desc" /></colgroup>
@@ -135,20 +135,58 @@
       <td><p>Annotation text</p></td>
     </tr>
     </table>
-    
+
     <h2 class="hasAnchor" id="value"><a class="anchor" href="#value"></a>Value</h2>
 
-    <p>Formatted annotation</p>
-    
+    <p>Formatted annotation for plotly chart</p>
 
+    <h2 class="hasAnchor" id="examples"><a class="anchor" href="#examples"></a>Examples</h2>
+    <pre class="examples"><div class='input'><span class='fu'>PlotlyChartAnnotation</span>(<span class='st'>'My chart annotation'</span>)</div><div class='output co'>#&gt; $text
+#&gt; [1] "My chart annotation"
+#&gt; 
+#&gt; $font
+#&gt; $font$size
+#&gt; [1] 12
+#&gt; 
+#&gt; $font$color
+#&gt; [1] "#393939"
+#&gt; 
+#&gt; 
+#&gt; $showarrow
+#&gt; [1] FALSE
+#&gt; 
+#&gt; $xref
+#&gt; [1] "paper"
+#&gt; 
+#&gt; $x
+#&gt; [1] -0.0075
+#&gt; 
+#&gt; $yref
+#&gt; [1] "paper"
+#&gt; 
+#&gt; $y
+#&gt; [1] 1.075
+#&gt; 
+#&gt; $xanchor
+#&gt; [1] "left"
+#&gt; 
+#&gt; $yanchor
+#&gt; [1] "auto"
+#&gt; 
+#&gt; $xshift
+#&gt; [1] 0.5
+#&gt; 
+#&gt; $yshift
+#&gt; [1] 0.5
+#&gt; </div></pre>
   </div>
   <div class="col-md-3 hidden-xs hidden-sm" id="sidebar">
     <h2>Contents</h2>
     <ul class="nav nav-pills nav-stacked">
       <li><a href="#arguments">Arguments</a></li>
-      
       <li><a href="#value">Value</a></li>
-          </ul>
+      <li><a href="#examples">Examples</a></li>
+    </ul>
 
   </div>
 </div>

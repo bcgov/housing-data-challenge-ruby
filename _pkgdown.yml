@@ -1,0 +1,62 @@
+navbar:
+  structure:
+    left:
+    - home
+    - intro
+    - reference
+    - articles
+    - tutorials
+    - news
+    right: github
+  components:
+    home:
+      icon: fa-home fa-lg
+      href: index.html
+    reference:
+      text: Reference
+      href: reference/index.html
+    articles:
+      text: Articles
+      menu:
+      - text: Getting Census data
+        href: articles/getting-census-data.html
+      - text: Getting Property Transfer Tax data
+        href: articles/getting-ptt-data.html
+    github:
+      icon: fa-github fa-lg
+      href: https://github.com/bcgov/housing-data-challenge-ruby
+
+reference:
+  - title: App helpers
+    desc: Functions used within the Shiny app.
+    contents:
+    - '`app_server`'
+    - '`app_ui`'
+    - '`run_app`'
+    - '`Jumbotron`'
+    - '`PlotlyChartAnnotation`'
+    - '`PlotlyChartTitle`'
+    - '`ValueBox`'
+  - title: Datasets
+    desc: Datasets used within Shiny app.
+    contents:
+    - '`ptt_dr_sf`'
+    - '`ptt_mun_sf`'
+    - '`ptt_prov_dash`'
+    - '`ptt_rd_sf`'
+  - title: Boundaries
+    desc: Boudaries (shape files) used in Shiny app for mapping the PTT data.
+    contents:
+    - '`shapes_dr`'
+    - '`shapes_mun`'
+    - '`shapes_rd`'
+  - title: Getting data
+    desc: Functions used in scripts that generate the app datasets from raw data.
+    contents:
+    - '`AddTransactionPeriodColumns`'
+    - '`GetJoinedPp`'
+    - '`JoinPttShapes`'
+    - '`SplitBySeparator`'
+    - '`WranglePttData`'
+    - '`WrangleShapeFiles`'
+

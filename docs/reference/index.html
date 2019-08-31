@@ -8,11 +8,13 @@
 
 <title>Function reference • bchousing</title>
 
+
 <!-- jquery -->
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.3.1/jquery.min.js" integrity="sha256-FgpCb/KJQlLNfOu91ta32o/NMZxltwRo8QtmkMRdAu8=" crossorigin="anonymous"></script>
 <!-- Bootstrap -->
 
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/twitter-bootstrap/3.3.7/css/bootstrap.min.css" integrity="sha256-916EbMg70RQy9LHiGkXzG8hSg9EdNy97GazNG/aiY1w=" crossorigin="anonymous" />
+
 <script src="https://cdnjs.cloudflare.com/ajax/libs/twitter-bootstrap/3.3.7/js/bootstrap.min.js" integrity="sha256-U5ZEeKfGNOja007MMD3YBI0A3OSZOQbeG6z2f2Y0hu8=" crossorigin="anonymous"></script>
 
 <!-- Font Awesome icons -->
@@ -30,7 +32,9 @@
 
 
 
+
 <meta property="og:title" content="Function reference" />
+
 
 
 
@@ -91,7 +95,6 @@
   </ul>
 </li>
       </ul>
-      
       <ul class="nav navbar-nav navbar-right">
         <li>
   <a href="https://github.com/bcgov/housing-data-challenge-ruby">
@@ -125,28 +128,28 @@
     <tbody>
       <tr>
         <th colspan="2">
-          <h2 id="section-all-functions" class="hasAnchor"><a href="#section-all-functions" class="anchor"></a>All functions</h2>
-          <p class="section-desc"></p>
+          <h2 id="section-app-helpers" class="hasAnchor"><a href="#section-app-helpers" class="anchor"></a>App helpers</h2>
+          <p class="section-desc"><p>Functions used within the Shiny app.</p></p>
         </th>
       </tr>
       <tr>
         
         <td>
-          <p><code><a href="AddTransactionPeriodColumns.html">AddTransactionPeriodColumns()</a></code> </p>
+          <p><code><a href="app_server.html">app_server()</a></code> </p>
         </td>
-        <td><p>Add Transaction Period Columns</p></td>
+        <td><p>Shiny server function</p></td>
       </tr><tr>
         
         <td>
-          <p><code><a href="GetJoinedPp.html">GetJoinedPp()</a></code> </p>
+          <p><code><a href="app_ui.html">app_ui()</a></code> </p>
         </td>
-        <td><p>Population Pyramid data</p></td>
+        <td><p>Shiny UI function</p></td>
       </tr><tr>
         
         <td>
-          <p><code><a href="JoinPttShapes.html">JoinPttShapes()</a></code> </p>
+          <p><code><a href="run_app.html">run_app()</a></code> </p>
         </td>
-        <td><p>Join PTT and Shape files</p></td>
+        <td><p>Run the Shiny Application</p></td>
       </tr><tr>
         
         <td>
@@ -168,34 +171,18 @@
       </tr><tr>
         
         <td>
-          <p><code><a href="SplitBySeparator.html">SplitBySeparator()</a></code> </p>
+          <p><code><a href="ValueBox.html">ValueBox()</a></code> </p>
         </td>
-        <td><p>Split string by a separator</p></td>
-      </tr><tr>
-        
-        <td>
-          <p><code><a href="WranglePttData.html">WranglePttData()</a></code> </p>
-        </td>
-        <td><p>Wrangles PTT data</p></td>
-      </tr><tr>
-        
-        <td>
-          <p><code><a href="WrangleShapeFiles.html">WrangleShapeFiles()</a></code> </p>
-        </td>
-        <td><p>Wrangle Shape files</p></td>
-      </tr><tr>
-        
-        <td>
-          <p><code><a href="app_server.html">app_server()</a></code> </p>
-        </td>
-        <td><p>Shiny server function</p></td>
-      </tr><tr>
-        
-        <td>
-          <p><code><a href="app_ui.html">app_ui()</a></code> </p>
-        </td>
-        <td><p>Shiny UI function</p></td>
-      </tr><tr>
+        <td><p>Dashboard-style value box</p></td>
+      </tr>
+    </tbody><tbody>
+      <tr>
+        <th colspan="2">
+          <h2 id="section-datasets" class="hasAnchor"><a href="#section-datasets" class="anchor"></a>Datasets</h2>
+          <p class="section-desc"><p>Datasets used within Shiny app.</p></p>
+        </th>
+      </tr>
+      <tr>
         
         <td>
           <p><code><a href="ptt_dr_sf.html">ptt_dr_sf</a></code> </p>
@@ -219,13 +206,15 @@
           <p><code><a href="ptt_rd_sf.html">ptt_rd_sf</a></code> </p>
         </td>
         <td><p>PTT Regional District-level</p></td>
-      </tr><tr>
-        
-        <td>
-          <p><code><a href="run_app.html">run_app()</a></code> </p>
-        </td>
-        <td><p>Run the Shiny Application</p></td>
-      </tr><tr>
+      </tr>
+    </tbody><tbody>
+      <tr>
+        <th colspan="2">
+          <h2 id="section-boundaries" class="hasAnchor"><a href="#section-boundaries" class="anchor"></a>Boundaries</h2>
+          <p class="section-desc"><p>Boudaries (shape files) used in Shiny app for mapping the PTT data.</p></p>
+        </th>
+      </tr>
+      <tr>
         
         <td>
           <p><code><a href="shapes_dr.html">shapes_dr</a></code> </p>
@@ -244,6 +233,50 @@
         </td>
         <td><p>PTT boundaries - Regional District-level</p></td>
       </tr>
+    </tbody><tbody>
+      <tr>
+        <th colspan="2">
+          <h2 id="section-getting-data" class="hasAnchor"><a href="#section-getting-data" class="anchor"></a>Getting data</h2>
+          <p class="section-desc"><p>Functions used in scripts that generate the app datasets from raw data.</p></p>
+        </th>
+      </tr>
+      <tr>
+        
+        <td>
+          <p><code><a href="AddTransactionPeriodColumns.html">AddTransactionPeriodColumns()</a></code> </p>
+        </td>
+        <td><p>Add Transaction Period Columns</p></td>
+      </tr><tr>
+        
+        <td>
+          <p><code><a href="GetJoinedPp.html">GetJoinedPp()</a></code> </p>
+        </td>
+        <td><p>Population Pyramid data</p></td>
+      </tr><tr>
+        
+        <td>
+          <p><code><a href="JoinPttShapes.html">JoinPttShapes()</a></code> </p>
+        </td>
+        <td><p>Join PTT and Shape files</p></td>
+      </tr><tr>
+        
+        <td>
+          <p><code><a href="SplitBySeparator.html">SplitBySeparator()</a></code> </p>
+        </td>
+        <td><p>Split string by a separator</p></td>
+      </tr><tr>
+        
+        <td>
+          <p><code><a href="WranglePttData.html">WranglePttData()</a></code> </p>
+        </td>
+        <td><p>Wrangles PTT data</p></td>
+      </tr><tr>
+        
+        <td>
+          <p><code><a href="WrangleShapeFiles.html">WrangleShapeFiles()</a></code> </p>
+        </td>
+        <td><p>Wrangle Shape files</p></td>
+      </tr>
     </tbody>
     </table>
   </div>
@@ -251,7 +284,10 @@
   <div class="col-md-3 hidden-xs hidden-sm" id="sidebar">
     <h2>Contents</h2>
     <ul class="nav nav-pills nav-stacked">
-      <li><a href="#section-all-functions">All functions</a></li>
+      <li><a href="#section-app-helpers">App helpers</a></li>
+      <li><a href="#section-datasets">Datasets</a></li>
+      <li><a href="#section-boundaries">Boundaries</a></li>
+      <li><a href="#section-getting-data">Getting data</a></li>
     </ul>
   </div>
 </div>

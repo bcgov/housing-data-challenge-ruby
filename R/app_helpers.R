@@ -312,7 +312,7 @@ PlotlyChartAnnotation <- function(annotation_text) {
 #'
 #' @export
 #'
-valueBox <- function(value, subtitle = '', location = '') {
+ValueBox <- function(value, subtitle = '', location = '') {
   div(
     class = "panel fmv_dash",
     div(
