@@ -360,11 +360,11 @@ app_server <- function(input, output, session) {
         name = "Residential FMV",
         type = 'scatter',
         mode = 'markers+lines',
-        line = list(color = colCanadian),
+        line = list(color = colRecreational),
         marker = list(
           opacity = 0.75,
           size = 5,
-          color = colForeign
+          color = colRecreational
         ), fill = 'tozeroy', fillcolor = 'rgba(158, 202, 225, 0.25)'
     ) %>%
       add_trace(
@@ -372,11 +372,11 @@ app_server <- function(input, output, session) {
         name = "Residential FMV Foreign",
         type = 'scatter',
         mode = 'markers+lines',
-        line = list(color = colForeign),
+        line = list(color = colFarms),
         marker = list(
           opacity = 0.75,
           size = 5,
-          color = colForeign
+          color = colFarms
         ), fill = 'tozeroy', fillcolor = 'rgba(158, 202, 225, 0.25)'
       # ) %>%
       # add_trace(
