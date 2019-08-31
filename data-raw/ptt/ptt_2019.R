@@ -6,11 +6,20 @@ library(bcdata)
 library(bchousing)
 library(sf)
 
-# 02. Discover data in Open Data Catalogue
+# Set to TRUE after initial discovery. It saves the data as .rds files into /data-raw dir
+# so that they are not downloaded each time while doing dev work with the script.
+# Set to FALSE when new data needs to be retrieved from the BC Data Catalogue.
+use_cached_data = TRUE
+
+# 02. Discover data in BC Open Data Catalogue ----
 # bcdata::bcdc_search("property transfer tax 2019")
 ptt2019_record_id <- 'b35d45d1-e468-4aec-b8af-e1c1cb24bc07'
 # bcdata::bcdc_get_data(ptt2019_record_id)
 
+# ****************************
+# RELEVANT DATASETS DISCOVERED
+# ****************************
+#
 # 7) PROVINCIAL_MONTHLY_2019
 # format: csv
 # url: https://catalogue.data.gov.bc.ca/dataset/b35d45d1-e468-4aec-b8af-e1c1cb24bc07/resource/622b9cf1-6278-419d-94a1-986da85b27fe/download/provincial_monthly_2019.csv
@@ -35,8 +44,8 @@ ptt2019_record_id <- 'b35d45d1-e468-4aec-b8af-e1c1cb24bc07'
 # resource: 75ed8fec-f7ff-4d74-9257-fe36f697de8f
 # code: bcdc_get_data(record = 'b35d45d1-e468-4aec-b8af-e1c1cb24bc07', resource = '75ed8fec-f7ff-4d74-9257-fe36f697de8f')
 
-# 02. Get data from Open Data Catalogue ----
-if (file.exists("data-raw/ptt_pr_2019.rds")) {
+# 03. Get data from Open Data Catalogue ----
+if (use_cached_data == TRUE & file.exists("data-raw/ptt_pr_2019.rds")) {
   ptt_pr_bcdc <- readRDS("data-raw/ptt_pr_2019.rds")
 } else {
   ptt_pr_bcdc <- bcdata::bcdc_get_data(
@@ -47,7 +56,7 @@ if (file.exists("data-raw/ptt_pr_2019.rds")) {
   saveRDS(ptt_pr_bcdc, "data-raw/ptt_pr_2019.rds")
 }
 
-if (file.exists("data-raw/ptt_dr_2019.rds")) {
+if (use_cached_data == TRUE & file.exists("data-raw/ptt_dr_2019.rds")) {
   ptt_dr_bcdc <- readRDS("data-raw/ptt_dr_2019.rds")
 } else {
   ptt_dr_bcdc <- bcdata::bcdc_get_data(
@@ -58,7 +67,7 @@ if (file.exists("data-raw/ptt_dr_2019.rds")) {
   saveRDS(ptt_dr_bcdc, "data-raw/ptt_dr_2019.rds")
 }
 
-if (file.exists("data-raw/ptt_rd_2019.rds")) {
+if (use_cached_data == TRUE & file.exists("data-raw/ptt_rd_2019.rds")) {
   ptt_rd_bcdc <- readRDS("data-raw/ptt_rd_2019.rds")
 } else {
   ptt_rd_bcdc <- bcdata::bcdc_get_data(
@@ -69,7 +78,7 @@ if (file.exists("data-raw/ptt_rd_2019.rds")) {
   saveRDS(ptt_rd_bcdc, "data-raw/ptt_rd_2019.rds")
 }
 
-if (file.exists("data-raw/ptt_mn_2019.rds")) {
+if (use_cached_data == TRUE & file.exists("data-raw/ptt_mn_2019.rds")) {
   ptt_mn_bcdc <- readRDS("data-raw/ptt_mn_2019.rds")
 } else {
   ptt_mn_bcdc <- bcdata::bcdc_get_data(
@@ -81,12 +90,13 @@ if (file.exists("data-raw/ptt_mn_2019.rds")) {
   saveRDS(ptt_mn_bcdc, "data-raw/ptt_mn_2019.rds")
 }
 
-# 03. Wrangle PTT data ----
+# 04. Wrangle PTT data ----
 ptt_pr_2019 <- ptt_pr_bcdc %>% bchousing::WranglePttData()
 ptt_dr_2019 <- ptt_dr_bcdc %>% bchousing::WranglePttData(calculate_percentages = FALSE)
 ptt_rd_2019 <- ptt_rd_bcdc %>% bchousing::WranglePttData(calculate_percentages = FALSE, region_name_split = TRUE)
 ptt_mn_2019 <- ptt_mn_bcdc %>% bchousing::WranglePttData(calculate_percentages = FALSE, region_name_split = TRUE)
 
+# 05. Define functions to align past and current data before joining ----
 FixPastData <- function(data, name_column) {
   data <- data %>%
     select(-c(GeoUID, PRUID, PRNAME)) %>%
@@ -140,12 +150,12 @@ FixCurrentData <- function(data) {
   return(data)
 }
 
-# Fix past data
+#  06. Fix past data ----
 ptt_dr_past <- FixPastData(ptt_dr_sf, name_column = 'DevelopmentRegion')
 ptt_rd_past <- FixPastData(ptt_rd_sf, name_column = 'RegionalDistrict')
 ptt_mn_past <- FixPastData(ptt_mun_sf, name_column = 'Municipality')
 
-# Fix current data
+# 07. Fix current data ----
 ptt_dr_2019 <- FixCurrentData(ptt_dr_2019)
 ptt_rd_2019 <- FixCurrentData(ptt_rd_2019) %>%
   mutate(
@@ -156,7 +166,7 @@ ptt_rd_2019 <- FixCurrentData(ptt_rd_2019) %>%
   )
 ptt_mn_2019 <- FixCurrentData(ptt_mn_2019)
 
-# Join past and current data
+# 08. Join past and current data ----
 ptt_dr_j <- full_join(ptt_dr_past, ptt_dr_2019)
 ptt_rd_j <- full_join(ptt_rd_past, ptt_rd_2019)
 ptt_mn_j <- full_join(ptt_mn_past, ptt_mn_2019)
@@ -188,7 +198,27 @@ ptt_mn_j <- full_join(ptt_mn_past, ptt_mn_2019)
 # ptt_mun_ps <- ptt_mun_ps %>%
 #   distinct(DevelopmentRegion, RegionalDistrict, GeoName)
 
-# 05. Set up dashboard data ----
+
+# 09. Add geometries ----
+ptt_dr_sf <- JoinPttShapes(
+    ptt_data = ptt_dr_j,
+    shapes = shapes_dr,
+    geo_name = "DevelopmentRegion"
+  )
+
+ptt_rd_sf <- JoinPttShapes(
+    ptt_data = ptt_rd_j,
+    shapes = shapes_rd,
+    geo_name = "RegionalDistrict"
+  )
+
+ptt_mun_sf <- JoinPttShapes(
+    ptt_data = ptt_mn_j,
+    shapes = shapes_mun,
+    geo_name = "Municipality"
+  )
+
+# 10. Set up dashboard data ----
 # Last month for which PTT data is available
 max_trans_period <- max(ptt_pr_2019$trans_period)
 
@@ -205,36 +235,8 @@ ptt_prov_dash <- ptt_pr_2019 %>%
     sum_FMV_foreign_perc = perc_FMV_foreign_res
   )
 
-
-# 06. Add geometries back ----
-ptt_dr_sf <- JoinPttShapes(
-    ptt_data = ptt_dr_j,
-    shapes = shapes_dr,
-    geo_name = "DevelopmentRegion"
-  # ) %>%
-  # mutate_if(
-  #   is.nan, list(~na_if(., NA))
-  )
-
-ptt_rd_sf <- JoinPttShapes(
-    ptt_data = ptt_rd_j,
-    shapes = shapes_rd,
-    geo_name = "RegionalDistrict"
-  )
-
-ptt_mun_sf <- JoinPttShapes(
-    ptt_data = ptt_mn_j,
-    shapes = shapes_mun,
-    geo_name = "Municipality"
-  )
-
-# ptt_rd_sf_2019 <- JoinPttShapes(ptt_data = ptt_rd_j, shapes = shapes_rd, geo_name = "RegionalDistrict")
-# ptt_mn_sf_2019 <- JoinPttShapes(ptt_data = ptt_mn_j, shapes = shapes_mun, geo_name = "Municipality")
-
-
-# 07. Save .rda files into data directory ----
+# 11. Save .rda files into data directory ----
 usethis::use_data(ptt_dr_sf, overwrite = TRUE, compress = "gzip")
 usethis::use_data(ptt_rd_sf, overwrite = TRUE, compress = "gzip")
 usethis::use_data(ptt_mun_sf, overwrite = TRUE, compress = "gzip")
 usethis::use_data(ptt_prov_dash, overwrite = TRUE)
-
