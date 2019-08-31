@@ -97,6 +97,8 @@ app_server <- function(input, output, session) {
   colC16 <- colCanadian <- "#E39398"
   colC11 <- colForeign <- "#9ecae1"
 
+  FormatCurrency <- scales::dollar_format()
+
   # Selection of metrics, variables and options ----
   selectionMetricsDF <- data.frame(
     value =
@@ -177,7 +179,7 @@ app_server <- function(input, output, session) {
     return(locationLabel)
   })
 
-  # This observer is responsible for PTT related data and charts.
+  # PTT observer (view, period, variable) ----
   observe({
     pt_view <- input$pt_view
     pt_trans_period <- input$pt_trans_period
@@ -189,6 +191,7 @@ app_server <- function(input, output, session) {
 
     pal <- colorNumeric("GnBu", ptDataPeriod()[[pt_metric]])
 
+    # 01.1 - PTT Leaflet ----
     output$mapPtt <- leaflet::renderLeaflet({
       leaflet::leaflet() %>%
         setView(lng = -123.2, lat = 52.7, zoom = 5) %>%
@@ -197,7 +200,7 @@ app_server <- function(input, output, session) {
           data = ptDataPeriod(),
           stroke = TRUE,
           weight = 1,
-          fillOpacity = 0.5,
+          fillOpacity = 0.65,
           smoothFactor = 0.2,
           color = '#333',
           layerId = ptDataPeriod()$GeoUID,
@@ -209,7 +212,7 @@ app_server <- function(input, output, session) {
             "</strong>",
             "<table class=\"leaflet-popup-table\">
           <tr><td>Period</td><td>",
-            as.Date(ptDataPeriod()$trans_period),
+            ptDataPeriod()$trans_period_label,
             "</td></tr><tr><td>Number of transactions</td><td>",
             format(ptDataPeriod()$tot_mkt_trans, big.mark = ",", scientific=FALSE),
             "</td></tr><tr><td>Number of foreign transactions</td><td>",
@@ -217,15 +220,15 @@ app_server <- function(input, output, session) {
             "</td></tr><tr><td>Number % by foreign purchasers</td><td>",
             format(ptDataPeriod()$no_foreign_perc, big.mark = ",", scientific=FALSE),
             "</td></tr><tr><td>Total value</td><td>",
-            paste0("$", format(ptDataPeriod()$sum_FMV, big.mark = ",", scientific=FALSE)),
+            FormatCurrency(ptDataPeriod()$sum_FMV),
             "</td></tr><tr><td>Total value by foreign purchasers</td><td>",
-            paste0("$", format(ptDataPeriod()$sum_FMV_foreign, big.mark = ",", scientific=FALSE)),
+            FormatCurrency(ptDataPeriod()$sum_FMV_foreign),
             "</td></tr><tr><td>Value % by foreign purchasers</td><td>",
             format(ptDataPeriod()$sum_FMV_foreign_perc, big.mark = ",", scientific=FALSE),
             "</td></tr><tr><td>PTT Paid</td><td>",
-            paste0("$", format(ptDataPeriod()$sum_PPT_paid, big.mark = ",", scientific=FALSE)),
+            FormatCurrency(ptDataPeriod()$sum_PPT_paid),
             "</td></tr><tr><td>Additional Tax Paid</td><td>",
-            paste0("$", format(ptDataPeriod()$add_tax_paid, big.mark = ",", scientific=FALSE)),
+            FormatCurrency(ptDataPeriod()$add_tax_paid),
             "</td></tr></table>"
           ),
           highlight = highlightOptions(
@@ -246,8 +249,11 @@ app_server <- function(input, output, session) {
     })
   })
 
+  # 01.2 - PTT dashboard widgets values ----
   output$fmv_perc_month <- renderText({
-    ptt_data_location_period() %>% dplyr::pull(trans_period_label)
+    # browser()
+    label <- ptt_data_location_period() %>% dplyr::pull(trans_period_label)
+    return(label)
   })
   output$fmv_perc_loc <- renderText({
     ptt_data_location_period() %>% dplyr::pull(GeoName)
@@ -321,7 +327,7 @@ app_server <- function(input, output, session) {
     ptt_data_location_period() %>% dplyr::pull(no_other_res)
   })
 
-  # Monthly Overview - FMV (Fair Market Value)
+  # 01.3 - FMV ----
   output$pt_mothly_fmv <- plotly::renderPlotly({
     plotly::plot_ly(
       ptt_data_location(),
@@ -409,7 +415,7 @@ app_server <- function(input, output, session) {
       )
   })
 
-  # Monthly Overview - Average and Median FMV
+  # 01.4 - Mean FMV ----
   output$pt_mothly_mnd_fmv <- plotly::renderPlotly({
     plotly::plot_ly(
       ptt_data_location(),
@@ -480,7 +486,7 @@ app_server <- function(input, output, session) {
       )
   })
 
-  # Monthly Overview - Property Transfer Tax
+  # 01.5 - PTT paid ----
   output$pt_mothly_ptt <- plotly::renderPlotly({
     plotly::plot_ly(
       ptt_data_location(),
@@ -521,7 +527,7 @@ app_server <- function(input, output, session) {
       )
   })
 
-  # Monthly Overview - Number of market transactions
+  # 01.6 - Number of market transactions ----
   output$pt_mothly <- plotly::renderPlotly({
     plotly::plot_ly(
       ptt_data_location(),
@@ -567,7 +573,7 @@ app_server <- function(input, output, session) {
       )
   })
 
-  # Monthly Overview - Number of market transactions - Residential
+  # 01.7 - Residential ----
   output$pt_mothly_res <- plotly::renderPlotly({
     plotly::plot_ly(
       ptt_data_location(),
@@ -613,7 +619,7 @@ app_server <- function(input, output, session) {
       )
   })
 
-  # Monthly Overview - Number of market transactions - Commercial
+  # 01.8 - Commercial ----
   output$pt_mothly_comm <- plotly::renderPlotly({
     plotly::plot_ly(
       ptt_data_location(),
@@ -649,7 +655,7 @@ app_server <- function(input, output, session) {
       )
   })
 
-  # Map region click observer
+  # 01.9 - PTT Map region click observer ----
   observeEvent(input$mapPtt_shape_click, {
     m <- input$mapPtt_shape_click
     if(!is.null(m$id)){
@@ -849,7 +855,7 @@ app_server <- function(input, output, session) {
   )
 
   #
-  # Census observer
+  # Census location observer ----
   #
   observe({
     # Reset location
@@ -928,6 +934,7 @@ app_server <- function(input, output, session) {
       domain = censusStir$percent_more_than_30, n = 10
     )
 
+    # 02.1 - Census Leaflet ----
     # Redraw polygons when geo-level or housing type selection changes
     output$mapCensus <- leaflet::renderLeaflet({
       leaflet::leaflet() %>%
@@ -1030,7 +1037,7 @@ app_server <- function(input, output, session) {
     })
     outputOptions(output, "mapCensus", suspendWhenHidden = FALSE)
 
-    # Map layers click observer
+    # 02.2 - Map layers click observer ----
     observeEvent(input$mapCensus_groups, {
       selectedGroup <- input$mapCensus_groups
 
@@ -1067,7 +1074,7 @@ app_server <- function(input, output, session) {
       }
     })
 
-    # Housing Types treemap
+    # 02.3 - Housing Types treemap ----
     # Have to drop geometry, i.e. convert sf to df to use in treemap
     housingTypesDf <- housingTypes
     sf::st_geometry(housingTypesDf) <- NULL
@@ -1118,7 +1125,7 @@ app_server <- function(input, output, session) {
     })
 
     #
-    # Mobility sunburst chart
+    # 02.4 - Mobility sunburst chart ----
     #
     # Have to drop geometry, i.e. convert sf to df to use in treemap
     censusMobilityDf <- censusMobilityGathered
@@ -1152,7 +1159,7 @@ app_server <- function(input, output, session) {
     })
 
     #
-    # Population Pyramid
+    # 02.5 - Population Pyramid ----
     #
     output$popPyr <- plotly::renderPlotly({
       p <- plotly::plot_ly(
@@ -1220,7 +1227,7 @@ app_server <- function(input, output, session) {
         )
     })
 
-    # STIR Stacked Bar
+    # 02.6 - STIR Stacked Bar ----
     topLabels <- c('More than 30%', 'Less than 30%')
     labelPositions <- c(
       censusStir()[1,"percent_more_than_30"]$percent_more_than_30 / 2,
@@ -1293,12 +1300,12 @@ app_server <- function(input, output, session) {
     )
   })
 
-  # Map region click observer
+  # 02.7 - Census Map region click observer ----
   observeEvent(input$mapCensus_shape_click, priority = 1, {
     m <- input$mapCensus_shape_click
     if (!is.null(m$id)) {
       id <- str_split(m$id, "-", simplify = TRUE)
-      locationId = id[1,2]
+      locationId = id[1, 2]
 
       updateTextInput(session, "c_location", value = locationId)
 
@@ -1314,5 +1321,4 @@ app_server <- function(input, output, session) {
   observeEvent(input$mapCensus_click, {
     m <- input$mapCensus_click
   })
-
 }

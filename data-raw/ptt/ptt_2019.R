@@ -87,12 +87,10 @@ ptt_dr_2019 <- ptt_dr_bcdc %>% bchousing::WranglePttData(calculate_percentages =
 ptt_rd_2019 <- ptt_rd_bcdc %>% bchousing::WranglePttData(calculate_percentages = FALSE, region_name_split = TRUE)
 ptt_mn_2019 <- ptt_mn_bcdc %>% bchousing::WranglePttData(calculate_percentages = FALSE, region_name_split = TRUE)
 
-c <- as_tibble(colnames(ptt_dr_2019))
-
-FixPastData <- function(data) {
+FixPastData <- function(data, name_column) {
   data <- data %>%
     select(-c(GeoUID, PRUID, PRNAME)) %>%
-    rename(DevelopmentRegion = GeoName) %>%
+    rename(!!name_column := GeoName) %>%
     mutate(
       n_tot_corp_tran = as.numeric(NA),
       n_tot_indv_tran = as.numeric(NA),
@@ -113,8 +111,9 @@ FixPastData <- function(data) {
       n_lt1M_foreign_res = as.numeric(NA),
       n_gt1M_foreign_res = as.numeric(NA),
       n_gt3M_foreign_res = as.numeric(NA)
-    )
-  st_geometry(data) <- NULL
+    ) %>%
+  mutate_if(is.numeric, list(~na_if(., "NaN")))
+  sf::st_geometry(data) <- NULL
   return(data)
 }
 
@@ -136,68 +135,37 @@ FixCurrentData <- function(data) {
       n_res_strata_other = as.numeric(NA),
       no_foreign_perc = 0,
       sum_FMV_foreign_perc = 0
-    )
+    ) %>%
+    mutate_if(is.numeric, list(~na_if(., "NaN")))
   return(data)
 }
 
 # Fix past data
-ptt_dr_past <- ptt_dr_sf %>%
-  select(-c(GeoUID, PRUID, PRNAME)) %>%
-  rename(DevelopmentRegion = GeoName) %>%
-  mutate(
-    n_tot_corp_tran = as.numeric(NA),
-    n_tot_indv_tran = as.numeric(NA),
-    n_res_strata_rental = as.numeric(NA),
-    n_res_unkn = as.numeric(NA),
-    n_comm_industry = as.numeric(NA),
-    n_comm_util = as.numeric(NA),
-    n_comm_unkn = as.numeric(NA),
-    n_forest_tran = as.numeric(NA),
-    n_foreign_comm = as.numeric(NA),
-    n_foreign_oth_unk = as.numeric(NA),
-    n_foreign_corp_tran = as.numeric(NA),
-    n_foreign_indv_tran = as.numeric(NA),
-    perc_n_foreign_res = as.numeric(NA),
-    perc_FMV_foreign_res = as.numeric(NA),
-    sum_invest_foreign_res = as.numeric(NA),
-    perc_invest_foreign_res = as.numeric(NA),
-    n_lt1M_foreign_res = as.numeric(NA),
-    n_gt1M_foreign_res = as.numeric(NA),
-    n_gt3M_foreign_res = as.numeric(NA)
-  )
-st_geometry(ptt_dr_past) <- NULL
+ptt_dr_past <- FixPastData(ptt_dr_sf, name_column = 'DevelopmentRegion')
+ptt_rd_past <- FixPastData(ptt_rd_sf, name_column = 'RegionalDistrict')
+ptt_mn_past <- FixPastData(ptt_mun_sf, name_column = 'Municipality')
 
-
-ptt_dr_2019 <- ptt_dr_2019 %>%
-  rename(
-    'no_res_trans' = 'n_res_trans',
-    'n_res_1fam_dwelling' = 'n_res_1fam',
-
-  ) %>%
-  mutate(
-    n_res_other = n_res_strata_rental + n_res_unkn,
-    n_comm_other = n_comm_industry + n_comm_util + n_comm_unkn,
-    n_foreign_nonres = n_foreign_comm + n_foreign_oth_unk,
-    n_res_1fam_suite = as.numeric(NA),
-    n_res_1fam_vacant_res = as.numeric(NA),
-    n_res_1fam_other = as.numeric(NA),
-    n_res_strata_row = as.numeric(NA),
-    n_res_strata_other = as.numeric(NA),
-    no_foreign_perc = 0,
-    sum_FMV_foreign_perc = 0
-  )
-
-ptt_dr_past <- FixPastData(ptt_dr_sf)
-ptt_rd_past <- FixPastData(ptt_rd_sf)
-ptt_mn_past <- FixPastData(ptt_mun_sf)
-
+# Fix current data
 ptt_dr_2019 <- FixCurrentData(ptt_dr_2019)
-ptt_rd_2019 <- FixCurrentData(ptt_rd_2019)
+ptt_rd_2019 <- FixCurrentData(ptt_rd_2019) %>%
+  mutate(
+    RegionalDistrict = as.character(RegionalDistrict),
+    # RegionalDistrict = dplyr::if_else(RegionalDistrict == 'Mount Waddington', 'Central Coast-Mount Waddington', RegionalDistrict),
+    RegionalDistrict = dplyr::if_else(RegionalDistrict == 'Powell River', 'qathet', RegionalDistrict),
+    RegionalDistrict = dplyr::if_else(RegionalDistrict == 'Qathet', 'qathet', RegionalDistrict)
+  )
 ptt_mn_2019 <- FixCurrentData(ptt_mn_2019)
 
+# Join past and current data
 ptt_dr_j <- full_join(ptt_dr_past, ptt_dr_2019)
 ptt_rd_j <- full_join(ptt_rd_past, ptt_rd_2019)
 ptt_mn_j <- full_join(ptt_mn_past, ptt_mn_2019)
+
+# ptt_rd_j <- ptt_rd_j %>%
+#   mutate(
+#     RegionalDistrict = dplyr::if_else(RegionalDistrict == 'Mount Waddington', 'Central Coast-Mount Waddington', RegionalDistrict),
+#     RegionalDistrict = dplyr::if_else(RegionalDistrict == 'Powell River', 'qathet', RegionalDistrict)
+#   )
 
 # Examine values of Municipality name and shape Municipality for records that match and can be joined
 # Shapes, not PTT
@@ -246,36 +214,18 @@ ptt_dr_sf <- JoinPttShapes(
   # ) %>%
   # mutate_if(
   #   is.nan, list(~na_if(., NA))
-  ) %>%
-  mutate(
-    GeoUID = forcats::as_factor(GeoUID),
-    GeoName = forcats::as_factor(GeoName),
-    PRUID = forcats::as_factor(PRUID),
-    PRNAME = forcats::as_factor(PRNAME)
   )
 
 ptt_rd_sf <- JoinPttShapes(
     ptt_data = ptt_rd_j,
     shapes = shapes_rd,
     geo_name = "RegionalDistrict"
-  ) %>%
-  mutate(
-    GeoUID = forcats::as_factor(GeoUID),
-    GeoName = forcats::as_factor(GeoName),
-    PRUID = forcats::as_factor(PRUID),
-    PRNAME = forcats::as_factor(PRNAME)
   )
 
 ptt_mun_sf <- JoinPttShapes(
     ptt_data = ptt_mn_j,
     shapes = shapes_mun,
     geo_name = "Municipality"
-  ) %>%
-  mutate(
-    GeoUID = forcats::as_factor(GeoUID),
-    GeoName = forcats::as_factor(GeoName),
-    PRUID = forcats::as_factor(PRUID),
-    PRNAME = forcats::as_factor(PRNAME)
   )
 
 # ptt_rd_sf_2019 <- JoinPttShapes(ptt_data = ptt_rd_j, shapes = shapes_rd, geo_name = "RegionalDistrict")
@@ -283,8 +233,8 @@ ptt_mun_sf <- JoinPttShapes(
 
 
 # 07. Save .rda files into data directory ----
-# usethis::use_data(ptt_dr_sf, overwrite = TRUE, compress = "gzip")
-# usethis::use_data(ptt_rd_sf, overwrite = TRUE, compress = "gzip")
-# usethis::use_data(ptt_mun_sf, overwrite = TRUE, compress = "gzip")
+usethis::use_data(ptt_dr_sf, overwrite = TRUE, compress = "gzip")
+usethis::use_data(ptt_rd_sf, overwrite = TRUE, compress = "gzip")
+usethis::use_data(ptt_mun_sf, overwrite = TRUE, compress = "gzip")
 usethis::use_data(ptt_prov_dash, overwrite = TRUE)
 

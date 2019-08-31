@@ -59,6 +59,7 @@ AddTransactionPeriodColumns <- function(data) {
 #'              of region names, etc.
 #'
 #' @importFrom dplyr filter
+#' @importFrom dplyr if_else
 #' @importFrom dplyr mutate
 #' @importFrom dplyr select
 #' @importFrom forcats as_factor
@@ -88,10 +89,10 @@ WranglePttData <- function(data, calculate_percentages = FALSE, region_name_spli
       dplyr::mutate(
         # Transform region names to Title Case
         DevelopmentRegion = stringr::str_to_title(DevelopmentRegion)
-      ) %>%
-      dplyr::mutate(
-        # Convert to factor
-        DevelopmentRegion = forcats::as_factor(DevelopmentRegion)
+      # ) %>%
+      # dplyr::mutate(
+      #   # Convert to factor
+      #   DevelopmentRegion = forcats::as_factor(DevelopmentRegion)
       )
   }
 
@@ -101,7 +102,8 @@ WranglePttData <- function(data, calculate_percentages = FALSE, region_name_spli
     if (region_name_split) {
       data <- data %>%
         dplyr::mutate(
-          RegionalDistrict = SplitBySeparator(RegionalDistrict, sep = ' - ', export_part = 2)
+          RegionalDistrict = SplitBySeparator(RegionalDistrict, sep = ' - ', export_part = 2),
+          RegionalDistrict = dplyr::if_else(stringr::str_to_title(RegionalDistrict) == 'Powell River', 'qathet', RegionalDistrict)
         )
     }
 
@@ -112,10 +114,10 @@ WranglePttData <- function(data, calculate_percentages = FALSE, region_name_spli
       )
 
     # Convert to factor
-    data <- data %>%
-      dplyr::mutate(
-        RegionalDistrict = forcats::as_factor(RegionalDistrict)
-      )
+    # data <- data %>%
+    #   dplyr::mutate(
+    #     RegionalDistrict = forcats::as_factor(RegionalDistrict)
+    #   )
   }
 
   if ('Municipality' %in% cols) {
@@ -139,10 +141,10 @@ WranglePttData <- function(data, calculate_percentages = FALSE, region_name_spli
     }
 
     # Convert to factor
-    data <- data %>%
-      dplyr::mutate(
-        Municipality = forcats::as_factor(Municipality)
-      )
+    # data <- data %>%
+    #   dplyr::mutate(
+    #     Municipality = forcats::as_factor(Municipality)
+    #   )
   }
 
   data <- data %>%
@@ -245,13 +247,14 @@ WrangleShapeFiles <- function(data, id_column, name_column, pr_uid = 59) {
           # Align region names for joining to PTT files
           GeoName = stringr::str_replace(GeoName, 'Kootenay Boundary', 'Kootenay-Boundary'),
           GeoName = dplyr::if_else(GeoName == 'Greater Vancouver', 'Metro Vancouver', GeoName),
-          GeoName = dplyr::if_else(GeoName == 'Central Coast', 'Central Coast-Mount Waddington', GeoName),
-          GeoName = dplyr::if_else(GeoName == 'Stikine', 'Rest Of Province', GeoName),
+          # GeoName = dplyr::if_else(GeoName == 'Central Coast', 'Central Coast-Mount Waddington', GeoName),
+          # GeoName = dplyr::if_else(GeoName == 'Stikine', 'Rest Of Province', GeoName),
           # Make union of  because they are joined in PTT data
-          GeoName = dplyr::if_else(GeoName %in% c('Skeena-Queen Charlotte', 'Central Coast'), 'North Coast', GeoName),
-          GeoUID = dplyr::if_else(GeoUID %in% c(5947, 5945), '5947', GeoUID),
-          GeoName = dplyr::if_else(GeoName %in% c('Northern Rockies', 'Peace River'), 'Northern Rockies Rm-Peace River', GeoName),
-          GeoUID = dplyr::if_else(GeoUID %in% c(5959, 5955), '5959', GeoUID)
+          GeoName = dplyr::if_else(GeoName %in% c('Skeena-Queen Charlotte'), 'North Coast', GeoName),
+          # GeoUID = dplyr::if_else(GeoUID %in% c(5947, 5945), '5947', GeoUID),
+          # GeoName = dplyr::if_else(GeoName %in% c('Northern Rockies', 'Peace River'), 'Northern Rockies Rm-Peace River', GeoName),
+          # GeoUID = dplyr::if_else(GeoUID %in% c(5959, 5955), '5959', GeoUID),
+          GeoName = dplyr::if_else(GeoName == 'Powell River', 'qathet', GeoName)
         )
     }
 
@@ -297,10 +300,11 @@ JoinPttShapes <- function(ptt_data, shapes, geo_name) {
     dplyr::ungroup() %>%
     dplyr::mutate(
       GeoUID = forcats::as_factor(GeoUID),
-      GeoName = forcats::as_factor(GeoName),
-      PRUID = forcats::as_factor(PRUID),
-      PRNAME = forcats::as_factor(PRNAME)
-    )
+      # GeoName = forcats::as_factor(GeoName),
+      PRUID = forcats::as_factor(PRUID)#,
+      # PRNAME = forcats::as_factor(PRNAME)
+    ) %>%
+    mutate_if(is.numeric, list(~na_if(., "NaN")))
 
   # https://github.com/r-spatial/mapview/issues/72
   ptt_sf <- ptt_sf %>%
