@@ -98,6 +98,12 @@ ptt_mn_2019 <- ptt_mn_bcdc %>% bchousing::WranglePttData(calculate_percentages =
 
 # 05. Define functions to align past and current data before joining ----
 FixPastData <- function(data, name_column) {
+  # If 2019 data was already imported, filter that out
+  data <- data %>%
+    filter(
+      trans_period < '2019-01-01'
+    )
+
   data <- data %>%
     select(-c(GeoUID, PRUID, PRNAME)) %>%
     rename(!!name_column := GeoName) %>%

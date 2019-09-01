@@ -14,6 +14,163 @@ knitr::opts_chunk$set(
 )
 ```
 
-```{r setup}
+```{r setup, echo = FALSE}
 library(bchousing)
 ```
+
+## Shiny app PTT data
+Property transfer tax (PTT) portion of the BC Housing Data Visualization app uses three internal datasets, one for each geographical level
+for which the data is published. Those datasets are exported by the `bchousing` package, and are lazily loaded by the app 
+(i.e. they are loaded by the app at runtime only when they are explicitly requested). The datasets are `sf` data frames and contain one observation per location and transaction period (month), a number of variables as well as geography (polygons).
+
+Those datasets are:
+
+- `ptt_dr_sf` - PTT data at Development Region level.
+- `ptt_rd_sf` - PTT data at Regional District level.
+- `ptt_mun_sf` - PTT data at Municipality level.
+
+They are saved as `.rda.` files in `data/` package directory. This article explains how these datasets are generated and kept up to date.
+
+## Data Source
+
+Property Transfer Tax data is published by BC Government Ministry of Finance at the [BC Open Data Catalogue](https://catalogue.data.gov.bc.ca/organization/property-taxation). The Ministry of Finance publishes the data separataly for each year.
+
+For the purpose of BC Housing Data Visualization app, we used montly data published in `csv` format.
+
+### Data for past years (2016 - 2018)
+
+Data for 2016, 2017 and 2018 was cleaned up and provided by BC Stats as `csv` files. Three files were produced, 
+one for each geography level:
+
+- `data-raw/ptt/DR_all_years.csv` (Development Regions)
+- `data-raw/ptt/Regional_all_years.csv` (Regional Districts)
+- `data-raw/ptt/Municipal_all_years.csv` (Municipalities)
+
+That data was then used to attach to the boundaries at the corresponding level.
+
+The R script that loads and processes the raw `csv` files and attaches the boundaries is `data-raw/ptt/ptt_2016_2018.R`. In case past data needs to be regenerated, it can simply be done by sourcing this file.
+
+```
+source('data-raw/ptt/ptt_2016_2018.R')
+```
+
+It is assumed that current working directory is the root directory of the repository.
+
+> *NOTE:* Sourcing this file will regenerate the PTT datasets and overwrite existing ones, effectively dropping any data beyond 2018. If this file gets sourced, it has to be made sure that all relevant files are sourced too to include data of any subsequent year PTT data is available for.
+
+The steps to generate the datasets from raw csv files and boundaries are:
+
+1. Load raw data from csv files prepared by BC Stats.
+2. Wrangle the loaded PTT data using `WranglePttData()` function.
+3. Wrangle shape files using `WrangleShapeFiles()` function.
+4. Join PTT data and shapes by location name using `JoinPttShapes()` function.
+5. Save such data as datasets into `data/` package directory for each geographical level.
+
+### Data for current year (2019)
+
+At the moment of this writing, current year is 2019. Data for 2019 is retrieved using an alternate method compared to previous years. The R script developed for this purpose is `data-raw/ptt/ptt_2019.R`. It uses [bcdata R package](https://bcgov.github.io/bcdata) - an R package for searching & retrieving data from the B.C. Data Catalogue.
+
+First part of the script explores the B.C. Data Catalogue to identify the records and resources relevant for PTT 2019 data. 
+
+> When the script is run in development mode, the datasets can be cached (saved as `.rds` files into `data-raw/ptt` directory) so that BC Data Catalogue API endpoints are not polled repeatedly. This can be done by setting the `use_cached_data` variable to `TRUE`.
+
+The data is retrieved at all three regular geographical levels (Development Region, Regional District and Municipality), as well as at the Province level. Province level data is used for summary stats shown on the app home page as quick facts.
+
+Ad-hoc functions `FixPastData()` and `FixCurrentData()` are defined in the script to align the data for the previous years (retrieved from package datasets `ptt_dr_sf`, `ptt_rd_sf` and `ptt_mun_sf`) and current year retrieved using `bcdata` R package. These functions are applied to the data past and current data respectively, for each geographical level (except the Province level).
+
+Function `FixPastData()` takes package datasets `ptt_dr_sf`, `ptt_rd_sf` and `ptt_mun_sf` as input. It first filters out any previously imporated data for 2019, to avoid any potential collission with the data being freshly imported for 2019.
+
+Once aligned in such way, the past and current data is then joined together.
+
+After joining, the geometry is added from the boundaries files, again using function `JoinPttShapes()`.
+
+Summary data is then prepared from the Province-level data and all four datasets are saved into `ptt_dr_sf`, `ptt_rd_sf`, `ptt_mun_sf` and `ptt_prov_dash` datasets into `data/` package directory, overwriting existing files.
+
+## Importing fresh 2019 data into the app
+
+To import fresh 2019 data into the app after Ministry of Finance has published updated data in the B.C. Data Catalogue, it is enough to only source the `data-raw/ptt/ptt_2019.R` file. 
+
+```
+source('data-raw/ptt/ptt_2019.R')
+```
+
+It will pull the most recent data and update package datasets.
+
+## Deploying fresh 2019 data to shinyapps.io
+
+When the 2019 data is refreshed as above, all it takes to get that new data installed on shinyapps.io instance is to re-deploy the app to BC Stats shinyapps.io account.
+
+In general, this can be done in two ways, as described on the [Shinyapps.io - Getting started](https://shiny.rstudio.com/articles/shinyapps.html) documentation page.
+
+> *NOTE:* Make sure all dependencies are installed on your computer before the deployment. To do so, follow the steps below:
+
+1. Detach all currently attached R packages.
+
+```
+all_attached <- paste("package:", names(sessionInfo()$otherPkgs), sep = "")
+suppressWarnings(lapply(all_attached, detach, character.only = TRUE, unload = TRUE))
+```
+
+2. Install required packages:
+
+```
+required_packages <- c(
+  'bsplus',
+  'cancensus',
+  'DT',
+  'dplyr',
+  'forcats',
+  'golem',
+  'here',
+  'htmlwidgets',
+  'leaflet',
+  'leaflet.extras',
+  'lubridate',
+  'magrittr',
+  'markdown',
+  'pkgload',
+  'plotly',
+  'readr',
+  'rmapshaper',
+  'rmarkdown',
+  'scales',
+  'sf',
+  'shiny',
+  'shinyjs',
+  'stringr',
+  'tidyr'
+)
+    
+install.packages(required_packages, quiet = TRUE)
+```
+
+3. Install development packages fron GitHub using `remotes` package:
+
+```
+remotes::install_github('andrewsali/shinycssloaders')
+remotes::install_github('mtennekes/treemap')
+remotes::install_github('timelyportfolio/sunburstR')
+```
+
+
+
+#### Using "Publish to Server" button in RStudio
+
+In RStudio, open `app.R` file that can be found in the root directory of the repository. In the editor panel, click the blue "Publish to Server" button. The dialog will open where you can select the files and directories to publish. Make sure the 
+
+#### Running `deployApp` command from the `rsconnect` package
+
+In the repository root directory, run the following in R console:
+
+```
+rsconnect::deployApp()
+```
+
+## Beyond 2019
+
+There were a few challenges when working with PTT data published on B.C Data Catalogue. They include:
+
+- The file layout (varaible names and availability) was changing from year to year, or even between different geographical levels within the same year. In other words, some varaibles would not be present across all years, and some would have thrir names changed.
+- The location names were not consistens between the years. Location names were not always in the same case, sometimes they contained seqence numbers as prefixes.
+
+For this reason, the best strategy to import data beyond 2019 is to create a new R script for each year, and follow similar procedure as it was done in `data-raw/ptt/ptt_2019.R` script. Because similar challenges to those described above can probably be expected in the future too, special attention needs to be made to changing PTT file layouts (variable names) and location names.
