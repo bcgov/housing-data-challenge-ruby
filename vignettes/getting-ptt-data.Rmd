@@ -19,6 +19,7 @@ library(bchousing)
 ```
 
 ## Shiny app PTT data
+
 Property transfer tax (PTT) portion of the BC Housing Data Visualization app uses three internal datasets, one for each geographical level
 for which the data is published. Those datasets are exported by the `bchousing` package, and are lazily loaded by the app 
 (i.e. they are loaded by the app at runtime only when they are explicitly requested). The datasets are `sf` data frames and contain one observation per location and transaction period (month), a number of variables as well as geography (polygons).
@@ -50,13 +51,13 @@ That data was then used to attach to the boundaries at the corresponding level.
 
 The R script that loads and processes the raw `csv` files and attaches the boundaries is `data-raw/ptt/ptt_2016_2018.R`. In case past data needs to be regenerated, it can simply be done by sourcing this file.
 
-```
+```{r eval=FALSE, echo=TRUE}
 source('data-raw/ptt/ptt_2016_2018.R')
 ```
 
 It is assumed that current working directory is the root directory of the repository.
 
-> *NOTE:* Sourcing this file will regenerate the PTT datasets and overwrite existing ones, effectively dropping any data beyond 2018. If this file gets sourced, it has to be made sure that all relevant files are sourced too to include data of any subsequent year PTT data is available for.
+> NOTE: Sourcing this file will regenerate the PTT datasets and overwrite existing ones, effectively dropping any data beyond 2018. If this file gets sourced, it has to be made sure that all relevant files are sourced too to include data of any subsequent year PTT data is available for.
 
 The steps to generate the datasets from raw csv files and boundaries are:
 
@@ -90,7 +91,7 @@ Summary data is then prepared from the Province-level data and all four datasets
 
 To import fresh 2019 data into the app after Ministry of Finance has published updated data in the B.C. Data Catalogue, it is enough to only source the `data-raw/ptt/ptt_2019.R` file. 
 
-```
+```{r eval=FALSE, echo=TRUE}
 source('data-raw/ptt/ptt_2019.R')
 ```
 
@@ -102,18 +103,18 @@ When the 2019 data is refreshed as above, all it takes to get that new data inst
 
 In general, this can be done in two ways, as described on the [Shinyapps.io - Getting started](https://shiny.rstudio.com/articles/shinyapps.html) documentation page.
 
-> *NOTE:* Make sure all dependencies are installed on your computer before the deployment. To do so, follow the steps below:
+> NOTE: Make sure all dependencies are installed on your computer before the deployment. To do so, follow the steps below:
 
 1. Detach all currently attached R packages.
 
-```
+```{r eval=FALSE, echo=TRUE}
 all_attached <- paste("package:", names(sessionInfo()$otherPkgs), sep = "")
 suppressWarnings(lapply(all_attached, detach, character.only = TRUE, unload = TRUE))
 ```
 
 2. Install required packages:
 
-```
+```{r eval=FALSE, echo=TRUE}
 required_packages <- c(
   'bsplus',
   'cancensus',
@@ -146,13 +147,11 @@ install.packages(required_packages, quiet = TRUE)
 
 3. Install development packages fron GitHub using `remotes` package:
 
-```
+```{r eval=FALSE, echo=TRUE}
 remotes::install_github('andrewsali/shinycssloaders')
 remotes::install_github('mtennekes/treemap')
 remotes::install_github('timelyportfolio/sunburstR')
 ```
-
-
 
 #### Using "Publish to Server" button in RStudio
 
@@ -162,15 +161,17 @@ In RStudio, open `app.R` file that can be found in the root directory of the rep
 
 In the repository root directory, run the following in R console:
 
-```
+```{r eval=FALSE, echo=TRUE}
 rsconnect::deployApp()
 ```
 
 ## Beyond 2019
 
-There were a few challenges when working with PTT data published on B.C Data Catalogue. They include:
+There are a few challenges when working with PTT data published on B.C Data Catalogue. They include:
 
-- The file layout (varaible names and availability) was changing from year to year, or even between different geographical levels within the same year. In other words, some varaibles would not be present across all years, and some would have thrir names changed.
-- The location names were not consistens between the years. Location names were not always in the same case, sometimes they contained seqence numbers as prefixes.
+- The file layout (varaible names and availability) is not consistent from year to year, or even between different geographical levels within the same year. In other words, some varaibles are not present across all years, and some have their names changed.
+- The location names are not consistens between the years. Location names are not always in the same case, sometimes they contained seqence numbers as prefixes, etc.
 
-For this reason, the best strategy to import data beyond 2019 is to create a new R script for each year, and follow similar procedure as it was done in `data-raw/ptt/ptt_2019.R` script. Because similar challenges to those described above can probably be expected in the future too, special attention needs to be made to changing PTT file layouts (variable names) and location names.
+For this reason, the best strategy to import data beyond 2019 is to create a new R script for each year, and follow similar procedure as it was done in `data-raw/ptt/ptt_2019.R` script. Modifications will need to be made as necessary, after carefully inspecting the varaible location names in the data.
+
+Because similar challenges to those described above can probably be expected in the future too, special attention needs to be paid to changing PTT file layouts (variable names) and location names.
