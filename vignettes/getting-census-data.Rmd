@@ -14,6 +14,73 @@ knitr::opts_chunk$set(
 )
 ```
 
-```{r setup}
+```{r setup, echo=FALSE}
 library(bchousing)
 ```
+
+## Shiny app Census data
+
+Census portion of the BC Housing Data Visualization app is currently focused on four topics:
+
+- **Housing types** - Distribution of dwellings by property type (e.g. detached single-family homes, row houses, appartments in buildings).
+- **Population pyramid** -  Distribution of population by age band and gender.
+- **Mobility** - Percentages of population that moved, categorized by the type of move (e.g. inter- or intra-provincial movers).
+- **Shelter-to-income ratio** - Proportion of households with that spend more than 30% of pre-tax income on shelter.
+
+Consequently, the data the app uses is that of relevance to those topics.
+
+Relevant data for each of these topics is retrieved at the following levels:
+
+- Province
+- Census Division
+- Census Subdivision
+- Census Metropolitan Area
+- Census Tract
+
+While data at Dissimination Area level is also available, it is not incorporated into the BC Housing Data Visualization app due to performance reasons, but can be made available upon request.
+
+Census data that downloaded is saved into internal datasets within `bchousing` package, but it is not exported by the package. Instead, all base datasets downloaded from Statistics Canada and any datasets derived from them that are used by the app are stored as internal data inside `R/sysdata.rda` file.
+
+This article explains how these datasets are generated and how they can be refreshed if required.
+
+## Data Source
+
+The census visualizations in the app use data published by Statistics Canada for 2016 census year, as well as 2011 and 2006 in the case of population pyramid.
+
+The data is obtained through [CensusMapper API](https://censusmapper.ca/api) using [cancensus R package](https://github.com/mountainMath/cancensus)^1^.
+
+## Census topics exploration
+
+For the purpose of exploration of census topics and identificataion of relevant variables and datasets, a separate R Shiny app was developed to help with the task, [cancensus-explorer](https://github.com/sasha-ruby/cancenus-explorer)^2^. While the app can be generalized and be applied to Canada-wide regions, in the scope of BC Housing Data Visualization app cancensus explorer filters out all non-B.C. data.
+
+## Downloading data 
+
+Census data is downloaded using `data-raw/census/get_census_data.R` script. It requires a CensusMapper API KEY, which can be obtained by signing up for a [CensusMapper account](https://censusmapper.ca/users/sign_up).
+
+For each census topic explored, the script loops through a vector of census levels (`c("CMA", "CD", "CSD", "CT", "DA", "PR")`) and census years (2016 in general, and `c(2016, 2011, 2006)` for Population Pyramid data). 
+
+In addition to fetching data from Statistics Canada using CensusMapper API, the data is also reshaped in format suitable for its particular use  (i.e. data visualization type) within the app.
+
+## Refreshing data
+
+If there is a need to refresh the data, the following steps need to be performed:
+
+1. Update `data-raw/census/get_census_data.R` script to set `use_cached_data` variable to `FALSE`.
+2. Source the `data-raw/census/get_census_data.R` script to download fresh data and save it into `R/sysdata.rda`.
+
+```{r eval=FALSE, echo=TRUE}
+source('data-raw/census/get_census_data.R')
+```
+
+It is assumed that current working directory is the root directory of the BC Housing Data Visualization repository.
+
+## Beyond 2016 census
+
+When new census data in 2021 gets collected and published by Statistics Canada, a new data exploration exercise will need to be performed to identofy relevant varaibles and datasets for the selected topics. After that, the `data-raw/census/get_census_data.R` script will require modifications to include new variables identified as relevant during exploration. Once the modifications are complete, 
+
+
+***
+
+^1^ von Bergmann J, Shkolnik D, Jacobs A (2019). cancensus: R package to access, retrieve, and work with Canadian Census data and geography. R package version 0.2.0, https://mountainmath.github.io/cancensus/.
+
+^2^ Bogdanovic S (2019). cancensus-explorer: R Shiny app that enables users to discover, explore and visualize Canadian census data, https://github.com/sasha-ruby/cancenus-explorer/.

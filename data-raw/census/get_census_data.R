@@ -13,12 +13,15 @@ library(rmapshaper)
 options(cancensus.api_key = "my.census.mapper.api.key")
 options(cancensus.cache_path = here::here("cache"))
 
+# Set this variable to FALSE if fresh data download from Statistics Canada is needed
+use_cached_data = TRUE
+
 # get only BC regions
-getRegions <- function() {
-  regions <- list_census_regions("CA16", use_cache = TRUE)
+getRegions <- function(use_cached_data) {
+  regions <- list_census_regions("CA16", use_cache = use_cached_data)
   return(as_census_region_list(regions %>% filter(PR_UID == "59")))
 }
-regions <- getRegions()
+regions <- getRegions(use_cached_data)
 
 # General census data
 getHousingTypesData <- function(year, censusLevel = "CMA", regions) {
@@ -52,7 +55,7 @@ getHousingTypesData <- function(year, censusLevel = "CMA", regions) {
       level = censusLevel,
       regions = regions,
       vectors = vectors,
-      use_cache = TRUE,
+      use_cache = use_cached_data,
       labels = "short",
       geo_format = "sf"
     )
@@ -104,7 +107,7 @@ getHousingTypesData <- function(year, censusLevel = "CMA", regions) {
     select(-one_of(c("SumAll")))
 
   # saveRDS(censusHousing, here::here("data", "housing", paste0("census",  year, "-housing-", censusLevel, ".rds")))
-  save(censusHousing, file = paste0("data/housingTypes", stringr::str_to_title(censusLevel), ".rda"))
+  save(censusHousing, file = paste0("cache/housingTypes", stringr::str_to_title(censusLevel), ".rda"))
 }
 
 # Loop through year and geographical levels and save housing types-related data
@@ -126,7 +129,7 @@ for (censusLevel in c("CMA", "CD", "CSD", "CT", "DA")) {
       level = censusLevel,
       regions = regions,
       vectors = vectorsMobility %>% pull("vector"),
-      use_cache = TRUE,
+      use_cache = use_cached_data,
       labels = "short",
       geo_format = "sf"
     )
@@ -172,7 +175,7 @@ for (censusLevel in c("CMA", "CD", "CSD", "CT", "DA")) {
     )
 
   # saveRDS(censusData, here::here("data", paste0("census2016-mobility-", censusLevel, ".rds")))
-  save(censusData, file = paste0("data/censusMobility", stringr::str_to_title(censusLevel), ".rda"))
+  save(censusData, file = paste0("cache/censusMobility", stringr::str_to_title(censusLevel), ".rda"))
 
   censusDataGathered <- censusData %>%
     mutate(`Region` = as.character(`Region`), Type = as.character(Type)) %>%
@@ -183,7 +186,7 @@ for (censusLevel in c("CMA", "CD", "CSD", "CT", "DA")) {
     select(GeoUID, Region, Migration, count, geometry)
 
   # saveRDS(censusDataGathered, here::here("data", paste0("census2016-mobility-", censusLevel, "-gathered.rds")))
-  save(censusDataGathered, file = paste0("data/censusMobility", stringr::str_to_title(censusLevel), "Gathered.rda"))
+  save(censusDataGathered, file = paste0("cache/censusMobility", stringr::str_to_title(censusLevel), "Gathered.rda"))
 
   censusMobilitySeq <- censusData %>%
   gather(
@@ -220,7 +223,7 @@ for (censusLevel in c("CMA", "CD", "CSD", "CT", "DA")) {
   st_geometry(censusMobilitySeq) <- NULL
 
   # saveRDS(censusMobilitySeq, here::here("data", paste0("census2016-mobility-", censusLevel, "-seq.rds")))
-  save(censusMobilitySeq, file = paste0("data/censusMobility", stringr::str_to_title(censusLevel), "Seq.rda"))
+  save(censusMobilitySeq, file = paste0("cache/censusMobility", stringr::str_to_title(censusLevel), "Seq.rda"))
 }
 
 # Shelter-Cost-to-Income Ratio
@@ -232,7 +235,7 @@ for (censusLevel in c("CMA", "CD", "CSD", "CT", "DA")) {
       level = censusLevel,
       regions = regions,
       vectors = vectorsStir,# %>% pull("vector"),
-      use_cache = TRUE,
+      use_cache = use_cached_data,
       labels = "short",
       geo_format = "sf"
     )
@@ -268,7 +271,7 @@ for (censusLevel in c("CMA", "CD", "CSD", "CT", "DA")) {
   )
 
   # saveRDS(censusStirData, here::here("data", paste0("census2016Spatial-stir-", censusLevel, ".rds")))
-  save(censusStirData, file = paste0("data/census2016", stringr::str_to_title(censusLevel), "Stir.rda"))
+  save(censusStirData, file = paste0("cache/census2016", stringr::str_to_title(censusLevel), "Stir.rda"))
 }
 
 # Age and Sex - Average Age
@@ -279,7 +282,7 @@ for (censusLevel in c("CMA", "CD", "CSD", "CT", "DA")) {
       level = censusLevel,
       regions = regions,
       vectors = c("v_CA16_379"),
-      use_cache = TRUE,
+      use_cache = use_cached_data,
       labels = "short",
       geo_format = "sf"
     )
@@ -299,7 +302,7 @@ for (censusLevel in c("CMA", "CD", "CSD", "CT", "DA")) {
     filter("Average Age" > 0)
 
   # saveRDS(censusData, here::here("data", paste0("census2016-avg-age-", censusLevel, ".rds")))
-  save(censusData, file = paste0("data/census2016aa", stringr::str_to_title(censusLevel), ".rda"))
+  save(censusData, file = paste0("cache/census2016aa", stringr::str_to_title(censusLevel), ".rda"))
 }
 
 
@@ -363,7 +366,7 @@ for (year in c("2006", "2011", "2016")) {
     censusPPFemale <-
       get_census(
         censusYear, level = censusLevel, regions = regions, vectors = vectorsFemale,
-        use_cache = TRUE, labels = "short", geo_format = NA
+        use_cache = use_cached_data, labels = "short", geo_format = NA
       )
     censusPPFemale %<>%
       filter(Type == censusLevel) %<>%
@@ -398,7 +401,7 @@ for (year in c("2006", "2011", "2016")) {
     censusPPMale <-
       get_census(
         censusYear, level = censusLevel, regions = regions, vectors = vectorsMale,
-        use_cache = TRUE, labels = "short", geo_format = NA
+        use_cache = use_cached_data, labels = "short", geo_format = NA
       )
     censusPPMale <- censusPPMale %<>%
       filter(Type == censusLevel) %<>%
@@ -465,6 +468,6 @@ for (year in c("2006", "2011", "2016")) {
     censusPP %<>% select(-one_of("Type", "population"))
 
     # saveRDS(censusPP, here::here("data", "population_pyramid", paste0("census", year, "-pp-", censusLevel, ".rds")))
-    save(censusPP, file = paste0("data/census", year, 'pp', stringr::str_to_title(censusLevel), ".rda"))
+    save(censusPP, file = paste0("cache/census", year, 'pp', stringr::str_to_title(censusLevel), ".rda"))
   }
 }
