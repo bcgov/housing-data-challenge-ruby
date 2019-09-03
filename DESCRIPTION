@@ -42,7 +42,6 @@ Imports:
 Remotes:
     andrewsali/shinycssloaders,
     bcgov/housing-data-challenge-ruby,
-    mountainmath/cancensus,
     mtennekes/treemap,
     timelyportfolio/sunburstR
 RoxygenNote: 6.1.1

@@ -168,63 +168,7 @@
 <h2 class="hasAnchor">
 <a href="#deploying-fresh-2019-data-to-shinyapps-io" class="anchor"></a>Deploying fresh 2019 data to shinyapps.io</h2>
 <p>When the 2019 data is refreshed as above, all it takes to get that new data installed on shinyapps.io instance is to re-deploy the app to BC Stats shinyapps.io account.</p>
-<p>In general, this can be done in two ways, as described on the <a href="https://shiny.rstudio.com/articles/shinyapps.html">Shinyapps.io - Getting started</a> documentation page.</p>
-<blockquote>
-<p>NOTE: Make sure all dependencies are installed on your computer before the deployment. To do so, follow the steps below:</p>
-</blockquote>
-<ol style="list-style-type: decimal">
-<li>Detach all currently attached R packages.</li>
-</ol>
-<div class="sourceCode" id="cb3"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb3-1" data-line-number="1">all_attached &lt;-<span class="st"> </span><span class="kw"><a href="https://www.rdocumentation.org/packages/base/topics/paste">paste</a></span>(<span class="st">"package:"</span>, <span class="kw"><a href="https://www.rdocumentation.org/packages/base/topics/names">names</a></span>(<span class="kw"><a href="https://www.rdocumentation.org/packages/utils/topics/sessionInfo">sessionInfo</a></span>()<span class="op">$</span>otherPkgs), <span class="dt">sep =</span> <span class="st">""</span>)</a>
-<a class="sourceLine" id="cb3-2" data-line-number="2"><span class="kw"><a href="https://www.rdocumentation.org/packages/base/topics/warning">suppressWarnings</a></span>(<span class="kw"><a href="https://www.rdocumentation.org/packages/base/topics/lapply">lapply</a></span>(all_attached, detach, <span class="dt">character.only =</span> <span class="ot">TRUE</span>, <span class="dt">unload =</span> <span class="ot">TRUE</span>))</a></code></pre></div>
-<ol start="2" style="list-style-type: decimal">
-<li>Install required packages:</li>
-</ol>
-<div class="sourceCode" id="cb4"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb4-1" data-line-number="1">required_packages &lt;-<span class="st"> </span><span class="kw"><a href="https://www.rdocumentation.org/packages/base/topics/c">c</a></span>(</a>
-<a class="sourceLine" id="cb4-2" data-line-number="2">  <span class="st">'bsplus'</span>,</a>
-<a class="sourceLine" id="cb4-3" data-line-number="3">  <span class="st">'cancensus'</span>,</a>
-<a class="sourceLine" id="cb4-4" data-line-number="4">  <span class="st">'DT'</span>,</a>
-<a class="sourceLine" id="cb4-5" data-line-number="5">  <span class="st">'dplyr'</span>,</a>
-<a class="sourceLine" id="cb4-6" data-line-number="6">  <span class="st">'forcats'</span>,</a>
-<a class="sourceLine" id="cb4-7" data-line-number="7">  <span class="st">'golem'</span>,</a>
-<a class="sourceLine" id="cb4-8" data-line-number="8">  <span class="st">'here'</span>,</a>
-<a class="sourceLine" id="cb4-9" data-line-number="9">  <span class="st">'htmlwidgets'</span>,</a>
-<a class="sourceLine" id="cb4-10" data-line-number="10">  <span class="st">'leaflet'</span>,</a>
-<a class="sourceLine" id="cb4-11" data-line-number="11">  <span class="st">'leaflet.extras'</span>,</a>
-<a class="sourceLine" id="cb4-12" data-line-number="12">  <span class="st">'lubridate'</span>,</a>
-<a class="sourceLine" id="cb4-13" data-line-number="13">  <span class="st">'magrittr'</span>,</a>
-<a class="sourceLine" id="cb4-14" data-line-number="14">  <span class="st">'markdown'</span>,</a>
-<a class="sourceLine" id="cb4-15" data-line-number="15">  <span class="st">'pkgload'</span>,</a>
-<a class="sourceLine" id="cb4-16" data-line-number="16">  <span class="st">'plotly'</span>,</a>
-<a class="sourceLine" id="cb4-17" data-line-number="17">  <span class="st">'readr'</span>,</a>
-<a class="sourceLine" id="cb4-18" data-line-number="18">  <span class="st">'rmapshaper'</span>,</a>
-<a class="sourceLine" id="cb4-19" data-line-number="19">  <span class="st">'rmarkdown'</span>,</a>
-<a class="sourceLine" id="cb4-20" data-line-number="20">  <span class="st">'scales'</span>,</a>
-<a class="sourceLine" id="cb4-21" data-line-number="21">  <span class="st">'sf'</span>,</a>
-<a class="sourceLine" id="cb4-22" data-line-number="22">  <span class="st">'shiny'</span>,</a>
-<a class="sourceLine" id="cb4-23" data-line-number="23">  <span class="st">'shinyjs'</span>,</a>
-<a class="sourceLine" id="cb4-24" data-line-number="24">  <span class="st">'stringr'</span>,</a>
-<a class="sourceLine" id="cb4-25" data-line-number="25">  <span class="st">'tidyr'</span></a>
-<a class="sourceLine" id="cb4-26" data-line-number="26">)</a>
-<a class="sourceLine" id="cb4-27" data-line-number="27">    </a>
-<a class="sourceLine" id="cb4-28" data-line-number="28"><span class="kw"><a href="https://www.rdocumentation.org/packages/utils/topics/install.packages">install.packages</a></span>(required_packages, <span class="dt">quiet =</span> <span class="ot">TRUE</span>)</a></code></pre></div>
-<ol start="3" style="list-style-type: decimal">
-<li>Install development packages fron GitHub using <code>remotes</code> package:</li>
-</ol>
-<div class="sourceCode" id="cb5"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb5-1" data-line-number="1">remotes<span class="op">::</span><span class="kw"><a href="https://www.rdocumentation.org/packages/remotes/topics/install_github">install_github</a></span>(<span class="st">'andrewsali/shinycssloaders'</span>)</a>
-<a class="sourceLine" id="cb5-2" data-line-number="2">remotes<span class="op">::</span><span class="kw"><a href="https://www.rdocumentation.org/packages/remotes/topics/install_github">install_github</a></span>(<span class="st">'mtennekes/treemap'</span>)</a>
-<a class="sourceLine" id="cb5-3" data-line-number="3">remotes<span class="op">::</span><span class="kw"><a href="https://www.rdocumentation.org/packages/remotes/topics/install_github">install_github</a></span>(<span class="st">'timelyportfolio/sunburstR'</span>)</a></code></pre></div>
-<div id="using-publish-to-server-button-in-rstudio" class="section level4">
-<h4 class="hasAnchor">
-<a href="#using-publish-to-server-button-in-rstudio" class="anchor"></a>Using “Publish to Server” button in RStudio</h4>
-<p>In RStudio, open <code>app.R</code> file that can be found in the root directory of the repository. In the editor panel, click the blue “Publish to Server” button. The dialog will open where you can select the files and directories to publish. Make sure the</p>
-</div>
-<div id="running-deployapp-command-from-the-rsconnect-package" class="section level4">
-<h4 class="hasAnchor">
-<a href="#running-deployapp-command-from-the-rsconnect-package" class="anchor"></a>Running <code>deployApp</code> command from the <code>rsconnect</code> package</h4>
-<p>In the repository root directory, run the following in R console:</p>
-<div class="sourceCode" id="cb6"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb6-1" data-line-number="1">rsconnect<span class="op">::</span><span class="kw"><a href="https://www.rdocumentation.org/packages/rsconnect/topics/deployApp">deployApp</a></span>()</a></code></pre></div>
-</div>
+<p>Refer to <a href="deploying-the-app.html">Deploying the app</a> vignette for details.</p>
 </div>
 <div id="beyond-2019" class="section level2">
 <h2 class="hasAnchor">

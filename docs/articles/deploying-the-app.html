@@ -93,11 +93,103 @@
 
     
     
-
+<div id="deploying-on-shinyapps-io" class="section level2">
+<h2 class="hasAnchor">
+<a href="#deploying-on-shinyapps-io" class="anchor"></a>Deploying on shinyapps.io</h2>
+<p>In general, this can be done in two ways, as described on the <a href="https://shiny.rstudio.com/articles/shinyapps.html">Shinyapps.io - Getting started</a> documentation page.</p>
+<blockquote>
+<p>NOTE: Make sure all dependencies are installed on your computer before the deployment. To do so, follow the steps below:</p>
+</blockquote>
+<ol style="list-style-type: decimal">
+<li>Detach all currently attached R packages.</li>
+</ol>
+<div class="sourceCode" id="cb1"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb1-1" data-line-number="1">all_attached &lt;-<span class="st"> </span><span class="kw"><a href="https://www.rdocumentation.org/packages/base/topics/paste">paste</a></span>(<span class="st">"package:"</span>, <span class="kw"><a href="https://www.rdocumentation.org/packages/base/topics/names">names</a></span>(<span class="kw"><a href="https://www.rdocumentation.org/packages/utils/topics/sessionInfo">sessionInfo</a></span>()<span class="op">$</span>otherPkgs), <span class="dt">sep =</span> <span class="st">""</span>)</a>
+<a class="sourceLine" id="cb1-2" data-line-number="2"><span class="kw"><a href="https://www.rdocumentation.org/packages/base/topics/warning">suppressWarnings</a></span>(<span class="kw"><a href="https://www.rdocumentation.org/packages/base/topics/lapply">lapply</a></span>(all_attached, detach, <span class="dt">character.only =</span> <span class="ot">TRUE</span>, <span class="dt">unload =</span> <span class="ot">TRUE</span>))</a></code></pre></div>
+<ol start="2" style="list-style-type: decimal">
+<li>Install required packages:</li>
+</ol>
+<div class="sourceCode" id="cb2"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb2-1" data-line-number="1">required_packages &lt;-<span class="st"> </span><span class="kw"><a href="https://www.rdocumentation.org/packages/base/topics/c">c</a></span>(</a>
+<a class="sourceLine" id="cb2-2" data-line-number="2">  <span class="st">'bsplus'</span>,</a>
+<a class="sourceLine" id="cb2-3" data-line-number="3">  <span class="st">'cancensus'</span>,</a>
+<a class="sourceLine" id="cb2-4" data-line-number="4">  <span class="st">'DT'</span>,</a>
+<a class="sourceLine" id="cb2-5" data-line-number="5">  <span class="st">'dplyr'</span>,</a>
+<a class="sourceLine" id="cb2-6" data-line-number="6">  <span class="st">'forcats'</span>,</a>
+<a class="sourceLine" id="cb2-7" data-line-number="7">  <span class="st">'golem'</span>,</a>
+<a class="sourceLine" id="cb2-8" data-line-number="8">  <span class="st">'here'</span>,</a>
+<a class="sourceLine" id="cb2-9" data-line-number="9">  <span class="st">'htmlwidgets'</span>,</a>
+<a class="sourceLine" id="cb2-10" data-line-number="10">  <span class="st">'leaflet'</span>,</a>
+<a class="sourceLine" id="cb2-11" data-line-number="11">  <span class="st">'leaflet.extras'</span>,</a>
+<a class="sourceLine" id="cb2-12" data-line-number="12">  <span class="st">'lubridate'</span>,</a>
+<a class="sourceLine" id="cb2-13" data-line-number="13">  <span class="st">'magrittr'</span>,</a>
+<a class="sourceLine" id="cb2-14" data-line-number="14">  <span class="st">'markdown'</span>,</a>
+<a class="sourceLine" id="cb2-15" data-line-number="15">  <span class="st">'pkgload'</span>,</a>
+<a class="sourceLine" id="cb2-16" data-line-number="16">  <span class="st">'plotly'</span>,</a>
+<a class="sourceLine" id="cb2-17" data-line-number="17">  <span class="st">'readr'</span>,</a>
+<a class="sourceLine" id="cb2-18" data-line-number="18">  <span class="st">'rmapshaper'</span>,</a>
+<a class="sourceLine" id="cb2-19" data-line-number="19">  <span class="st">'rmarkdown'</span>,</a>
+<a class="sourceLine" id="cb2-20" data-line-number="20">  <span class="st">'scales'</span>,</a>
+<a class="sourceLine" id="cb2-21" data-line-number="21">  <span class="st">'sf'</span>,</a>
+<a class="sourceLine" id="cb2-22" data-line-number="22">  <span class="st">'shiny'</span>,</a>
+<a class="sourceLine" id="cb2-23" data-line-number="23">  <span class="st">'shinyjs'</span>,</a>
+<a class="sourceLine" id="cb2-24" data-line-number="24">  <span class="st">'stringr'</span>,</a>
+<a class="sourceLine" id="cb2-25" data-line-number="25">  <span class="st">'tidyr'</span></a>
+<a class="sourceLine" id="cb2-26" data-line-number="26">)</a>
+<a class="sourceLine" id="cb2-27" data-line-number="27">    </a>
+<a class="sourceLine" id="cb2-28" data-line-number="28"><span class="kw"><a href="https://www.rdocumentation.org/packages/utils/topics/install.packages">install.packages</a></span>(required_packages, <span class="dt">quiet =</span> <span class="ot">TRUE</span>)</a></code></pre></div>
+<ol start="3" style="list-style-type: decimal">
+<li>Install development packages fron GitHub using <code>remotes</code> package:</li>
+</ol>
+<div class="sourceCode" id="cb3"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb3-1" data-line-number="1">remotes<span class="op">::</span><span class="kw"><a href="https://www.rdocumentation.org/packages/remotes/topics/install_github">install_github</a></span>(<span class="st">'andrewsali/shinycssloaders'</span>)</a>
+<a class="sourceLine" id="cb3-2" data-line-number="2">remotes<span class="op">::</span><span class="kw"><a href="https://www.rdocumentation.org/packages/remotes/topics/install_github">install_github</a></span>(<span class="st">"bcgov/housing-data-challenge-ruby"</span>)</a>
+<a class="sourceLine" id="cb3-3" data-line-number="3">remotes<span class="op">::</span><span class="kw"><a href="https://www.rdocumentation.org/packages/remotes/topics/install_github">install_github</a></span>(<span class="st">"mtennekes/treemap"</span>, <span class="dt">subdir =</span> <span class="st">'pkg'</span>)</a>
+<a class="sourceLine" id="cb3-4" data-line-number="4">remotes<span class="op">::</span><span class="kw"><a href="https://www.rdocumentation.org/packages/remotes/topics/install_github">install_github</a></span>(<span class="st">'timelyportfolio/sunburstR'</span>)</a></code></pre></div>
+<div id="using-publish-to-server-button-in-rstudio" class="section level4">
+<h4 class="hasAnchor">
+<a href="#using-publish-to-server-button-in-rstudio" class="anchor"></a>Using “Publish to Server” button in RStudio</h4>
+<p>In RStudio, open <code>app.R</code> file that can be found in the root directory of the repository. In the editor panel, click the blue “Publish to Server” button. The dialog will open where you can select the files and directories to publish. Make sure you have the shinyapps.io deployment account credentials properly set.</p>
+<p>Upon clicking the “Publish to Server” button, the popup dialog appears in which it is possible to select the files and directories being deployed. As a minimum, the following files are directories are required (directories are distinguished by appended <code>/</code> character):</p>
+<ul>
+<li><code>.Rbuildignore</code></li>
+<li><code>app.R</code></li>
+<li><code>DESCRIPTION</code></li>
+<li><code>NAMESPACE</code></li>
+<li><code>data/</code></li>
+<li><code>inst/</code></li>
+<li><code>R/</code></li>
+</ul>
+</div>
+<div id="running-deployapp-command-from-the-rsconnect-package" class="section level4">
+<h4 class="hasAnchor">
+<a href="#running-deployapp-command-from-the-rsconnect-package" class="anchor"></a>Running <code>deployApp</code> command from the <code>rsconnect</code> package</h4>
+<p>Alternate way to deploy an app is to use <code>deployApp</code> command from the <code>rsconnect</code> package. In the repository root directory, run the following in R console:</p>
+<div class="sourceCode" id="cb4"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb4-1" data-line-number="1">rsconnect<span class="op">::</span><span class="kw"><a href="https://www.rdocumentation.org/packages/rsconnect/topics/deployApp">deployApp</a></span>(<span class="dt">appFileManifest =</span> <span class="st">'app_file_manifest'</span>)</a></code></pre></div>
+<p>It will deploy the app, bundling the files specified in the <code>app_file_manifest</code> in the root directory of the repository.</p>
+</div>
+</div>
+<div id="deploying-locally" class="section level2">
+<h2 class="hasAnchor">
+<a href="#deploying-locally" class="anchor"></a>Deploying locally</h2>
+<p>To deploy locally in your computer, all it takes is to install the package from the GitHub repository using <code>remotes</code> package:</p>
+<div class="sourceCode" id="cb5"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb5-1" data-line-number="1">remotes<span class="op">::</span><span class="kw"><a href="https://www.rdocumentation.org/packages/remotes/topics/install_github">install_github</a></span>(<span class="st">'bcgov/housing-data-challenge-ruby'</span>)</a></code></pre></div>
+<p>To run the BC Housing Data Visualization app, load the <code>bchousing</code> packages and run the app:</p>
+<div class="sourceCode" id="cb6"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb6-1" data-line-number="1"><span class="kw"><a href="https://www.rdocumentation.org/packages/base/topics/library">library</a></span>(bchousing)</a>
+<a class="sourceLine" id="cb6-2" data-line-number="2">bchousing<span class="op">::</span><span class="kw"><a href="https://www.rdocumentation.org/packages/bchousing/topics/run_app">run_app</a></span>()</a></code></pre></div>
+<p>Optionally, <code><a href="../reference/run_app.html">run_app()</a></code> function takes <code>host</code> and <code>port</code> arguments if you want to explicitly set the host and port to run the app on. For example:</p>
+<div class="sourceCode" id="cb7"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb7-1" data-line-number="1"><span class="kw"><a href="https://www.rdocumentation.org/packages/base/topics/library">library</a></span>(bchousing)</a>
+<a class="sourceLine" id="cb7-2" data-line-number="2">bchousing<span class="op">::</span><span class="kw"><a href="https://www.rdocumentation.org/packages/bchousing/topics/run_app">run_app</a></span>(<span class="dt">host =</span> <span class="st">'0.0.0.0'</span>, <span class="dt">port =</span> <span class="dv">8080</span>)</a></code></pre></div>
+</div>
   </div>
 
   <div class="col-md-3 hidden-xs hidden-sm" id="sidebar">
 
+        <div id="tocnav">
+      <h2 class="hasAnchor">
+<a href="#tocnav" class="anchor"></a>Contents</h2>
+      <ul class="nav nav-pills nav-stacked">
+<li><a href="#deploying-on-shinyapps-io">Deploying on shinyapps.io</a></li>
+      <li><a href="#deploying-locally">Deploying locally</a></li>
+      </ul>
+</div>
       </div>
 
 </div>

@@ -1,0 +1,7 @@
+.Rbuildignore
+app.R
+DESCRIPTION
+NAMESPACE
+data/
+inst/
+R/

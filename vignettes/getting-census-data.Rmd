@@ -86,7 +86,8 @@ remotes::install_github('bcgov/housing-data-challenge-ruby')
 ```{r eval=FALSE, echo=TRUE}
 source('data-raw/census/get_census_data.R')
 ```
-8. Deploy the app.
+8. Deploy the app - refer to [Deploying the app](deploying-the-app.html) vignette for details.
+
 
 ## Beyond 2016 census
 

@@ -101,69 +101,7 @@ It will pull the most recent data and update package datasets.
 
 When the 2019 data is refreshed as above, all it takes to get that new data installed on shinyapps.io instance is to re-deploy the app to BC Stats shinyapps.io account.
 
-In general, this can be done in two ways, as described on the [Shinyapps.io - Getting started](https://shiny.rstudio.com/articles/shinyapps.html) documentation page.
-
-> NOTE: Make sure all dependencies are installed on your computer before the deployment. To do so, follow the steps below:
-
-1. Detach all currently attached R packages.
-
-```{r eval=FALSE, echo=TRUE}
-all_attached <- paste("package:", names(sessionInfo()$otherPkgs), sep = "")
-suppressWarnings(lapply(all_attached, detach, character.only = TRUE, unload = TRUE))
-```
-
-2. Install required packages:
-
-```{r eval=FALSE, echo=TRUE}
-required_packages <- c(
-  'bsplus',
-  'cancensus',
-  'DT',
-  'dplyr',
-  'forcats',
-  'golem',
-  'here',
-  'htmlwidgets',
-  'leaflet',
-  'leaflet.extras',
-  'lubridate',
-  'magrittr',
-  'markdown',
-  'pkgload',
-  'plotly',
-  'readr',
-  'rmapshaper',
-  'rmarkdown',
-  'scales',
-  'sf',
-  'shiny',
-  'shinyjs',
-  'stringr',
-  'tidyr'
-)
-    
-install.packages(required_packages, quiet = TRUE)
-```
-
-3. Install development packages fron GitHub using `remotes` package:
-
-```{r eval=FALSE, echo=TRUE}
-remotes::install_github('andrewsali/shinycssloaders')
-remotes::install_github('mtennekes/treemap')
-remotes::install_github('timelyportfolio/sunburstR')
-```
-
-#### Using "Publish to Server" button in RStudio
-
-In RStudio, open `app.R` file that can be found in the root directory of the repository. In the editor panel, click the blue "Publish to Server" button. The dialog will open where you can select the files and directories to publish. Make sure the 
-
-#### Running `deployApp` command from the `rsconnect` package
-
-In the repository root directory, run the following in R console:
-
-```{r eval=FALSE, echo=TRUE}
-rsconnect::deployApp()
-```
+Refer to [Deploying the app](deploying-the-app.html) vignette for details.
 
 ## Beyond 2019
 

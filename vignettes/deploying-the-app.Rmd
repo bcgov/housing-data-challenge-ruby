@@ -18,4 +18,103 @@ knitr::opts_chunk$set(
 library(bchousing)
 ```
 
+## Deploying on shinyapps.io
 
+In general, this can be done in two ways, as described on the [Shinyapps.io - Getting started](https://shiny.rstudio.com/articles/shinyapps.html) documentation page.
+
+> NOTE: Make sure all dependencies are installed on your computer before the deployment. To do so, follow the steps below:
+
+1. Detach all currently attached R packages.
+
+```{r eval=FALSE, echo=TRUE}
+all_attached <- paste("package:", names(sessionInfo()$otherPkgs), sep = "")
+suppressWarnings(lapply(all_attached, detach, character.only = TRUE, unload = TRUE))
+```
+
+2. Install required packages:
+
+```{r eval=FALSE, echo=TRUE}
+required_packages <- c(
+  'bsplus',
+  'cancensus',
+  'DT',
+  'dplyr',
+  'forcats',
+  'golem',
+  'here',
+  'htmlwidgets',
+  'leaflet',
+  'leaflet.extras',
+  'lubridate',
+  'magrittr',
+  'markdown',
+  'pkgload',
+  'plotly',
+  'readr',
+  'rmapshaper',
+  'rmarkdown',
+  'scales',
+  'sf',
+  'shiny',
+  'shinyjs',
+  'stringr',
+  'tidyr'
+)
+    
+install.packages(required_packages, quiet = TRUE)
+```
+
+3. Install development packages fron GitHub using `remotes` package:
+
+```{r eval=FALSE, echo=TRUE}
+remotes::install_github('andrewsali/shinycssloaders')
+remotes::install_github("bcgov/housing-data-challenge-ruby")
+remotes::install_github("mtennekes/treemap", subdir = 'pkg')
+remotes::install_github('timelyportfolio/sunburstR')
+```
+
+#### Using "Publish to Server" button in RStudio
+
+In RStudio, open `app.R` file that can be found in the root directory of the repository. In the editor panel, click the blue "Publish to Server" button. The dialog will open where you can select the files and directories to publish. Make sure you have the shinyapps.io deployment account credentials properly set.
+
+Upon clicking the "Publish to Server" button, the popup dialog appears in which it is possible to select the files and directories being deployed. As a minimum, the following files are directories are required (directories are distinguished by appended `/` character):
+
+- `.Rbuildignore`
+- `app.R`
+- `DESCRIPTION`
+- `NAMESPACE`
+- `data/`
+- `inst/`
+- `R/`
+
+#### Running `deployApp` command from the `rsconnect` package
+
+Alternate way to deploy an app is to use `deployApp` command from the `rsconnect` package. In the repository root directory, run the following in R console:
+
+```{r eval=FALSE, echo=TRUE}
+rsconnect::deployApp(appFileManifest = 'app_file_manifest')
+```
+
+It will deploy the app, bundling the files specified in the `app_file_manifest` in the root directory of the repository.
+
+## Deploying locally
+
+To deploy locally in your computer, all it takes is to install the package from the GitHub repository using `remotes` package:
+
+```{r eval=FALSE, echo=TRUE}
+remotes::install_github('bcgov/housing-data-challenge-ruby')
+```
+
+To run the BC Housing Data Visualization app, load the `bchousing` packages and run the app:
+
+```{r eval=FALSE, echo=TRUE}
+library(bchousing)
+bchousing::run_app()
+```
+
+Optionally, `run_app()` function takes `host` and `port` arguments if you want to explicitly set the host and port to run the app on. For example:
+
+```{r eval=FALSE, echo=TRUE}
+library(bchousing)
+bchousing::run_app(host = '0.0.0.0', port = 8080)
+```
