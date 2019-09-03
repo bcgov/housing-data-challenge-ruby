@@ -11,6 +11,7 @@ License: Apache-2.0
 Encoding: UTF-8
 LazyData: true
 Imports: 
+    bchousing,
     bsplus,
     cancensus,
     DT,
@@ -38,8 +39,9 @@ Imports:
     stringr,
     tidyr,
     treemap
-Remotes: 
+Remotes:
     andrewsali/shinycssloaders,
+    bcgov/housing-data-challenge-ruby,
     mountainmath/cancensus,
     mtennekes/treemap,
     timelyportfolio/sunburstR
