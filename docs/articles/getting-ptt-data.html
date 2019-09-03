@@ -53,6 +53,9 @@
   </a>
   <ul class="dropdown-menu" role="menu">
 <li>
+      <a href="../articles/deploying-the-app.html">Deploying the app</a>
+    </li>
+    <li>
       <a href="../articles/getting-census-data.html">Getting Census data</a>
     </li>
     <li>
@@ -90,9 +93,9 @@
 
     
     
-<div id="shiny-app-data" class="section level2">
+<div id="shiny-app-ptt-data" class="section level2">
 <h2 class="hasAnchor">
-<a href="#shiny-app-data" class="anchor"></a>Shiny app data</h2>
+<a href="#shiny-app-ptt-data" class="anchor"></a>Shiny app PTT data</h2>
 <p>Property transfer tax (PTT) portion of the BC Housing Data Visualization app uses three internal datasets, one for each geographical level for which the data is published. Those datasets are exported by the <code>bchousing</code> package, and are lazily loaded by the app (i.e. they are loaded by the app at runtime only when they are explicitly requested). The datasets are <code>sf</code> data frames and contain one observation per location and transaction period (month), a number of variables as well as geography (polygons).</p>
 <p>Those datasets are:</p>
 <ul>
@@ -124,10 +127,10 @@
 </ul>
 <p>That data was then used to attach to the boundaries at the corresponding level.</p>
 <p>The R script that loads and processes the raw <code>csv</code> files and attaches the boundaries is <code>data-raw/ptt/ptt_2016_2018.R</code>. In case past data needs to be regenerated, it can simply be done by sourcing this file.</p>
-<pre><code><a href="https://www.rdocumentation.org/packages/base/topics/source">source('data-raw/ptt/ptt_2016_2018.R')</a></code></pre>
+<div class="sourceCode" id="cb1"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb1-1" data-line-number="1"><span class="kw"><a href="https://www.rdocumentation.org/packages/base/topics/source">source</a></span>(<span class="st">'data-raw/ptt/ptt_2016_2018.R'</span>)</a></code></pre></div>
 <p>It is assumed that current working directory is the root directory of the repository.</p>
 <blockquote>
-<p><strong>NOTE:</strong> Sourcing this file will regenerate the PTT datasets and overwrite existing ones, effectively dropping any data beyond 2018. If this file gets sourced, it has to be made sure that all relevant files are sourced too to include data of any subsequent year PTT data is available for.</p>
+<p>NOTE: Sourcing this file will regenerate the PTT datasets and overwrite existing ones, effectively dropping any data beyond 2018. If this file gets sourced, it has to be made sure that all relevant files are sourced too to include data of any subsequent year PTT data is available for.</p>
 </blockquote>
 <p>The steps to generate the datasets from raw csv files and boundaries are:</p>
 <ol style="list-style-type: decimal">
@@ -148,9 +151,7 @@
 </blockquote>
 <p>The data is retrieved at all three regular geographical levels (Development Region, Regional District and Municipality), as well as at the Province level. Province level data is used for summary stats shown on the app home page as quick facts.</p>
 <p>Ad-hoc functions <code>FixPastData()</code> and <code>FixCurrentData()</code> are defined in the script to align the data for the previous years (retrieved from package datasets <code>ptt_dr_sf</code>, <code>ptt_rd_sf</code> and <code>ptt_mun_sf</code>) and current year retrieved using <code>bcdata</code> R package. These functions are applied to the data past and current data respectively, for each geographical level (except the Province level).</p>
-<blockquote>
 <p>Function <code>FixPastData()</code> takes package datasets <code>ptt_dr_sf</code>, <code>ptt_rd_sf</code> and <code>ptt_mun_sf</code> as input. It first filters out any previously imporated data for 2019, to avoid any potential collission with the data being freshly imported for 2019.</p>
-</blockquote>
 <p>Once aligned in such way, the past and current data is then joined together.</p>
 <p>After joining, the geometry is added from the boundaries files, again using function <code><a href="../reference/JoinPttShapes.html">JoinPttShapes()</a></code>.</p>
 <p>Summary data is then prepared from the Province-level data and all four datasets are saved into <code>ptt_dr_sf</code>, <code>ptt_rd_sf</code>, <code>ptt_mun_sf</code> and <code>ptt_prov_dash</code> datasets into <code>data/</code> package directory, overwriting existing files.</p>
@@ -160,7 +161,7 @@
 <h2 class="hasAnchor">
 <a href="#importing-fresh-2019-data-into-the-app" class="anchor"></a>Importing fresh 2019 data into the app</h2>
 <p>To import fresh 2019 data into the app after Ministry of Finance has published updated data in the B.C. Data Catalogue, it is enough to only source the <code>data-raw/ptt/ptt_2019.R</code> file.</p>
-<pre><code><a href="https://www.rdocumentation.org/packages/base/topics/source">source('data-raw/ptt/ptt_2019.R')</a></code></pre>
+<div class="sourceCode" id="cb2"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb2-1" data-line-number="1"><span class="kw"><a href="https://www.rdocumentation.org/packages/base/topics/source">source</a></span>(<span class="st">'data-raw/ptt/ptt_2019.R'</span>)</a></code></pre></div>
 <p>It will pull the most recent data and update package datasets.</p>
 </div>
 <div id="deploying-fresh-2019-data-to-shinyapps-io" class="section level2">
@@ -169,50 +170,50 @@
 <p>When the 2019 data is refreshed as above, all it takes to get that new data installed on shinyapps.io instance is to re-deploy the app to BC Stats shinyapps.io account.</p>
 <p>In general, this can be done in two ways, as described on the <a href="https://shiny.rstudio.com/articles/shinyapps.html">Shinyapps.io - Getting started</a> documentation page.</p>
 <blockquote>
-<p><em>NOTE:</em> Make sure all dependencies are installed on your computer before the deployment. To do so, follow the steps below:</p>
+<p>NOTE: Make sure all dependencies are installed on your computer before the deployment. To do so, follow the steps below:</p>
 </blockquote>
 <ol style="list-style-type: decimal">
 <li>Detach all currently attached R packages.</li>
 </ol>
-<pre><code>all_attached &lt;- paste("package:", names(sessionInfo()$otherPkgs), sep = "")
-suppressWarnings(lapply(all_attached, detach, character.only = TRUE, unload = TRUE))</code></pre>
+<div class="sourceCode" id="cb3"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb3-1" data-line-number="1">all_attached &lt;-<span class="st"> </span><span class="kw"><a href="https://www.rdocumentation.org/packages/base/topics/paste">paste</a></span>(<span class="st">"package:"</span>, <span class="kw"><a href="https://www.rdocumentation.org/packages/base/topics/names">names</a></span>(<span class="kw"><a href="https://www.rdocumentation.org/packages/utils/topics/sessionInfo">sessionInfo</a></span>()<span class="op">$</span>otherPkgs), <span class="dt">sep =</span> <span class="st">""</span>)</a>
+<a class="sourceLine" id="cb3-2" data-line-number="2"><span class="kw"><a href="https://www.rdocumentation.org/packages/base/topics/warning">suppressWarnings</a></span>(<span class="kw"><a href="https://www.rdocumentation.org/packages/base/topics/lapply">lapply</a></span>(all_attached, detach, <span class="dt">character.only =</span> <span class="ot">TRUE</span>, <span class="dt">unload =</span> <span class="ot">TRUE</span>))</a></code></pre></div>
 <ol start="2" style="list-style-type: decimal">
 <li>Install required packages:</li>
 </ol>
-<pre><code>required_packages &lt;- c(
-  'bsplus',
-  'cancensus',
-  'DT',
-  'dplyr',
-  'forcats',
-  'golem',
-  'here',
-  'htmlwidgets',
-  'leaflet',
-  'leaflet.extras',
-  'lubridate',
-  'magrittr',
-  'markdown',
-  'pkgload',
-  'plotly',
-  'readr',
-  'rmapshaper',
-  'rmarkdown',
-  'scales',
-  'sf',
-  'shiny',
-  'shinyjs',
-  'stringr',
-  'tidyr'
-)
-    
-install.packages(required_packages, quiet = TRUE)</code></pre>
+<div class="sourceCode" id="cb4"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb4-1" data-line-number="1">required_packages &lt;-<span class="st"> </span><span class="kw"><a href="https://www.rdocumentation.org/packages/base/topics/c">c</a></span>(</a>
+<a class="sourceLine" id="cb4-2" data-line-number="2">  <span class="st">'bsplus'</span>,</a>
+<a class="sourceLine" id="cb4-3" data-line-number="3">  <span class="st">'cancensus'</span>,</a>
+<a class="sourceLine" id="cb4-4" data-line-number="4">  <span class="st">'DT'</span>,</a>
+<a class="sourceLine" id="cb4-5" data-line-number="5">  <span class="st">'dplyr'</span>,</a>
+<a class="sourceLine" id="cb4-6" data-line-number="6">  <span class="st">'forcats'</span>,</a>
+<a class="sourceLine" id="cb4-7" data-line-number="7">  <span class="st">'golem'</span>,</a>
+<a class="sourceLine" id="cb4-8" data-line-number="8">  <span class="st">'here'</span>,</a>
+<a class="sourceLine" id="cb4-9" data-line-number="9">  <span class="st">'htmlwidgets'</span>,</a>
+<a class="sourceLine" id="cb4-10" data-line-number="10">  <span class="st">'leaflet'</span>,</a>
+<a class="sourceLine" id="cb4-11" data-line-number="11">  <span class="st">'leaflet.extras'</span>,</a>
+<a class="sourceLine" id="cb4-12" data-line-number="12">  <span class="st">'lubridate'</span>,</a>
+<a class="sourceLine" id="cb4-13" data-line-number="13">  <span class="st">'magrittr'</span>,</a>
+<a class="sourceLine" id="cb4-14" data-line-number="14">  <span class="st">'markdown'</span>,</a>
+<a class="sourceLine" id="cb4-15" data-line-number="15">  <span class="st">'pkgload'</span>,</a>
+<a class="sourceLine" id="cb4-16" data-line-number="16">  <span class="st">'plotly'</span>,</a>
+<a class="sourceLine" id="cb4-17" data-line-number="17">  <span class="st">'readr'</span>,</a>
+<a class="sourceLine" id="cb4-18" data-line-number="18">  <span class="st">'rmapshaper'</span>,</a>
+<a class="sourceLine" id="cb4-19" data-line-number="19">  <span class="st">'rmarkdown'</span>,</a>
+<a class="sourceLine" id="cb4-20" data-line-number="20">  <span class="st">'scales'</span>,</a>
+<a class="sourceLine" id="cb4-21" data-line-number="21">  <span class="st">'sf'</span>,</a>
+<a class="sourceLine" id="cb4-22" data-line-number="22">  <span class="st">'shiny'</span>,</a>
+<a class="sourceLine" id="cb4-23" data-line-number="23">  <span class="st">'shinyjs'</span>,</a>
+<a class="sourceLine" id="cb4-24" data-line-number="24">  <span class="st">'stringr'</span>,</a>
+<a class="sourceLine" id="cb4-25" data-line-number="25">  <span class="st">'tidyr'</span></a>
+<a class="sourceLine" id="cb4-26" data-line-number="26">)</a>
+<a class="sourceLine" id="cb4-27" data-line-number="27">    </a>
+<a class="sourceLine" id="cb4-28" data-line-number="28"><span class="kw"><a href="https://www.rdocumentation.org/packages/utils/topics/install.packages">install.packages</a></span>(required_packages, <span class="dt">quiet =</span> <span class="ot">TRUE</span>)</a></code></pre></div>
 <ol start="3" style="list-style-type: decimal">
 <li>Install development packages fron GitHub using <code>remotes</code> package:</li>
 </ol>
-<pre><code><a href="https://www.rdocumentation.org/packages/remotes/topics/install_github">remotes::install_github('andrewsali/shinycssloaders')
-remotes::install_github('mtennekes/treemap')
-remotes::install_github('timelyportfolio/sunburstR')</a></code></pre>
+<div class="sourceCode" id="cb5"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb5-1" data-line-number="1">remotes<span class="op">::</span><span class="kw"><a href="https://www.rdocumentation.org/packages/remotes/topics/install_github">install_github</a></span>(<span class="st">'andrewsali/shinycssloaders'</span>)</a>
+<a class="sourceLine" id="cb5-2" data-line-number="2">remotes<span class="op">::</span><span class="kw"><a href="https://www.rdocumentation.org/packages/remotes/topics/install_github">install_github</a></span>(<span class="st">'mtennekes/treemap'</span>)</a>
+<a class="sourceLine" id="cb5-3" data-line-number="3">remotes<span class="op">::</span><span class="kw"><a href="https://www.rdocumentation.org/packages/remotes/topics/install_github">install_github</a></span>(<span class="st">'timelyportfolio/sunburstR'</span>)</a></code></pre></div>
 <div id="using-publish-to-server-button-in-rstudio" class="section level4">
 <h4 class="hasAnchor">
 <a href="#using-publish-to-server-button-in-rstudio" class="anchor"></a>Using “Publish to Server” button in RStudio</h4>
@@ -222,18 +223,19 @@ remotes::install_github('timelyportfolio/sunburstR')</a></code></pre>
 <h4 class="hasAnchor">
 <a href="#running-deployapp-command-from-the-rsconnect-package" class="anchor"></a>Running <code>deployApp</code> command from the <code>rsconnect</code> package</h4>
 <p>In the repository root directory, run the following in R console:</p>
-<pre><code><a href="https://www.rdocumentation.org/packages/rsconnect/topics/deployApp">rsconnect::deployApp()</a></code></pre>
+<div class="sourceCode" id="cb6"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb6-1" data-line-number="1">rsconnect<span class="op">::</span><span class="kw"><a href="https://www.rdocumentation.org/packages/rsconnect/topics/deployApp">deployApp</a></span>()</a></code></pre></div>
 </div>
 </div>
 <div id="beyond-2019" class="section level2">
 <h2 class="hasAnchor">
 <a href="#beyond-2019" class="anchor"></a>Beyond 2019</h2>
-<p>There were a few challenges when working with PTT data published on B.C Data Catalogue. They include:</p>
+<p>There are a few challenges when working with PTT data published on B.C Data Catalogue. They include:</p>
 <ul>
-<li>The file layout (varaible names and availability) was changing from year to year, or even between different geographical levels within the same year. In other words, some varaibles would not be present across all years, and some would have thrir names changed.</li>
-<li>The location names were not consistens between the years. Location names were not always in the same case, sometimes they contained seqence numbers as prefixes.</li>
+<li>The file layout (varaible names and availability) is not consistent from year to year, or even between different geographical levels within the same year. In other words, some varaibles are not present across all years, and some have their names changed.</li>
+<li>The location names are not consistens between the years. Location names are not always in the same case, sometimes they contained seqence numbers as prefixes, etc.</li>
 </ul>
-<p>For this reason, the best strategy to import data beyond 2019 is to create a new R script for each year, and follow similar procedure as it was done in <code>data-raw/ptt/ptt_2019.R</code> script. Because similar challenges to those described above can probably be expected in the future too, special attention needs to be made to changing PTT file layouts (variable names) and location names.</p>
+<p>For this reason, the best strategy to import data beyond 2019 is to create a new R script for each year, and follow similar procedure as it was done in <code>data-raw/ptt/ptt_2019.R</code> script. Modifications will need to be made as necessary, after carefully inspecting the varaible location names in the data.</p>
+<p>Because similar challenges to those described above can probably be expected in the future too, special attention needs to be paid to changing PTT file layouts (variable names) and location names.</p>
 </div>
   </div>
 
@@ -243,7 +245,7 @@ remotes::install_github('timelyportfolio/sunburstR')</a></code></pre>
       <h2 class="hasAnchor">
 <a href="#tocnav" class="anchor"></a>Contents</h2>
       <ul class="nav nav-pills nav-stacked">
-<li><a href="#shiny-app-data">Shiny app data</a></li>
+<li><a href="#shiny-app-ptt-data">Shiny app PTT data</a></li>
       <li><a href="#data-source">Data Source</a></li>
       <li><a href="#importing-fresh-2019-data-into-the-app">Importing fresh 2019 data into the app</a></li>
       <li><a href="#deploying-fresh-2019-data-to-shinyapps-io">Deploying fresh 2019 data to shinyapps.io</a></li>

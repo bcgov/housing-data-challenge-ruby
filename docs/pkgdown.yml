@@ -2,6 +2,7 @@ pandoc: 2.3.1
 pkgdown: 1.3.0
 pkgdown_sha: ~
 articles:
+  deploying-the-app: deploying-the-app.html
   getting-census-data: getting-census-data.html
   getting-ptt-data: getting-ptt-data.html
 

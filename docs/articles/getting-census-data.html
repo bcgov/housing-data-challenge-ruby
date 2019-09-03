@@ -53,6 +53,9 @@
   </a>
   <ul class="dropdown-menu" role="menu">
 <li>
+      <a href="../articles/deploying-the-app.html">Deploying the app</a>
+    </li>
+    <li>
       <a href="../articles/getting-census-data.html">Getting Census data</a>
     </li>
     <li>
@@ -90,11 +93,105 @@
 
     
     
-<div class="sourceCode" id="cb1"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb1-1" data-line-number="1"><span class="kw"><a href="https://www.rdocumentation.org/packages/base/topics/library">library</a></span>(bchousing)</a></code></pre></div>
+<div id="shiny-app-census-data" class="section level2">
+<h2 class="hasAnchor">
+<a href="#shiny-app-census-data" class="anchor"></a>Shiny app Census data</h2>
+<p>Census portion of the BC Housing Data Visualization app is currently focused on four topics:</p>
+<ul>
+<li>
+<strong>Housing types</strong> - Distribution of dwellings by property type (e.g. detached single-family homes, row houses, appartments in buildings).</li>
+<li>
+<strong>Population pyramid</strong> - Distribution of population by age band and gender.</li>
+<li>
+<strong>Mobility</strong> - Percentages of population that moved, categorized by the type of move (e.g. inter- or intra-provincial movers).</li>
+<li>
+<strong>Shelter-to-income ratio</strong> - Proportion of households with that spend more than 30% of pre-tax income on shelter.</li>
+</ul>
+<p>Consequently, the data the app uses is that of relevance to those topics.</p>
+<p>Relevant data for each of these topics is retrieved at the following levels:</p>
+<ul>
+<li>Province</li>
+<li>Census Division</li>
+<li>Census Subdivision</li>
+<li>Census Metropolitan Area</li>
+<li>Census Tract</li>
+</ul>
+<p>While data at Dissimination Area level is also available, it is not incorporated into the BC Housing Data Visualization app due to performance reasons, but can be made available upon request.</p>
+<p>Census data that downloaded is saved into internal datasets within <code>bchousing</code> package, but it is not exported by the package. Instead, all base datasets downloaded from Statistics Canada and any datasets derived from them that are used by the app are stored as internal data inside <code>R/sysdata.rda</code> file.</p>
+<p>This article explains how these datasets are generated and how they can be refreshed if required.</p>
+</div>
+<div id="data-source" class="section level2">
+<h2 class="hasAnchor">
+<a href="#data-source" class="anchor"></a>Data Source</h2>
+<p>The census visualizations in the app use data published by Statistics Canada for 2016 census year, as well as 2011 and 2006 in the case of population pyramid.</p>
+<p>The data is obtained through <a href="https://censusmapper.ca/api">CensusMapper API</a> using <a href="https://github.com/mountainMath/cancensus">cancensus R package</a><sup>1</sup>.</p>
+</div>
+<div id="census-topics-exploration" class="section level2">
+<h2 class="hasAnchor">
+<a href="#census-topics-exploration" class="anchor"></a>Census topics exploration</h2>
+<p>For the purpose of exploration of census topics and identificataion of relevant variables and datasets, a separate R Shiny app was developed to help with the task, <a href="https://github.com/sasha-ruby/cancenus-explorer">cancensus-explorer</a><sup>2</sup>. While the app can be generalized and be applied to Canada-wide regions, in the scope of BC Housing Data Visualization app cancensus explorer filters out all non-B.C. data.</p>
+</div>
+<div id="downloading-data" class="section level2">
+<h2 class="hasAnchor">
+<a href="#downloading-data" class="anchor"></a>Downloading data</h2>
+<p>Census data is downloaded using <code>data-raw/census/get_census_data.R</code> script. It requires a CensusMapper API KEY, which can be obtained by signing up for a <a href="https://censusmapper.ca/users/sign_up">CensusMapper account</a>.</p>
+<p>For each census topic explored, the script loops through a vector of census levels (<code><a href="https://www.rdocumentation.org/packages/base/topics/c">c("CMA", "CD", "CSD", "CT", "DA", "PR")</a></code>) and census years (2016 in general, and <code><a href="https://www.rdocumentation.org/packages/base/topics/c">c(2016, 2011, 2006)</a></code> for Population Pyramid data).</p>
+<p>In addition to fetching data from Statistics Canada using CensusMapper API, the data is also reshaped in format suitable for its particular use (i.e. data visualization type) within the app.</p>
+</div>
+<div id="refreshing-data" class="section level2">
+<h2 class="hasAnchor">
+<a href="#refreshing-data" class="anchor"></a>Refreshing data</h2>
+<blockquote>
+<p>It is assumed that current working directory is the root directory of the BC Housing Data Visualization repository.</p>
+</blockquote>
+<p>If there is a need to refresh the data, the following steps need to be performed:</p>
+<ol style="list-style-type: decimal">
+<li>Sign up for a <a href="https://censusmapper.ca/users/sign_up">CensusMapper account</a> to obtain a a CensusMapper API KEY.</li>
+<li>In the root directory of the repository, create a <code>.Renviron</code> file by running the following command in the R console:</li>
+</ol>
+<div class="sourceCode" id="cb1"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb1-1" data-line-number="1">usethis<span class="op">::</span><span class="kw"><a href="https://usethis.r-lib.org/reference/edit.html">edit_r_environ</a></span>(<span class="dt">scope =</span> <span class="st">'project'</span>)</a></code></pre></div>
+<ol start="3" style="list-style-type: decimal">
+<li>When the file opens in the editor, add the following key-value pair on a separate line (make sure to replace the <code>my_censusmapper_api_key</code> with the actual API key obtained from your CensusMapper account:</li>
+</ol>
+<div class="sourceCode" id="cb2"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb2-1" data-line-number="1">cancensus.api_key =<span class="st"> 'my_censusmapper_api_key'</span></a></code></pre></div>
+<ol start="4" style="list-style-type: decimal">
+<li>Restart your R session (so that new configuration in .Renviron is loaded).</li>
+<li>Modify <code>data-raw/census/get_census_data.R</code> script to set <code>use_cached_data</code> variable to <code>FALSE</code>. Alternatively, remove all the content inside <code>cache/</code> directory in the root directory of the repository.</li>
+<li>Install BC Housing Data Visualization app as a package (so that it would be possible to use package internal functions) from GitHub using <code>remotes</code> package:</li>
+</ol>
+<div class="sourceCode" id="cb3"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb3-1" data-line-number="1">remotes<span class="op">::</span><span class="kw"><a href="https://www.rdocumentation.org/packages/remotes/topics/install_github">install_github</a></span>(<span class="st">'bcgov/housing-data-challenge-ruby'</span>)</a></code></pre></div>
+<ol start="7" style="list-style-type: decimal">
+<li>Source the <code>data-raw/census/get_census_data.R</code> script to download fresh data and save it into <code>R/sysdata.rda</code>.</li>
+</ol>
+<div class="sourceCode" id="cb4"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb4-1" data-line-number="1"><span class="kw"><a href="https://www.rdocumentation.org/packages/base/topics/source">source</a></span>(<span class="st">'data-raw/census/get_census_data.R'</span>)</a></code></pre></div>
+<ol start="8" style="list-style-type: decimal">
+<li>Deploy the app.</li>
+</ol>
+</div>
+<div id="beyond-2016-census" class="section level2">
+<h2 class="hasAnchor">
+<a href="#beyond-2016-census" class="anchor"></a>Beyond 2016 census</h2>
+<p>When new census data in 2021 gets collected and published by Statistics Canada, a new data exploration exercise will need to be performed to identofy relevant varaibles and datasets for the selected topics. After that, the <code>data-raw/census/get_census_data.R</code> script will require modifications to include new variables identified as relevant during exploration. Once the modifications are complete,</p>
+<hr>
+<p><sup>1</sup> von Bergmann J, Shkolnik D, Jacobs A (2019). cancensus: R package to access, retrieve, and work with Canadian Census data and geography. R package version 0.2.0, <a href="https://mountainmath.github.io/cancensus/" class="uri">https://mountainmath.github.io/cancensus/</a>.</p>
+<p><sup>2</sup> Bogdanovic S (2019). cancensus-explorer: R Shiny app that enables users to discover, explore and visualize Canadian census data, <a href="https://github.com/sasha-ruby/cancenus-explorer/" class="uri">https://github.com/sasha-ruby/cancenus-explorer/</a>.</p>
+</div>
   </div>
 
   <div class="col-md-3 hidden-xs hidden-sm" id="sidebar">
 
+        <div id="tocnav">
+      <h2 class="hasAnchor">
+<a href="#tocnav" class="anchor"></a>Contents</h2>
+      <ul class="nav nav-pills nav-stacked">
+<li><a href="#shiny-app-census-data">Shiny app Census data</a></li>
+      <li><a href="#data-source">Data Source</a></li>
+      <li><a href="#census-topics-exploration">Census topics exploration</a></li>
+      <li><a href="#downloading-data">Downloading data</a></li>
+      <li><a href="#refreshing-data">Refreshing data</a></li>
+      <li><a href="#beyond-2016-census">Beyond 2016 census</a></li>
+      </ul>
+</div>
       </div>
 
 </div>
