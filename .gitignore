@@ -12,3 +12,6 @@
 /data/housing/*DA.rds
 inst/doc
 housing-data-challenge-ruby.dcf
+
+# Environment variables
+.Renviron

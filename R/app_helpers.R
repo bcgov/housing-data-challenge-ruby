@@ -179,7 +179,7 @@ Jumbotron <- function(header, popPerc = 0, popInc = TRUE, dwellPerc = 0, dwellIn
               </div>
               <div class=\"splash-text\">
                 At the same time, number of private
-                dwellings has ", dwellChange ," by <strong>", dwellPerc ,
+                dwellings occupied by usual residents has ", dwellChange ," by <strong>", dwellPerc ,
     "%</strong>
               </div>
               <div class=\"splash-text\">",

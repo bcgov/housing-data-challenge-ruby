@@ -7,10 +7,13 @@ library(tidyr)
 library(here)
 library(sf)
 library(rmapshaper)
+library(bchousing)
 
-# cancensus global config
+# 01. Options - cancensus global config ----
 # Obtain a free API key by signing up for a CensusMapper account at https://censusmapper.ca/users/sign_up.
-options(cancensus.api_key = "my.census.mapper.api.key")
+# and store it in .Renviron file in the root directory of the repository. This file is git-ignored.
+cancensus.api_key <- Sys.getenv("cancensus.api_key")
+options(cancensus.api_key = cancensus.api_key)
 options(cancensus.cache_path = here::here("cache"))
 
 # Set this variable to FALSE if fresh data download from Statistics Canada is needed
@@ -23,7 +26,46 @@ getRegions <- function(use_cached_data) {
 }
 regions <- getRegions(use_cached_data)
 
+# 02. 2016 census - province level ----
+c_16 <- get_census(
+  dataset = 'CA16',
+  regions = list(PR = "59"),
+  vectors = c('v_CA16_401', 'v_CA16_402', 'v_CA16_403', 'v_CA16_404', 'v_CA16_405', 'v_CA16_406', 'v_CA16_407'),
+  use_cache = TRUE,
+  labels = "short",
+  geo_format = NA
+) %>%
+  select(GeoUID, v_CA16_403, v_CA16_405)
+
+# 2011 census - province level
+c_11 <- get_census(
+  dataset = 'CA11',
+  # level = 'PR',
+  regions = list(PR = "59"),
+  vectors = c('v_CA11F_1', 'v_CA11F_2', 'v_CA11F_3', 'v_CA11F_4', 'v_CA11F_5', 'v_CA11F_6', 'v_CA11F_7'),
+  use_cache = TRUE,
+  labels = "short",
+  geo_format = NA
+) %>%
+  select(GeoUID, v_CA11F_3)
+
+# join 2016 and 2011 data
+c_16_prov <- dplyr::inner_join(c_16, c_11, by = c('GeoUID'), keep = TRUE)
+
+# Get only required variables
+c_16_prov <- c_16_prov %>%
+  mutate(
+    usual_res_dwellings_change = round((v_CA16_405 - v_CA11F_3) / v_CA16_405 * 100, 2)
+  ) %>%
+  select(
+    -c(v_CA11F_3, v_CA16_405)
+  ) %>%
+  rename(
+    population_change = v_CA16_403
+  )
+
 # General census data
+# 03. Hosuing types ----
 getHousingTypesData <- function(year, censusLevel = "CMA", regions) {
   censusYear <- paste0('CA', substr(paste0(year), 3, 4))
 
@@ -106,8 +148,7 @@ getHousingTypesData <- function(year, censusLevel = "CMA", regions) {
     ) %>%
     select(-one_of(c("SumAll")))
 
-  # saveRDS(censusHousing, here::here("data", "housing", paste0("census",  year, "-housing-", censusLevel, ".rds")))
-  save(censusHousing, file = paste0("cache/housingTypes", stringr::str_to_title(censusLevel), ".rda"))
+  saveRDS(censusHousing, file = paste0("cache/housingTypes", stringr::str_to_title(censusLevel), ".rds"))
 }
 
 # Loop through year and geographical levels and save housing types-related data
@@ -118,7 +159,7 @@ for (censusYear in c("2016")) {
   }
 }
 
-# mobility
+# 04. Mobility ----
 vectorsMobility <- search_census_vectors(' Mobility status 1 year ago', "CA16", type = "Total") %>%
   child_census_vectors(leaves_only = FALSE)
 
@@ -174,8 +215,7 @@ for (censusLevel in c("CMA", "CD", "CSD", "CT", "DA")) {
       `External Migrants Ratio` = round(`External migrants` / (`Non-movers` + `Movers`) * 100, digits = 2)
     )
 
-  # saveRDS(censusData, here::here("data", paste0("census2016-mobility-", censusLevel, ".rds")))
-  save(censusData, file = paste0("cache/censusMobility", stringr::str_to_title(censusLevel), ".rda"))
+  saveRDS(censusData, file = paste0("cache/censusMobility", stringr::str_to_title(censusLevel), ".rds"))
 
   censusDataGathered <- censusData %>%
     mutate(`Region` = as.character(`Region`), Type = as.character(Type)) %>%
@@ -185,8 +225,7 @@ for (censusLevel in c("CMA", "CD", "CSD", "CT", "DA")) {
       key = "Migration", value = "count") %>%
     select(GeoUID, Region, Migration, count, geometry)
 
-  # saveRDS(censusDataGathered, here::here("data", paste0("census2016-mobility-", censusLevel, "-gathered.rds")))
-  save(censusDataGathered, file = paste0("cache/censusMobility", stringr::str_to_title(censusLevel), "Gathered.rda"))
+  saveRDS(censusDataGathered, file = paste0("cache/censusMobility", stringr::str_to_title(censusLevel), "Gathered.rds"))
 
   censusMobilitySeq <- censusData %>%
   gather(
@@ -222,11 +261,10 @@ for (censusLevel in c("CMA", "CD", "CSD", "CT", "DA")) {
   select(GeoUID, sequence, count)
   st_geometry(censusMobilitySeq) <- NULL
 
-  # saveRDS(censusMobilitySeq, here::here("data", paste0("census2016-mobility-", censusLevel, "-seq.rds")))
-  save(censusMobilitySeq, file = paste0("cache/censusMobility", stringr::str_to_title(censusLevel), "Seq.rda"))
+  saveRDS(censusMobilitySeq, file = paste0("cache/censusMobility", stringr::str_to_title(censusLevel), "Seq.rds"))
 }
 
-# Shelter-Cost-to-Income Ratio
+# 05. Shelter-Cost-to-Income Ratio ----
 vectorsStir <- c("v_CA16_4886", "v_CA16_4887", "v_CA16_4888")
 for (censusLevel in c("CMA", "CD", "CSD", "CT", "DA")) {
   censusStirData <-
@@ -270,11 +308,10 @@ for (censusLevel in c("CMA", "CD", "CSD", "CT", "DA")) {
     )]
   )
 
-  # saveRDS(censusStirData, here::here("data", paste0("census2016Spatial-stir-", censusLevel, ".rds")))
-  save(censusStirData, file = paste0("cache/census2016", stringr::str_to_title(censusLevel), "Stir.rda"))
+  saveRDS(censusStirData, file = paste0("cache/census2016", stringr::str_to_title(censusLevel), "Stir.rds"))
 }
 
-# Age and Sex - Average Age
+# 06. Age and Sex - Average Age ----
 for (censusLevel in c("CMA", "CD", "CSD", "CT", "DA")) {
   censusData <-
     get_census(
@@ -301,12 +338,11 @@ for (censusLevel in c("CMA", "CD", "CSD", "CT", "DA")) {
     mutate(`Region` = as.character(`Region.Name`), Type = as.character(Type)) %<>%
     filter("Average Age" > 0)
 
-  # saveRDS(censusData, here::here("data", paste0("census2016-avg-age-", censusLevel, ".rds")))
-  save(censusData, file = paste0("cache/census2016aa", stringr::str_to_title(censusLevel), ".rda"))
+  saveRDS(censusData, file = paste0("cache/census2016aa", stringr::str_to_title(censusLevel), ".rds"))
 }
 
 
-# Age and Sex - Population pyramid
+# 07. Age and Sex - Population pyramid ----
 # cancensus
 ## Census 2016 has 5 year bands up to 100 years of age and over,
 ## while census 2011 and 2006 bands go up to 85 and over
@@ -358,8 +394,8 @@ for (year in c("2006", "2011", "2016")) {
     }
   )
 
-  for (censusLevel in c("CMA", "CD", "CSD", "CT", "DA", "PR")) {
-    print(paste("Now getting geo-level ", censusLevel, " for ", censusYear))
+  for (censusLevel in c("CMA", "CD", "CSD", "CT")) { # , "DA", "PR"
+    cat(paste("Now getting geo-level ", censusLevel, " for ", censusYear))
     # ppData <- getPopulationPyramidData(censusYear, censusLevel, ppVectorsFemale, ppVectorsMale, regions)
 
     # Female population
@@ -432,6 +468,8 @@ for (year in c("2006", "2011", "2016")) {
     censusPPMale %<>%
       gather("age", "population", 5:(length(vectorsMale) + 4))
 
+    cat("Binding rows...\n")
+
     censusPP <- bind_rows(censusPPMale, censusPPFemale)
     censusPP %<>%
       mutate(
@@ -440,6 +478,8 @@ for (year in c("2006", "2011", "2016")) {
         sex = as.character(sex),
         age = as.character(age)
       )
+
+    cat("Adding missing bands...\n")
 
     censusPP %<>%
       mutate(
@@ -459,15 +499,137 @@ for (year in c("2006", "2011", "2016")) {
       ungroup() %>%
       arrange(GeoUID, sex, ageStartYear)
 
+    cat("Rearranging columns...\n")
+
     # Rearrange for proper sorting when plotting
     # censusPP$age <- factor(censusPP$age, levels = unique(censusPP$age)[order(censusPP$ageStartYear, decreasing = FALSE)])
     censusPP$ageStartYear <- factor(censusPP$ageStartYear, levels = unique(censusPP$ageStartYear)[order(censusPP$ageStartYear, decreasing = FALSE)])
     censusPP$age <- factor(censusPP$age, levels = unique(censusPP$age)[order(censusPP$ageStartYear, decreasing = FALSE)])
 
+    cat("Dropping unnecessary columns...\n")
+
     # Drop unnecessary columns
     censusPP %<>% select(-one_of("Type", "population"))
 
-    # saveRDS(censusPP, here::here("data", "population_pyramid", paste0("census", year, "-pp-", censusLevel, ".rds")))
-    save(censusPP, file = paste0("cache/census", year, 'pp', stringr::str_to_title(censusLevel), ".rda"))
+    cat("Saving to cache...\n")
+
+    saveRDS(censusPP, file = paste0("cache/census", year, 'pp', stringr::str_to_title(censusLevel), ".rds"))
   }
 }
+
+# 08. Read data from cache and store into objects ----
+# Average Age
+census2016aaCma <- readr::read_rds(file.path("cache", "census2016aaCMA.rds"))
+census2016aaCd <- readr::read_rds(file.path("cache", "census2016aaCD.rds"))
+census2016aaCsd <- readr::read_rds(file.path("cache", "census2016aaCSD.rds"))
+census2016aaCt <- readr::read_rds(file.path("cache", "census2016aaCT.rds"))
+# census2016aaDa <- readr::read_rds(file.path("cache", "census2016aaDA.rds"))
+
+
+# Not used
+# census2016ppPr <- readr::read_rds(file.path("cache", "census2016ppPR.rds"))
+# census2011ppPr <- readr::read_rds(file.path("cache", "census2011ppPR.rds"))
+# census2006ppPr <- readr::read_rds(file.path("cache", "census2006ppPR.rds"))
+# censusPpPr <- GetJoinedPp(census2016ppPr, census2011ppPr, census2006ppPr)
+
+census2016ppCma <- readr::read_rds(file.path("cache", "census2016ppCMA.rds"))
+census2011ppCma <- readr::read_rds(file.path("cache", "census2011ppCMA.rds"))
+census2006ppCma <- readr::read_rds(file.path("cache", "census2006ppCMA.rds"))
+censusPpCma <- GetJoinedPp(census2016ppCma, census2011ppCma, census2006ppCma)
+
+census2016ppCd <- readr::read_rds(file.path("cache", "census2016ppCD.rds"))
+census2011ppCd <- readr::read_rds(file.path("cache", "census2011ppCD.rds"))
+census2006ppCd <- readr::read_rds(file.path("cache", "census2006ppCD.rds"))
+censusPpCd <- GetJoinedPp(census2016ppCd, census2011ppCd, census2006ppCd)
+
+census2016ppCsd <- readr::read_rds(file.path("cache", "census2016ppCSD.rds"))
+census2011ppCsd <- readr::read_rds(file.path("cache", "census2011ppCSD.rds"))
+census2006ppCsd <- readr::read_rds(file.path("cache", "census2006ppCSD.rds"))
+censusPpCsd <- GetJoinedPp(census2016ppCsd, census2011ppCsd, census2006ppCsd)
+
+census2016ppCt <- readr::read_rds(file.path("cache", "census2016ppCT.rds"))
+census2011ppCt <- readr::read_rds(file.path("cache", "census2011ppCT.rds"))
+census2006ppCt <- readr::read_rds(file.path("cache", "census2006ppCT.rds"))
+censusPpCt <- GetJoinedPp(census2016ppCt, census2011ppCt, census2006ppCt)
+
+# census2016ppDa <- readr::read_rds(file.path("cache", "census2016ppDA.rds"))
+# census2006ppDa <- readr::read_rds(file.path("cache", "census2006ppDA.rds"))
+# census2011ppDa <- readr::read_rds(file.path("cache", "census2011ppDA.rds"))
+# censusPpDa <- GetJoinedPp(census2016ppDa, census2011ppDa, census2006ppDa)
+
+# Mobility
+censusMobilityCma <- readr::read_rds(file.path("cache", "censusMobilityCma.rds"))
+censusMobilityCd <- readr::read_rds(file.path("cache", "censusMobilityCd.rds"))
+censusMobilityCsd <- readr::read_rds(file.path("cache", "censusMobilityCsd.rds"))
+censusMobilityCt <- readr::read_rds(file.path("cache", "censusMobilityCt.rds"))
+# censusMobilityDa <- readr::read_rds(file.path("cache", "censusMobilityDa.rds"))
+censusMobilityCmaGathered <- readr::read_rds(file.path("cache", "censusMobilityCmaGathered.rds"))
+censusMobilityCdGathered <- readr::read_rds(file.path("cache", "censusMobilityCdGathered.rds"))
+censusMobilityCsdGathered <- readr::read_rds(file.path("cache", "censusMobilityCsdGathered.rds"))
+censusMobilityCtGathered <- readr::read_rds(file.path("cache", "censusMobilityCtGathered.rds"))
+# censusMobilityDa <- readr::read_rds(file.path("cache", "censusMobilityDa.rds"))
+censusMobilityCmaSeq <- readr::read_rds(file.path("cache", "censusMobilityCmaSeq.rds"))
+censusMobilityCdSeq <- readr::read_rds(file.path("cache", "censusMobilityCdSeq.rds"))
+censusMobilityCsdSeq <- readr::read_rds(file.path("cache", "censusMobilityCsdSeq.rds"))
+censusMobilityCtSeq <- readr::read_rds(file.path("cache", "censusMobilityCtSeq.rds"))
+# censusMobilityDa <- readr::read_rds(file.path("cache", "censusMobilityDa.rds"))
+
+# Housing Type
+housingTypesCma <- readr::read_rds(file.path("cache", "housingTypesCma.rds")) %>% na.omit()
+housingTypesCsd <- readr::read_rds(file.path("cache", "housingTypesCsd.rds")) %>% na.omit()
+housingTypesCd <- readr::read_rds(file.path("cache", "housingTypesCd.rds")) %>% na.omit()
+housingTypesCt <- readr::read_rds(file.path("cache", "housingTypesCt.rds")) %>% na.omit()
+# housingTypesDa <- readr::read_rds(file.path("cache", "housingTypesDa.rds"))
+
+# Shelter-Cost-to-Income Ratio data
+census2016CmaStir <- readr::read_rds(file.path("cache", "census2016CmaStir.rds"))
+census2016CdStir <- readr::read_rds(file.path("cache", "census2016CdStir.rds"))
+census2016CsdStir <- readr::read_rds(file.path("cache", "census2016CsdStir.rds"))
+census2016CtStir <- readr::read_rds(file.path("cache", "census2016CtStir.rds"))
+# census2016DaStir <- readr::read_rds(file.path("cache", "census2016DaStir.rds"))
+
+usethis::use_data(
+  c_16_prov,
+  census2016aaCma,
+  census2016aaCd,
+  census2016aaCsd,
+  census2016aaCt,
+  census2016ppCma,
+  census2011ppCma,
+  census2006ppCma,
+  censusPpCma,
+  census2016ppCd,
+  census2011ppCd,
+  census2006ppCd,
+  censusPpCd,
+  census2016ppCsd,
+  census2011ppCsd,
+  census2006ppCsd,
+  censusPpCsd,
+  census2016ppCt,
+  census2011ppCt,
+  census2006ppCt,
+  censusPpCt,
+  censusMobilityCma,
+  censusMobilityCd,
+  censusMobilityCsd,
+  censusMobilityCt,
+  censusMobilityCmaGathered,
+  censusMobilityCdGathered,
+  censusMobilityCsdGathered,
+  censusMobilityCtGathered,
+  censusMobilityCmaSeq,
+  censusMobilityCdSeq,
+  censusMobilityCsdSeq,
+  censusMobilityCtSeq,
+  housingTypesCma,
+  housingTypesCsd,
+  housingTypesCd,
+  housingTypesCt,
+  census2016CmaStir,
+  census2016CdStir,
+  census2016CsdStir,
+  census2016CtStir,
+  overwrite = TRUE,
+  internal = TRUE, compress = 'gzip'
+)

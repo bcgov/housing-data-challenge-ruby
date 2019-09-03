@@ -63,16 +63,30 @@ In addition to fetching data from Statistics Canada using CensusMapper API, the 
 
 ## Refreshing data
 
+> It is assumed that current working directory is the root directory of the BC Housing Data Visualization repository.
+
 If there is a need to refresh the data, the following steps need to be performed:
 
-1. Update `data-raw/census/get_census_data.R` script to set `use_cached_data` variable to `FALSE`.
-2. Source the `data-raw/census/get_census_data.R` script to download fresh data and save it into `R/sysdata.rda`.
-
+1. Sign up for a [CensusMapper account](https://censusmapper.ca/users/sign_up) to obtain a a CensusMapper API KEY.
+2. In the root directory of the repository, create a `.Renviron` file by running the following command in the R console:
+```{r eval=FALSE, echo=TRUE}
+usethis::edit_r_environ(scope = 'project')
+```
+3. When the file opens in the editor, add the following key-value pair on a separate line (make sure to replace the `my_censusmapper_api_key` with the actual API key obtained from your CensusMapper account:
+```{r eval=FALSE, echo=TRUE}
+cancensus.api_key = 'my_censusmapper_api_key'
+```
+4. Restart your R session (so that new configuration in .Renviron is loaded).
+5. Modify `data-raw/census/get_census_data.R` script to set `use_cached_data` variable to `FALSE`. Alternatively, remove all the content inside `cache/` directory in the root directory of the repository.
+6. Install BC Housing Data Visualization app as a package (so that it would be possible to use package internal functions) from GitHub using `remotes` package:
+```{r eval=FALSE, echo=TRUE}
+remotes::install_github('bcgov/housing-data-challenge-ruby')
+```
+7. Source the `data-raw/census/get_census_data.R` script to download fresh data and save it into `R/sysdata.rda`.
 ```{r eval=FALSE, echo=TRUE}
 source('data-raw/census/get_census_data.R')
 ```
-
-It is assumed that current working directory is the root directory of the BC Housing Data Visualization repository.
+8. Deploy the app.
 
 ## Beyond 2016 census
 

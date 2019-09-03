@@ -99,7 +99,7 @@ app_server <- function(input, output, session) {
 
   FormatCurrency <- scales::dollar_format()
 
-  # Selection of metrics, variables and options ----
+  # Selection of metrics, variables and options
   selectionMetricsDF <- data.frame(
     value =
       c("no_mkt_trans", "sum_FMV", "sum_PPT_paid", "no_foreign", "no_foreign_perc",
@@ -110,6 +110,7 @@ app_server <- function(input, output, session) {
         "Additional Tax Paid", "Average FMV", "Average Foreign FMV")
   )
 
+  # Reactives ----
   # 01. PTT ----
   ptData <- reactive({
     ptData <- switch(

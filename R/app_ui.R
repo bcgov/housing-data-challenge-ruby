@@ -63,7 +63,6 @@ app_ui <- function() {
     "Movable dwelling ratio"
   )
 
-
   ui <- navbarPage(
     # theme = "css/bcgov.css",
     title = "BC Housing Market",
@@ -74,9 +73,9 @@ app_ui <- function() {
       fluidPage(
         Jumbotron(
           header = "BC Housing Market",
-          popPerc = c16Prov$Population.Change,
+          popPerc = c_16_prov$population_change,
           popInc = TRUE,
-          dwellPerc = c16Prov$Total.Private.Dwellings.Change,
+          dwellPerc = c_16_prov$usual_res_dwellings_change,
           dwellInc = TRUE,
           trans_period = maxTransPeriod,
           no_mkt_trans = no_mkt_trans,
