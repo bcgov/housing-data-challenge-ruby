@@ -1,5 +1,7 @@
 ---
 title: "Deploying the app"
+author: Sasha Bogdanovic
+date: September 3rd, 2019
 output: rmarkdown::html_vignette
 vignette: >
   %\VignetteIndexEntry{Deploying the app}
