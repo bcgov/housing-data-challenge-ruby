@@ -24,9 +24,9 @@ app_ui <- function() {
 
   # Selection of metrics, variables and options ----
   selectionMetrics <- c(
-    "Average FMV" = "mn_FMV",
-    "Average Foreign FMV" = "mn_FMV_foreign",
-    "% of Foreign Transactions" = "no_foreign_perc"
+    "Mean FMV (fair market value)" = "mn_FMV",
+    "Mean foreign FMV (fair market value)" = "mn_FMV_foreign",
+    "% of foreign transactions" = "no_foreign_perc"
   )
 
   # Initialize variables
@@ -331,10 +331,10 @@ app_ui <- function() {
       fluidPage(
         titlePanel("Property Sales Monthly Overview"),
         tags$p("Property Transfer Tax data gives accurate measures of the total number of
-           market transactions and changes in time, by a variety of levels
-           of geography (e.g. municipality and regional district),
-           property types (residential, commercial, farm, etc.),
-           the average prices and tax amount paid, and the proportion of
+           market transactions and changes over time, by a variety of levels
+           of geography (for example, municipality and regional district),
+           property types (for example, residential, commercial, farm),
+           the average prices and tax amounts paid, and the proportion of
            foreign participation in those transactions."),
 
         wellPanel(
@@ -353,7 +353,7 @@ app_ui <- function() {
                 bsplus::shinyInput_label_embed(
                   shiny::icon('question-circle-o') %>%
                     bsplus::bs_embed_tooltip(
-                      title = "Changing transaction period will redraw the map and all charts to populate them with data relevant for the selected transaction period.",
+                      title = "Changing geographical level will redraw the map and all charts to populate them with data relevant for the selected geographical level.",
                       placement = "right"
                     )
                 )
@@ -370,7 +370,7 @@ app_ui <- function() {
                 bsplus::shinyInput_label_embed(
                   shiny::icon('question-circle-o') %>%
                     bsplus::bs_embed_tooltip(
-                      title = "Changing geographical level will redraw the map and all charts to populate them with data relevant for the selected geographical level.",
+                      title = "Changing transaction period will redraw the map and all charts to populate them with data relevant for the selected transaction period.",
                       placement = "right"
                     )
                 )
@@ -385,7 +385,7 @@ app_ui <- function() {
                 bsplus::shinyInput_label_embed(
                   shiny::icon('question-circle-o') %>%
                     bsplus::bs_embed_tooltip(
-                      title = "Selecting a different variable in this drop-down will redraw the map and selected charts to highlight selectec variable.",
+                      title = "Selecting a different variable in this drop-down will redraw the map and selected charts to highlight selected variable.",
                       placement = "right"
                     )
                 )
@@ -494,10 +494,10 @@ app_ui <- function() {
                     class = 'alert alert-info'
                   )
                 ),
-                tags$p("Mean and Median fair market value by month, total and foreign.")
+                tags$p("Mean and median fair market value by month, total and foreign.")
               ),
               tabPanel(
-                "Tax Paid",
+                "Tax paid",
                 # icon = icon("money"),
                 conditionalPanel(
                   condition = "input.pt_location != ''",
@@ -543,7 +543,7 @@ app_ui <- function() {
                 tags$p("Total property transfer tax paid by month.")
               ),
               tabPanel(
-                "Property Types",
+                "Property types",
                 # icon = icon("building-o"),
                 conditionalPanel(
                   condition = "input.pt_location != ''",
@@ -669,7 +669,6 @@ app_ui <- function() {
     tabPanel("Feedback", id = "feedback"),
     footer = HTML('
 <div id="footer">
-  <img src="/images/back-to-top.png" alt="Back to top" title="Back to top" class="back-to-top footer-overlap" style="bottom: 10px; display: inline;">
   <div id="footerWrapper">
     <div id="footerAdminSection">
       <div id="footerAdminLinksContainer" class="container">

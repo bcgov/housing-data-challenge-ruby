@@ -105,9 +105,9 @@ app_server <- function(input, output, session) {
       c("no_mkt_trans", "sum_FMV", "sum_PPT_paid", "no_foreign", "no_foreign_perc",
         "sum_FMV_foreign", "add_tax_paid", "mn_FMV", "mn_FMV_foreign"),
     label =
-      c("Number of Transactions", "Total FMV", "PTT Paid", "Number of Foreign Transactions",
-        "Percentage of Foreign Transactions", "Total FMV of Foreign Transactions",
-        "Additional Tax Paid", "Average FMV", "Average Foreign FMV")
+      c("Number of transactions", "Total FMV", "Property transfer tax paid",
+        "Number of foreign transactions", "% of foreign transactions", "Total FMV of foreign transactions",
+        "Additional tax paid", "Mean FMV", "Mean foreign FMV")
   )
 
   # Reactives ----
@@ -226,9 +226,9 @@ app_server <- function(input, output, session) {
             FormatCurrency(ptDataPeriod()$sum_FMV_foreign),
             "</td></tr><tr><td>Value % by foreign purchasers</td><td>",
             format(ptDataPeriod()$sum_FMV_foreign_perc, big.mark = ",", scientific=FALSE),
-            "</td></tr><tr><td>PTT Paid</td><td>",
+            "</td></tr><tr><td>Property transfer tax paid</td><td>",
             FormatCurrency(ptDataPeriod()$sum_PPT_paid),
-            "</td></tr><tr><td>Additional Tax Paid</td><td>",
+            "</td></tr><tr><td>Additional tax paid</td><td>",
             FormatCurrency(ptDataPeriod()$add_tax_paid),
             "</td></tr></table>"
           ),
@@ -346,7 +346,7 @@ app_server <- function(input, output, session) {
     ) %>%
       add_trace(
         y = ~ sum_FMV_foreign,
-        name = "Total FMV Foreign",
+        name = "Total FMV foreign",
         type = 'scatter',
         mode = 'markers+lines',
         line = list(color = colForeign),
@@ -370,7 +370,7 @@ app_server <- function(input, output, session) {
     ) %>%
       add_trace(
         y = ~ sum_FMV_foreign_res,
-        name = "Residential FMV Foreign",
+        name = "Residential FMV foreign",
         type = 'scatter',
         mode = 'markers+lines',
         line = list(color = colFarms),
@@ -397,7 +397,7 @@ app_server <- function(input, output, session) {
       #   ), fill = 'tozeroy'
       ) %>%
       plotly::layout(
-        title = PlotlyChartTitle(title_text = paste("FMV (Fair Market Value) in", ptGeoNameLabel())),
+        title = PlotlyChartTitle(title_text = paste("FMV (fair market value) in", ptGeoNameLabel())),
         xaxis = axisFormat,
         yaxis = axisFormat,
         yaxis2 = list(
@@ -434,7 +434,7 @@ app_server <- function(input, output, session) {
     ) %>%
       add_trace(
         y = ~ md_FMV_foreign_res,
-        name = "Median FMV Foreign",
+        name = "Median FMV foreign",
         line = list(color = colForeign),
         type = 'scatter',
         mode = 'markers+lines',
@@ -461,7 +461,7 @@ app_server <- function(input, output, session) {
       ) %>%
       add_trace(
         y = ~ mn_FMV_foreign_res,
-        name = "Mean FMV Foreign",
+        name = "Mean FMV foreign",
         line = list(
           color = colForeign,
           dash = 'dot'
@@ -475,7 +475,7 @@ app_server <- function(input, output, session) {
         )
       ) %>%
       plotly::layout(
-        title = PlotlyChartTitle(title_text = paste("Average FMV in", ptGeoNameLabel())),
+        title = PlotlyChartTitle(title_text = paste("Mean FMV in", ptGeoNameLabel())),
         xaxis = axisFormat,
         yaxis = axisFormat,
         margin = marginFormat,
@@ -516,7 +516,7 @@ app_server <- function(input, output, session) {
         )
       ) %>%
       plotly::layout(
-        title = PlotlyChartTitle(title_text = paste("Property Transfer Tax Paid in", ptGeoNameLabel())),
+        title = PlotlyChartTitle(title_text = paste("Property transfer tax paid in", ptGeoNameLabel())),
         xaxis = axisFormat,
         yaxis = axisFormat,
         margin = marginFormat,
@@ -561,7 +561,7 @@ app_server <- function(input, output, session) {
         marker = list(color = colUnknown)
       ) %>%
       plotly::layout(
-        title = PlotlyChartTitle(title_text = paste("Number of Transactions in", ptGeoNameLabel())),
+        title = PlotlyChartTitle(title_text = paste("Number of transactions in", ptGeoNameLabel())),
         xaxis = axisFormat,
         yaxis = axisFormat,
         margin = marginFormat,
@@ -580,7 +580,7 @@ app_server <- function(input, output, session) {
       ptt_data_location(),
       x = ~ trans_period,
       y = ~ n_res_1fam_dwelling,
-      name = "Single Family",
+      name = "Single family",
       type = "bar",
       marker = list(color = colSingleFam),
       hoverinfo = "y+name",
@@ -588,7 +588,7 @@ app_server <- function(input, output, session) {
     ) %>%
       add_trace(
         y = ~ n_res_fam,
-        name = "Multi Family",
+        name = "Multi family",
         marker = list(color = colMultiFam)
       ) %>%
       add_trace(
@@ -607,7 +607,7 @@ app_server <- function(input, output, session) {
         marker = list(color = colUnknown)
       ) %>%
       plotly::layout(
-        title = PlotlyChartTitle(title_text = paste("Number of Transactions (Residential) in", ptGeoNameLabel())),
+        title = PlotlyChartTitle(title_text = paste("Number of transactions (residential) in", ptGeoNameLabel())),
         xaxis = axisFormat,
         yaxis = axisFormat,
         margin = marginFormat,
@@ -643,7 +643,7 @@ app_server <- function(input, output, session) {
         marker = list(color = colUnknown)
       ) %>%
       plotly::layout(
-        title = PlotlyChartTitle(title_text = paste("Number of transactions (Commercial) in", ptGeoNameLabel())),
+        title = PlotlyChartTitle(title_text = paste("Number of transactions (commercial) in", ptGeoNameLabel())),
         xaxis = axisFormat,
         yaxis = axisFormat,
         margin = marginFormat,
