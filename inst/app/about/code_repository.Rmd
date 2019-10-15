@@ -1,7 +1,7 @@
 # Code Repository
 
-The code for BC Housing Data Visualization app is open-sourced and publicly available
-at BC Government [GitHub repository](https://github.com/bcgov/housing-data-challenge-ruby).
+The code for the BC Housing Data Visualization app is open-sourced and publicly available
+at the B.C. Government [GitHub repository](https://github.com/bcgov/housing-data-challenge-ruby).
 
 ## R packages
 The platform is developed using [R statistical software](https://www.r-project.org/), and realized as R [Shiny™](http://shiny.rstudio.com/) app 
