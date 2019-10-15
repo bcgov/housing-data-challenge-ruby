@@ -29,7 +29,7 @@ Statistics Canada provides a wealth of detail about the information collected in
 ### Property Transfer Tax
 Property transfer tax data relates to market transactions within the province.
 
-It is provided by Province of British Columbia Ministry of Finance, 
-licensed under [Open Government LicenCe - British Columbia](http://www.data.gov.bc.ca/local/dbc/docs/license/OGL-vbc2.0.pdf).
+Data is provided by the Province of B.C.'s Ministry of Finance,
+licensed under [Open Government Licence - British Columbia](https://www2.gov.bc.ca/gov/content?id=A519A56BC2BF44E4A008B33FCF527F61).
 
 The data is available for download at [B.C. Data Catalogue administered by DataBC](https://catalogue.data.gov.bc.ca/organization/property-taxation).
