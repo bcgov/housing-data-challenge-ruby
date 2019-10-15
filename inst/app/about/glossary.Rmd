@@ -2,7 +2,6 @@
 
 Following is the glossary of terms used in BC Housing Data Visualization app.
 
-
 ## Census
 
 (all definitions directly from the referenced Statistics Canada sources)
@@ -12,7 +11,6 @@ Following is the glossary of terms used in BC Housing Data Visualization app.
 [Structural Type of Dwelling](http://www12.statcan.gc.ca/census-recensement/2016/ref/guides/001/98-500-x2016001-eng.cfm)
 
 The variable for structural type of dwelling classifies private dwellings into the following nine mutually-exclusive categories: single-detached house, semi-detached house, row house, apartment or flat in a duplex, apartment in a building that has five or more storeys, apartment in a building that has fewer than five storeys, other single-attached house, mobile home and other movable dwelling.
-
 
 ### Population: Age and Sex
 
@@ -30,7 +28,6 @@ Refers to whether the person is male or female.
 
 * For the 2016 Census of Population, transgender, transsexual and intersex Canadians were asked to indicate the sex (male or female) with which they most associated themselves. Respondents who could not select one category when completing Question 2 on their census questionnaire had the option of leaving the question blank and indicating in the Comments section, the reason(s) for which they had chosen to leave this question unanswered.
 
-
 #### Mobility and Migration
 
 [Mobility and migration](http://www12.statcan.gc.ca/census-recensement/2016/ref/98-501/98-501-x2016014-eng.cfm)
@@ -39,22 +36,19 @@ Mobility status refers to the status of a person with regard to the place of res
 
 * Persons who lived in the same residence on the reference day as on the same date one year or five years earlier are referred to as **non-movers**.
 
-* Persons who did not live in the same residence on the reference day as on the same date one year or five years earlier are referred to as movers. 
+* Persons who did not live in the same residence on the reference day as on the same date one year or five years earlier are referred to as **movers**. 
 
 * **Movers** include non-migrants and migrants.
 
 * **Non-migrants** are movers who lived in the same census subdivision on the reference day as on the same date one year or five years earlier.
 
-
-* **Migrants**  include internal migrants and external migrants.
+* **Migrants** include internal migrants and external migrants.
 
 * **Internal migrants** include migrants who lived in Canada one year or five years ago. This includes persons who moved to a different city, town, township, village or Indian reserve within Canada. Greater detail can be provided for internal migrants by identifying whether they have crossed provincial and/or Census metropolitan area or Census agglomeration boundaries.
 
 * **External migrants** include migrants who did not live in Canada one year or five years ago.
 
-
 #### Shelter cost and Shelter-to-income ratio
-
 
 [Shelter cost](http://www12.statcan.gc.ca/census-recensement/2016/ref/dict/households-menage033-eng.cfm)
 
@@ -62,14 +56,11 @@ Mobility status refers to the status of a person with regard to the place of res
 
 Shelter costs for owner households include, where applicable, mortgage payments, property taxes and condominium fees, along with the costs of electricity, heat, water and other municipal services. For renter households, shelter costs include, where applicable, the rent and the costs of electricity, heat, water and other municipal services.
 
-
 [Shelter-to-income ratio (STIR)](http://www12.statcan.gc.ca/census-recensement/2016/ref/dict/households-menage028-eng.cfm)
 
 'Shelter-cost-to-income ratio' refers to the proportion of average total income of household which is spent on shelter costs.
 
 (from [Reference materials, 2016 Census: Housing](http://www12.statcan.gc.ca/census-recensement/2016/ref/98-501/98-501-x2016007-eng.cfm))
-
-
 
 ### Census Geography
 
@@ -77,34 +68,19 @@ The results of the Census of Canada are reported at a variety of geographic leve
 
 Some names used by Statistics Canada have British Columbia parallels you might be more familiar with:
 
+| Census Region                   | - Alternate area name          |
+| :------------------------------ | :----------------------------- |
+| Census Division (CD)            | - Regional District            |
+| Census Metropolitan Area (CMA)  | - (no equivalent)              |
+| Census Sub-division (CSD)       | - Municipality (or rural area) |
+| Census Tract (CT)               | - (no equivalent)              |
+| Dissemination Area (DA)         | - (no equivalent)              |
 
--------------------------------- ------------------------------
-Census Region                    Alternate area name
--------------------------------- ------------------------------    
-Census Division (CD)             Regional District
-
-Census Metropolitan Area (CMA)   (no equivalent)
-
-Census Sub-division (CSD)        Municipality (or rural area)
-
-Census Tract (CT)                (no equivalent)
-
-Dissemination Area (DA)          (no equivalent)
--------------------------------- ------------------------------
-
-
----
-
-
+***
 
 The main Statistics Canada Census page on [Geography](http://www12.statcan.gc.ca/census-recensement/2016/geo/index-eng.cfm)
 
-
 [Standard Geographical Classification (SGC) reference maps](http://www12.statcan.gc.ca/census-recensement/2011/geo/map-carte/ref/sgc-cgt/index-eng.cfm)
-
-
-
-
 
 ***
 
@@ -117,6 +93,3 @@ Information about [the British Columbia Property Transfer Tax](https://www2.gov.
 * Fair Market Value: "The price that would be paid by a willing purchaser to a willing seller for a property (land and improvements) in the open market on the date of registration."
 
 * Foreign involvement: "Transactions in which all or some of the parties involved are foreign purchasers, i.e., purchasers who are not Canadian citizens or permanent residents of Canada."
-
-
-
