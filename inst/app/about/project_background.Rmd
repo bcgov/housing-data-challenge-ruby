@@ -1,40 +1,30 @@
 ## Project Background
 
-The Province of British Columbia and other agencies collect a wealth of administrative data that relates 
-to housing, including the market for housing, as a consequence of their regulatory and administrative authorities.
- 
-The British Columbia Government wanted to develop statistics that will provide greater certainty 
-about the state of housing in the province, including the role of foreign ownership, 
+The Province of British Columbia and other agencies collect a wealth of administrative data 
+that relates to housing and the housing market as part of their regulatory and administrative authorities.
+
+The B.C. government wanted to develop statistics that would provide greater certainty about 
+the state of housing in the province, including the role of foreign ownership, 
 real estate as an investment or business strategy (rather than home ownership), 
-and insights into the regional impact of these issues. 
+and the regional impact of these issues. 
 For more information see https://github.com/bcgov/housing-data-visualization-project.
 
 This application is the result of the *Data Visualization Challenge*,
-launched by the [BC Innovation Council](http://www.bcic.com)
+launched by [Innovate BC](https://innovatebc.ca/) (former BC Innovation Council).
 in partnership with [BC Stats](https://www2.gov.bc.ca/gov/content/data/about-data-management/bc-stats)
 in December 2016.
 
-The challenge aimed to develop a tool to visualize BC housing data in a more meaningful and impactful way.
-BCIC and BCStats invited innovators around the province to submit their proposed solutions to the challenge.
-A review panel comprised of the BC Innovation Council, BC Developers’ Exchange and BC Stats 
-selected the five finalists who have been selected to present their prototypes at the 
-2017 [BCTech Summit](https://bctechsummit.ca/), the largest tech event in BC and a joint initiative between 
-the Province and BC Innovation Council. 
-[Ruby Industries Inc.](https://rubyind.com) was announced as 
-the winner of the Challenge and got the opportunity to continue working on the project and develop the solution.
+The challenge aimed to develop a tool to visualize B.C.’s housing data in a more meaningful and impactful way. 
+Innovate BC and BC Stats invited innovators around the province to submit their proposed solutions to the challenge. 
+A review panel comprised of Innovate BC, BC Developers’ Exchange and BC Stats selected five finalists 
+to present their prototypes at the 2017 [BCTech Summit](https://bctechsummit.ca/), the largest tech event in B.C. 
+and a joint initiative between the Province and Innovate BC. 
+[Ruby Industries Inc.](https://rubyind.com/), a Data Science and Data Visualization consulting firm from West Kelowna, 
+was announced as the winner of the Challenge and got the opportunity to continue working on the project 
+and develop the solution.
 
-Ruby Industries combined a variety of data visualization approaches in a way that makes 
-significant improvements to the accessibility and readability of BC Stats’ housing data.
-It provides BC Stats with an innovative tool
-for better use of their data and, and at the same time, offers interested BC residents, government agencies,
-and non-profits the opportunity to interact with, understand and make decisions based on community growth
-and housing data. The platform is currently in its beta-version, users are invited to provide
-[feedback](http://bcic.com)
-on their use of this iteration including ideas as to how it could be advanced
-to further fulfill its role.
-
-#### About Ruby Industries Inc.
-[Ruby Industries Inc.](https://rubyind.com/) is Kelowna-based [Data Science and Data Visualization consulting](https://rubyind.com/) firm.
-They provide engaging interactive data visualization solutions across wide range of industries.
-The company also features a number of Machine Learning APIs in marketing analytics domains. These include customer segmentation
-and prediction of customer lifetime value and customer churn.
+Ruby Industries combined a variety of data visualization approaches in a way that significantly improves 
+the accessibility and readability of BC Stats’ housing data. It provides BC Stats with an innovative tool 
+to better use their data and, and at the same time, offers interested British Columbians the opportunity 
+to interact with the data, and use it to make informed decisions. While the platform is currently 
+in its beta version, users are invited to provide on this iteration to help make it more effective.
