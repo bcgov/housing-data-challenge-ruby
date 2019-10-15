@@ -659,10 +659,30 @@ app_ui <- function() {
     # 04. About ----
     navbarMenu(
       "About",
-      tabPanel("Project background", shiny::includeMarkdown("inst/app/about/project_background.Rmd")),
-      tabPanel("Data sources", shiny::includeMarkdown("inst/app/about/data_sources.Rmd")),
-      tabPanel("Code repository", shiny::includeMarkdown("inst/app/about/code_repository.Rmd")),
-      tabPanel("Glossary", shiny::includeMarkdown("inst/app/about/glossary.Rmd"))
+      tabPanel(
+        "Project background",
+        fluidRow(
+          column(6, shiny::includeMarkdown("inst/app/about/project_background.Rmd"))
+        )
+      ),
+      tabPanel(
+        "Data sources",
+        fluidRow(
+          column(6, shiny::includeMarkdown("inst/app/about/data_sources.Rmd"))
+        )
+      ),
+      tabPanel(
+        "Code repository",
+        fluidRow(
+          column(6, shiny::includeMarkdown("inst/app/about/code_repository.Rmd"))
+        )
+      ),
+      tabPanel(
+        "Glossary",
+        fluidRow(
+          column(6, shiny::includeMarkdown("inst/app/about/glossary.Rmd"))
+        )
+      )
     ),
 
     #
