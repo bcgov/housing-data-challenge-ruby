@@ -98,14 +98,14 @@ Jumbotron <- function(header, popPerc = 0, popInc = TRUE, dwellPerc = 0, dwellIn
     dwellChange <- "decreased"
   }
 
-  boxHousingType <- paste0("At the province level, <strong>", htSummary$`Single detached house ratio`, "%</strong> of dwellings are
+  boxHousingType <- paste0("At the provincial level, <strong>", htSummary$`Single detached house ratio`, "%</strong> of dwellings in B.C. are
                           <strong>single-family homes</strong>.")
-  boxMobility <- paste0(mSummary$Region, " region has the highest ratio of movers in the last year - <strong>",
+  boxMobility <- paste0(bchousing::SplitBySeparator(mSummary$Region, ' \\('), " region has the highest ratio of movers* in the last year &mdash; <strong>",
                         mSummary$`Movers Ratio`, "%</strong>.")
-  boxStir <- paste0("In ", stirSummary$Region, ", <strong>", stirSummary$percent_more_than_30, "%</strong> of households
+  boxStir <- paste0("In ", bchousing::SplitBySeparator(stirSummary$Region, ' \\('), ", <strong>", stirSummary$percent_more_than_30, "%</strong> of households
                     spend more than 30% of their income on shelter cost.")
-  boxPp <- paste0("Municipality with the highest average age (<strong>", ageSummary$`Average Age`,"</strong>) is ",
-                  ageSummary$Region, ".")
+  boxPp <- paste0("The municipality with the highest average age (<strong>", ageSummary$`Average Age`,"</strong>) is ",
+                  bchousing::SplitBySeparator(ageSummary$Region, ' \\('), '.')
 
   no_mkt_trans <- ptt_prov_dash$tot_mkt_trans
   no_foreign_perc <- ptt_prov_dash$no_foreign_perc
@@ -125,8 +125,8 @@ Jumbotron <- function(header, popPerc = 0, popInc = TRUE, dwellPerc = 0, dwellIn
                 <h3><i class=\"fa fa-users\"></i>&nbsp;Population</h3>
               </div>
               <div class=\"splash-text\">
-                Between 2011 and 2016 censuses, BC&nbsp;population
-                has ", popChange ," by <strong>", popPerc , "%</strong>.
+                Between 2011 and 2016 censuses, the population of B.C. ",
+                popChange ," by <strong>", popPerc , "%</strong>.
               </div>
               <div class=\"splash-text\">",
     boxPp,"
@@ -178,7 +178,7 @@ Jumbotron <- function(header, popPerc = 0, popInc = TRUE, dwellPerc = 0, dwellIn
                 <h3><i class=\"fa fa-home\"></i>&nbsp;Housing</h3>
               </div>
               <div class=\"splash-text\">
-                At the same time, number of private
+                Between 2011 and 2016 censuses, the number of private
                 dwellings occupied by usual residents has ", dwellChange ," by <strong>", dwellPerc ,
     "%</strong>
               </div>
@@ -214,6 +214,9 @@ Jumbotron <- function(header, popPerc = 0, popInc = TRUE, dwellPerc = 0, dwellIn
                 <a href=\"#\" class=\"btn btn-bcgov explore-mobility\">
                   <i class=\"fa fa-truck\"></i>&nbsp;Explore mobility
                 </a>
+              </div>
+              <div class=\"splash-intro-credit\">
+                *movers &mdash; Persons who did not live in the same residence on the reference day as on the same date one year or five years earlier.
               </div>
             </div>
           </div>
