@@ -188,7 +188,7 @@ app_ui <- function() {
                 conditionalPanel(
                   condition = "input.c_location == ''",
                   tags$div(
-                    "Click location on the map to draw a chart showing ratio of different housing types for that location.",
+                    "Click an area on the map to draw a chart showing ratio of different housing types for that location.",
                     class = 'alert alert-info'
                   )
                 ),
@@ -204,10 +204,10 @@ app_ui <- function() {
                         placement = "right"
                       )
                   ),
-                tags$p("For the purpose of the Census, housing type is defined by \"structural type\",
-                   which includes single detached house, semi-detached and row houses, and a variety of apartment categories."),
+                tags$p("The Census and National Household Survey divides housing into \"structural types\",
+                   which include single detached houses, semi-detached and row houses, and a variety of apartment categories."),
                 tags$p("This report gives insights into diversity of the housing types in an area."),
-                tags$p("Select different housing types options below to redraw the map and highlight regions by the selected housing type ratios in that region.")
+                tags$p("Select different housing types options above to redraw the map and highlight regions by the selected housing type ratios.")
               ),
 
               # Population pyramid
@@ -279,7 +279,7 @@ app_ui <- function() {
                 conditionalPanel(
                   condition = "input.c_location == ''",
                   tags$div(
-                    "Click location on the map to draw a population distribution by age and sex for that location.",
+                    "Click an area on the map to draw a population distribution by age and sex for that location.",
                     class = 'alert alert-info'
                   )
                 ),
@@ -301,22 +301,22 @@ app_ui <- function() {
                 conditionalPanel(
                   condition = "input.c_location == ''",
                   tags$div(
-                    "Click location on the map to draw a chart showing ratios of different population mobility categories for that location.",
+                    "Click an area on the map to draw a chart showing ratios of different population mobility categories for that location.",
                     class = 'alert alert-info'
                   )
                 ),
-                tags$p("This report shows the number of people who had moved to the current location in the previous year.")
+                tags$p("This report shows the number of people who moved to the current location in the previous year.")
               ),
 
-              # Shelter-to-Income Ratio
+              # Shelter-cost-To-Income Ratio
               tabPanel(
-                "Shelter-to-Income Ratio",
+                "Shelter-cost-To-Income Ratio",
                 value = "STIR",
                 # icon = icon("money"),
                 plotly::plotlyOutput("stirStacked", height = chartHeight) %>% shinycssloaders::withSpinner(color="#0dc5c1"),
-                tags$p("Housing is considered affordable when spending on all shelter costs is below 30% of pre-tax income
-                   and measured through the Shelter-cost-To-Income Ratio (STIR)."),
-                tags$p("The reports shows proportion of households with greater than 30% of pre-tax income spent on shelter.")
+                tags$p("Housing is considered affordable when total shelter costs are less than 30% of pre-tax income,
+                       as measured through the Shelter-cost-To-Income Ratio (STIR)"),
+                tags$p("The report shows the proportion of households that spend more than 30% of pre-tax income on shelter.")
               )
             )
           )
@@ -441,7 +441,7 @@ app_ui <- function() {
                       3,
                       bchousing:::ValueBox(
                         value = "fmv_perc_foreign_res",
-                        subtitle = "Foreign Residential FMV"
+                        subtitle = "Foreign residential FMV"
                       )
                     )
                   ),
@@ -450,7 +450,7 @@ app_ui <- function() {
                 conditionalPanel(
                   condition = "input.pt_location == ''",
                   tags$div(
-                    "Click location on the map to draw a time series chart showing monthly total sales values for that location.",
+                    "Click an area on the map to draw a time series chart showing monthly total sales values for that location.",
                     class = 'alert alert-info'
                   )
                 ),
@@ -490,7 +490,7 @@ app_ui <- function() {
                 conditionalPanel(
                   condition = "input.pt_location == ''",
                   tags$div(
-                    "Click location on the map to draw a time series chart showing monthly average sales values for that location.",
+                    "Click an area on the map to draw a time series chart showing monthly average sales values for that location.",
                     class = 'alert alert-info'
                   )
                 ),
@@ -513,21 +513,21 @@ app_ui <- function() {
                       3,
                       bchousing:::ValueBox(
                         value = "sum_ptt_paid",
-                        subtitle = "Total PTT Paid"
+                        subtitle = "Total PTT paid"
                       )
                     ),
                     column(
                       3,
                       bchousing:::ValueBox(
                         value = "add_ptt_paid",
-                        subtitle = "Additional PTT Paid"
+                        subtitle = "Additional PTT paid"
                       )
                     ),
                     column(
                       3,
                       bchousing:::ValueBox(
                         value = "md_ppt_paid",
-                        subtitle = "Median PPT Paid"
+                        subtitle = "Median PPT paid"
                       )
                     )
                   ),
@@ -536,7 +536,7 @@ app_ui <- function() {
                 conditionalPanel(
                   condition = "input.pt_location == ''",
                   tags$div(
-                    "Click location on the map to draw a time series chart showing monthly property transfer tax paid for that location.",
+                    "Click an area on the map to draw a time series chart showing monthly property transfer tax paid for that location.",
                     class = 'alert alert-info'
                   )
                 ),
@@ -559,21 +559,21 @@ app_ui <- function() {
                       3,
                       bchousing:::ValueBox(
                         value = "tot_mkt_trans",
-                        subtitle = "No. of Transactions"
+                        subtitle = "No. of transactions"
                       )
                     ),
                     column(
                       3,
                       bchousing:::ValueBox(
                         value = "no_res_trans",
-                        subtitle = "Residential Transactions"
+                        subtitle = "Residential transactions"
                       )
                     ),
                     column(
                       3,
                       bchousing:::ValueBox(
                         value = "n_comm_tran",
-                        subtitle = "Commercial Transactions"
+                        subtitle = "Commercial transactions"
                       )
                     )
                   ),
@@ -582,7 +582,7 @@ app_ui <- function() {
                 conditionalPanel(
                   condition = "input.pt_location == ''",
                   tags$div(
-                    "Click location on the map to draw a time series chart showing monthly numbers of transactions for different property types for that location.",
+                    "Click an area on the map to draw a time series chart showing monthly numbers of transactions for different property types for that location.",
                     class = 'alert alert-info'
                   )
                 ),
@@ -605,7 +605,7 @@ app_ui <- function() {
                       3,
                       bchousing:::ValueBox(
                         value = "n_res_1fam_dwelling",
-                        subtitle = "Single Family Homes"
+                        subtitle = "Single-family Homes"
                       )
                     ),
                     column(
@@ -619,7 +619,7 @@ app_ui <- function() {
                       3,
                       bchousing:::ValueBox(
                         value = "no_other_res",
-                        subtitle = "Other Transactions"
+                        subtitle = "Other transactions"
                       )
                     )
                   ),
@@ -628,7 +628,7 @@ app_ui <- function() {
                 conditionalPanel(
                   condition = "input.pt_location == ''",
                   tags$div(
-                    "Click location on the map to draw a time series chart showing monthly number of transactions for residential properties for that location.",
+                    "Click an area on the map to draw a time series chart showing monthly number of transactions for residential properties for that location.",
                     class = 'alert alert-info'
                   )
                 ),
@@ -644,7 +644,7 @@ app_ui <- function() {
                 conditionalPanel(
                   condition = "input.pt_location == ''",
                   tags$div(
-                    "Click location on the map to draw a time series chart showing monthly number of transactions for commerction properties for that location.",
+                    "Click an area on the map to draw a time series chart showing monthly number of transactions for commerction properties for that location.",
                     class = 'alert alert-info'
                   )
                 ),

@@ -580,7 +580,7 @@ app_server <- function(input, output, session) {
       ptt_data_location(),
       x = ~ trans_period,
       y = ~ n_res_1fam_dwelling,
-      name = "Single family",
+      name = "Single-family",
       type = "bar",
       marker = list(color = colSingleFam),
       hoverinfo = "y+name",
@@ -588,7 +588,7 @@ app_server <- function(input, output, session) {
     ) %>%
       add_trace(
         y = ~ n_res_fam,
-        name = "Multi family",
+        name = "Multi-family",
         marker = list(color = colMultiFam)
       ) %>%
       add_trace(
@@ -956,10 +956,10 @@ app_server <- function(input, output, session) {
           popup = paste0(
             "<strong>", paste0(housingTypeMapData()$`Region`, " (", housingTypeMapData()$GeoUID), ")</strong>",
             "<table class=\"leaflet-popup-table\"><tr><td>Census Year</td><td>2016</td></tr>",
-            "<tr><td>Single family homes ratio</td><td><strong>",
+            "<tr><td>Single-family homes ratio</td><td><strong>",
             format(housingTypeMapData()$`Single detached house ratio`, big.mark = ","), "</strong></td></tr>",
-            "<tr><td>Semi detached house ratio</strong></td><td>",
-            format(housingTypeMapData()$`Semi detached house ratio`, big.mark = ","), "</strong></td></tr>",
+            "<tr><td>Semi-detached house ratio</strong></td><td>",
+            format(housingTypeMapData()$`Semi-detached house ratio`, big.mark = ","), "</strong></td></tr>",
             "<tr><td>Apartment in duplex ratio</strong></td><td>",
             format(housingTypeMapData()$`Apartment in duplex ratio`, big.mark = ","), "</strong></td></tr>",
             "<tr><td>Row house ratio</strong></td><td>",
