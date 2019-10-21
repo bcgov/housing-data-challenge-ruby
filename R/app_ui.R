@@ -23,10 +23,20 @@ app_ui <- function() {
   data("ptt_mun_sf", package = "bchousing")
 
   # Selection of metrics, variables and options ----
-  selectionMetrics <- c(
-    "Mean FMV (fair market value)" = "mn_FMV",
-    "Mean foreign FMV (fair market value)" = "mn_FMV_foreign",
-    "% of foreign transactions" = "no_foreign_perc"
+  selectionMetrics <- list(
+    "FMV (Fair Market Value)" = c(
+      "Median FMV" = "md_FMV",
+      "Total FMV" = "sum_FMV"
+    ),
+    "PTT (Property Transfer Tax)" = c(
+      "Median PTT paid" = "md_PPT",
+      "Total PTT paid" = "sum_PPT_paid"
+    ),
+    "Number of transactions" = c(
+      "Total" = "tot_mkt_trans",
+      "Residential" = "no_res_trans",
+      "Single-family homes" = "n_res_1fam_dwelling"
+    )
   )
 
   # Initialize variables
