@@ -1279,6 +1279,9 @@ app_server <- function(input, output, session) {
                             zeroline = FALSE),
                barmode = 'stack',
                margin = list(l = 150, r = 10, t = 70, b = 30),
+               title = PlotlyChartTitle(
+                 title_text = paste('Shelter-cost-To-Income-Ratio for', locationLabel(), '- Census year 2016')
+               ),
                showlegend = FALSE) %>%
         # labeling the y-axis
         add_annotations(xref = 'paper', yref = 'y', x = 0.14, y = ~`GeoUID`,

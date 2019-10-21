@@ -318,7 +318,11 @@ ul.inline li a:link, nav ul.inline li a:visited {
 
 /* Mobility sunburst title */
 #mobility_sunburst_title {
-    font-size: 14px;
-    text-align: center;
-    font-weight: bold;
+  font-family: Arial;
+  font-size: 16px;
+  fill: rgb(57, 57, 57);
+  opacity: 1;
+  font-weight: normal;
+  white-space: pre;
+  margin-top: 31px;
 }
