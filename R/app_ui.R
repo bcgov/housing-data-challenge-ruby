@@ -181,17 +181,6 @@ app_ui <- function() {
                 "Housing Type",
                 value = "Housing",
                 # icon = icon("home"),
-                conditionalPanel(
-                  condition = "input.c_location != ''",
-                  column(12, plotOutput("housingTypeTreemap", height = chartHeight) %>% shinycssloaders::withSpinner(color = "#0dc5c1"))
-                ),
-                conditionalPanel(
-                  condition = "input.c_location == ''",
-                  tags$div(
-                    "Click location on the map to draw a chart showing ratio of different housing types for that location.",
-                    class = 'alert alert-info'
-                  )
-                ),
                 selectizeInput(
                   'c_housing_types',
                   choices = housingTypesList,
@@ -204,6 +193,17 @@ app_ui <- function() {
                         placement = "right"
                       )
                   ),
+                conditionalPanel(
+                  condition = "input.c_location != ''",
+                  column(12, plotOutput("housingTypeTreemap", height = chartHeight) %>% shinycssloaders::withSpinner(color = "#0dc5c1"))
+                ),
+                conditionalPanel(
+                  condition = "input.c_location == ''",
+                  tags$div(
+                    "Click location on the map to draw a chart showing ratio of different housing types for that location.",
+                    class = 'alert alert-info'
+                  )
+                ),
                 tags$p("For the purpose of the Census, housing type is defined by \"structural type\",
                    which includes single detached house, semi-detached and row houses, and a variety of apartment categories."),
                 tags$p("This report gives insights into diversity of the housing types in an area."),
