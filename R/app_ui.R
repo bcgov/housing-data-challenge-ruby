@@ -23,10 +23,20 @@ app_ui <- function() {
   data("ptt_mun_sf", package = "bchousing")
 
   # Selection of metrics, variables and options ----
-  selectionMetrics <- c(
-    "Mean FMV (fair market value)" = "mn_FMV",
-    "Mean foreign FMV (fair market value)" = "mn_FMV_foreign",
-    "% of foreign transactions" = "no_foreign_perc"
+  selectionMetrics <- list(
+    "FMV (Fair Market Value)" = c(
+      "Median FMV" = "md_FMV",
+      "Total FMV" = "sum_FMV"
+    ),
+    "PTT (Property Transfer Tax)" = c(
+      "Median PTT paid" = "md_PPT",
+      "Total PTT paid" = "sum_PPT_paid"
+    ),
+    "Number of transactions" = c(
+      "Total" = "tot_mkt_trans",
+      "Residential" = "no_res_trans",
+      "Single-family homes" = "n_res_1fam_dwelling"
+    )
   )
 
   # Initialize variables
@@ -53,14 +63,14 @@ app_ui <- function() {
   )
 
   housingTypesList <- c(
-    "Single detached house ratio",
-    "Semi detached house ratio",
-    "Apartment in duplex ratio",
-    "Row house ratio",
-    "Apartment in small building ratio",
-    "Apartment in tall building ratio",
-    "Other single attached house ratio",
-    "Movable dwelling ratio"
+    "Single-family detached house" = "Single detached house ratio",
+    "Semi-detached house" = "Semi detached house ratio",
+    "Apartment in duplex" = "Apartment in duplex ratio",
+    "Row house" = "Row house ratio",
+    "Apartment in small building" = "Apartment in small building ratio",
+    "Apartment in tall building" = "Apartment in tall building ratio",
+    "Other single attached house" = "Other single attached house ratio",
+    "Movable dwelling" = "Movable dwelling ratio"
   )
 
   ui <- navbarPage(
@@ -178,9 +188,21 @@ app_ui <- function() {
 
               # Housing Type
               tabPanel(
-                "Housing Type",
+                "Housing type",
                 value = "Housing",
                 # icon = icon("home"),
+                selectizeInput(
+                  'c_housing_types',
+                  choices = housingTypesList,
+                  label = HTML('Housing type')
+                ) %>%
+                  bsplus::shinyInput_label_embed(
+                    shiny::icon('question-circle-o') %>%
+                      bsplus::bs_embed_tooltip(
+                        title = "Changing a housing type selection will redraw the map and shade the areas based on the ratio of selected housing type compared to all types.",
+                        placement = "right"
+                      )
+                  ),
                 conditionalPanel(
                   condition = "input.c_location != ''",
                   column(12, plotOutput("housingTypeTreemap", height = chartHeight) %>% shinycssloaders::withSpinner(color = "#0dc5c1"))
@@ -192,27 +214,15 @@ app_ui <- function() {
                     class = 'alert alert-info'
                   )
                 ),
-                selectizeInput(
-                  'c_housing_types',
-                  choices = housingTypesList,
-                  label = HTML('Housing Type')
-                ) %>%
-                  bsplus::shinyInput_label_embed(
-                    shiny::icon('question-circle-o') %>%
-                      bsplus::bs_embed_tooltip(
-                        title = "Changing a housing type selection will redraw the map and shade the areas based on the ratio of selected housing type compared to all types.",
-                        placement = "right"
-                      )
-                  ),
                 tags$p("The Census and National Household Survey divides housing into \"structural types\",
-                   which include single detached houses, semi-detached and row houses, and a variety of apartment categories."),
+                    which include single detached houses, semi-detached and row houses, and a variety of apartment categories."),
                 tags$p("This report gives insights into diversity of the housing types in an area."),
                 tags$p("Select different housing types options above to redraw the map and highlight regions by the selected housing type ratios.")
               ),
 
               # Population pyramid
               tabPanel(
-                "Population Age & Sex",
+                "Population age & sex",
                 value = "Population",
                 # icon = icon("venus-mars"),
                 conditionalPanel(
@@ -310,7 +320,7 @@ app_ui <- function() {
 
               # Shelter-cost-To-Income Ratio
               tabPanel(
-                "Shelter-cost-To-Income Ratio",
+                "Affordability",
                 value = "STIR",
                 # icon = icon("money"),
                 plotly::plotlyOutput("stirStacked", height = chartHeight) %>% shinycssloaders::withSpinner(color="#0dc5c1"),

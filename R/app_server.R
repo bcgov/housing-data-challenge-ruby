@@ -98,6 +98,9 @@ app_server <- function(input, output, session) {
   colC11 <- colForeign <- "#9ecae1"
 
   FormatCurrency <- scales::dollar_format()
+  FormatCount <- scales::number_format(big.mark = ',', accuracy = 1)
+  FormatFloat <- scales::number_format(big.mark = ',', accuracy = 0.01)
+  FormatPercent <- scales::percent_format(scale = 1, accuracy = 0.01)
 
   # Selection of metrics, variables and options
   selectionMetricsDF <- data.frame(
@@ -195,7 +198,7 @@ app_server <- function(input, output, session) {
     # 01.1 - PTT Leaflet ----
     output$mapPtt <- leaflet::renderLeaflet({
       leaflet::leaflet() %>%
-        setView(lng = -123.2, lat = 52.7, zoom = 5) %>%
+        setView(lng = -125.2, lat = 54.7, zoom = 5) %>%
         addProviderTiles(provider = "CartoDB.Positron", options = providerTileOptions(minZoom = 5, maxZoom = 12)) %>%
         addPolygons(
           data = ptDataPeriod(),
@@ -212,23 +215,23 @@ app_server <- function(input, output, session) {
             ptDataPeriod()$GeoName,
             "</strong>",
             "<table class=\"leaflet-popup-table\">
-          <tr><td>Period</td><td>",
+          <tr><td>Period</td><td class=\"text-right\">",
             ptDataPeriod()$trans_period_label,
-            "</td></tr><tr><td>Number of transactions</td><td>",
-            format(ptDataPeriod()$tot_mkt_trans, big.mark = ",", scientific=FALSE),
-            "</td></tr><tr><td>Number of foreign transactions</td><td>",
-            format(ptDataPeriod()$n_foreign_tran, big.mark = ",", scientific=FALSE),
-            "</td></tr><tr><td>Number % by foreign purchasers</td><td>",
-            format(ptDataPeriod()$no_foreign_perc, big.mark = ",", scientific=FALSE),
-            "</td></tr><tr><td>Total value</td><td>",
+            "</td></tr><tr><td>Number of transactions</td><td class=\"text-right\">",
+            FormatCount(ptDataPeriod()$tot_mkt_trans),
+            "</td></tr><tr><td>Number of foreign transactions</td><td class=\"text-right\">",
+            FormatCount(ptDataPeriod()$n_foreign_tran),
+            "</td></tr><tr><td>Number % by foreign purchasers</td><td class=\"text-right\">",
+            FormatPercent(ptDataPeriod()$no_foreign_perc),
+            "</td></tr><tr><td>Total value</td><td class=\"text-right\">",
             FormatCurrency(ptDataPeriod()$sum_FMV),
-            "</td></tr><tr><td>Total value by foreign purchasers</td><td>",
+            "</td></tr><tr><td>Total value by foreign purchasers</td><td class=\"text-right\">",
             FormatCurrency(ptDataPeriod()$sum_FMV_foreign),
-            "</td></tr><tr><td>Value % by foreign purchasers</td><td>",
-            format(ptDataPeriod()$sum_FMV_foreign_perc, big.mark = ",", scientific=FALSE),
-            "</td></tr><tr><td>Property transfer tax paid</td><td>",
+            "</td></tr><tr><td>Value % by foreign purchasers</td><td class=\"text-right\">",
+            FormatPercent(ptDataPeriod()$sum_FMV_foreign_perc),
+            "</td></tr><tr><td>Property transfer tax paid</td><td class=\"text-right\">",
             FormatCurrency(ptDataPeriod()$sum_PPT_paid),
-            "</td></tr><tr><td>Additional tax paid</td><td>",
+            "</td></tr><tr><td>Additional tax paid</td><td class=\"text-right\">",
             FormatCurrency(ptDataPeriod()$add_tax_paid),
             "</td></tr></table>"
           ),
@@ -946,7 +949,7 @@ app_server <- function(input, output, session) {
             maxZoom = 12
           )
         ) %>%
-        setView(lng = -123.2, lat = 52.7, zoom = 5) %>%
+        setView(lng = -125.2, lat = 54.7, zoom = 5) %>%
         addPolygons(
           data = housingTypeMapData(),
           label = ~ `Region`, color = '#333',
@@ -955,24 +958,24 @@ app_server <- function(input, output, session) {
           layerId = ~ paste0("ht-", GeoUID), group = "Housing",
           popup = paste0(
             "<strong>", paste0(housingTypeMapData()$`Region`, " (", housingTypeMapData()$GeoUID), ")</strong>",
-            "<table class=\"leaflet-popup-table\"><tr><td>Census Year</td><td>2016</td></tr>",
-            "<tr><td>Single-family homes ratio</td><td><strong>",
-            format(housingTypeMapData()$`Single detached house ratio`, big.mark = ","), "</strong></td></tr>",
-            "<tr><td>Semi-detached house ratio</strong></td><td>",
-            format(housingTypeMapData()$`Semi-detached house ratio`, big.mark = ","), "</strong></td></tr>",
-            "<tr><td>Apartment in duplex ratio</strong></td><td>",
-            format(housingTypeMapData()$`Apartment in duplex ratio`, big.mark = ","), "</strong></td></tr>",
-            "<tr><td>Row house ratio</strong></td><td>",
-            format(housingTypeMapData()$`Row house ratio`, big.mark = ","), "</strong></td></tr>",
-            "<tr><td>Apartment in small building ratio</strong></td><td>",
-            format(housingTypeMapData()$`Apartment in small building ratio`, big.mark = ","), "</strong></td></tr>",
-            "<tr><td>Apartment in tall building ratio</strong></td><td>",
-            format(housingTypeMapData()$`Apartment in tall building ratio`, big.mark = ","), "</strong></td></tr>",
-            "<tr><td>Other single attached house ratio</strong></td><td>",
-            format(housingTypeMapData()$`Other single attached house ratio`, big.mark = ","), "</strong></td></tr>",
-            "<tr><td>Movable dwelling ratio</strong></td><td>",
-            format(housingTypeMapData()$`Movable dwelling ratio`, big.mark = ","), "</strong></td></tr>",
-            "</table>"
+            "<table class=\"leaflet-popup-table\"><tr><td>Census Year</td><td class=\"text-right\">2016</td></tr>",
+            "<tr><td>Single-family homes</td><td class=\"text-right\">",
+            FormatCount(housingTypeMapData()$`Single detached house`),
+            "</td></tr><tr><td>Semi-detached house</td><td class=\"text-right\">",
+            FormatCount(housingTypeMapData()$`Semi detached house`),
+            "</strong></td></tr><tr><td>Apartment in duplex</td><td class=\"text-right\">",
+            FormatCount(housingTypeMapData()$`Apartment in duplex`),
+            "</strong></td></tr><tr><td>Row house</td><td class=\"text-right\">",
+            FormatCount(housingTypeMapData()$`Row house`),
+            "</strong></td></tr><tr><td>Apartment in small building</td><td class=\"text-right\">",
+            FormatCount(housingTypeMapData()$`Apartment in small building`),
+            "</strong></td></tr><tr><td>Apartment in tall building ratio</td><td class=\"text-right\">",
+            FormatCount(housingTypeMapData()$`Apartment in tall building`),
+            "</strong></td></tr><tr><td>Other single attached house</td><td class=\"text-right\">",
+            FormatCount(housingTypeMapData()$`Other single attached house`),
+            "</strong></td></tr><tr><td>Movable dwelling</td><td class=\"text-right\">",
+            FormatCount(housingTypeMapData()$`Movable dwelling`),
+            "</strong></td></tr></table>"
           ),
           highlight = highlightOptions(
             weight = 5, color = "#696969", fillOpacity = 0.75, bringToFront = TRUE
@@ -985,12 +988,17 @@ app_server <- function(input, output, session) {
           layerId = ~ paste0("p-", GeoUID), group = "Population",
           popup = paste0(
             "<strong>", paste0(censusAvgAge$`Region`, " (", censusAvgAge$GeoUID), ")</strong>",
-            "<table class=\"leaflet-popup-table\"><tr><td>Census Year</td><td>2016</td></tr>",
-            "<tr><td>Population</td><td>", format(censusAvgAge$Population, big.mark = ","),
-            "</td></tr><tr><td>Dwellings</td><td>", format(censusAvgAge$Dwellings, big.mark = ","),
-            "</td></tr><tr><td>Households</td><td>", format(censusAvgAge$Households, big.mark = ","),
-            "</td></tr><tr><td><strong>Average Age</strong></td><td><strong>",
-            format(censusAvgAge$`Average Age`, big.mark = ","), "</strong></td></tr></table>"
+            "<table class=\"leaflet-popup-table\">",
+            "<tr><td>Census Year</td><td class=\"text-right\">2016</td></tr>",
+            "<tr><td>Population</td><td class=\"text-right\">",
+            FormatCount(censusAvgAge$Population),
+            "</td></tr><tr><td>Dwellings</td><td class=\"text-right\">",
+            FormatCount(censusAvgAge$Dwellings),
+            "</td></tr><tr><td>Households</td><td class=\"text-right\">",
+            FormatCount(censusAvgAge$Households),
+            "</td></tr><tr><td><strong>Average Age</strong></td><td class=\"text-right\"><strong>",
+            FormatFloat(censusAvgAge$`Average Age`),
+            "</strong></td></tr></table>"
           ),
           highlight = highlightOptions(
           weight = 5, color = "#696969", fillOpacity = 0.75, bringToFront = TRUE)
@@ -1002,12 +1010,16 @@ app_server <- function(input, output, session) {
           layerId = ~ paste0("m-", GeoUID), group = "Mobility",
           popup = paste0(
             "<strong>", paste0(censusMobility$`Region`, " (", censusMobility$GeoUID), ")</strong>",
-            "<table class=\"leaflet-popup-table\"><tr><td>Census Year</td><td>2016</td></tr>",
-            "<tr><td>Population</td><td>", format(censusMobility$Population, big.mark = ","),
-            "</td></tr><tr><td>Dwellings</td><td>", format(censusMobility$Dwellings, big.mark = ","),
-            "</td></tr><tr><td>Households</td><td>", format(censusMobility$Households, big.mark = ","),
-            "</td></tr><tr><td><strong>Movers Ratio</strong></td><td><strong>",
-            format(censusMobility$`Movers Ratio`, big.mark = ","), "</strong></td></tr></table>"
+            "<table class=\"leaflet-popup-table\"><tr><td>Census Year</td><td class=\"text-right\">2016</td></tr>",
+            "<tr><td>Population</td><td class=\"text-right\">",
+            FormatCount(censusMobility$Population),
+            "</td></tr><tr><td>Dwellings</td><td class=\"text-right\">",
+            FormatCount(censusMobility$Dwellings),
+            "</td></tr><tr><td>Households</td><td class=\"text-right\">",
+            FormatCount(censusMobility$Households),
+            "</td></tr><tr><td><strong>Movers Ratio</strong></td><td class=\"text-right\"><strong>",
+            FormatFloat(censusMobility$`Movers Ratio`),
+            "</strong></td></tr></table>"
           ),
           highlight = highlightOptions(
           weight = 5, color = "#696969", fillOpacity = 0.75, bringToFront = TRUE)
@@ -1019,13 +1031,14 @@ app_server <- function(input, output, session) {
           layerId = ~ paste0("s-", GeoUID), group = "STIR",
           popup = paste0(
             "<strong>", paste(censusStir$`Region`), "</strong>",
-            "<table class=\"leaflet-popup-table\"><tr><td>Census Year</td><td>2016</td></tr>",
-            "<tr><td>Population</td><td>", format(censusStir$Population, big.mark = ","),
-            "</td></tr><tr><td>Dwellings</td><td>", format(censusStir$Dwellings, big.mark = ","),
-            "</td></tr><tr><td>Households</td><td>", format(censusStir$Households, big.mark = ","),
-            "</td></tr><tr><td>STIR < 30%</td><td>", format(censusStir$percent_less_than_30, big.mark = ","),
-            "</td></tr><tr><td><strong>STIR > 30%</strong></td><td><strong>",
-            format(censusStir$percent_more_than_30, big.mark = ","), "</strong></td></tr></table>"
+            "<table class=\"leaflet-popup-table\"><tr><td>Census Year</td><td class=\"text-right\">2016</td></tr>",
+            "<tr><td>Households with income</td><td class=\"text-right\">",
+            FormatCount(censusStir$total_households_with_income),
+            "</td></tr><tr><td>STIR < 30%</td><td class=\"text-right\">",
+            FormatCount(censusStir$stir_less_than_30),
+            "</td></tr><tr><td><strong>STIR > 30%</strong></td><td class=\"text-right\"><strong>",
+            FormatCount(censusStir$stir_more_than_30),
+            "</strong></td></tr></table>"
           ),
           highlight = highlightOptions(
           weight = 5, color = "#696969", fillOpacity = 0.5, bringToFront = TRUE)
@@ -1055,7 +1068,8 @@ app_server <- function(input, output, session) {
       } else if (selectedGroup == 'Housing') {
         mapCensus %>%
           addLegend(
-            title = input$c_housing_types, "bottomleft", opacity = 0.5,
+            title = '', #input$c_housing_types
+            "bottomleft", opacity = 0.5,
             pal = palHousingTypes, values = housingTypeMapData()$typewatch,
             labFormat = labelFormat(suffix = "%")
           )
@@ -1265,6 +1279,9 @@ app_server <- function(input, output, session) {
                             zeroline = FALSE),
                barmode = 'stack',
                margin = list(l = 150, r = 10, t = 70, b = 30),
+               title = PlotlyChartTitle(
+                 title_text = paste('Shelter-cost-To-Income-Ratio for', locationLabel(), '- Census year 2016')
+               ),
                showlegend = FALSE) %>%
         # labeling the y-axis
         add_annotations(xref = 'paper', yref = 'y', x = 0.14, y = ~`GeoUID`,
