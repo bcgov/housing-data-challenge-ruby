@@ -9,7 +9,7 @@ library(sf)
 # Set to TRUE after initial discovery. It saves the data as .rds files into /data-raw dir
 # so that they are not downloaded each time while doing dev work with the script.
 # Set to FALSE when new data needs to be retrieved from the BC Data Catalogue.
-use_cached_data = TRUE
+use_cached_data = FALSE
 
 # 02. Discover data in BC Open Data Catalogue ----
 # bcdata::bcdc_search("property transfer tax 2019")
@@ -210,19 +210,22 @@ ptt_dr_sf <- JoinPttShapes(
     ptt_data = ptt_dr_j,
     shapes = shapes_dr,
     geo_name = "DevelopmentRegion"
-  )
+  ) %>%
+  mutate_if(is.numeric, list(~na_if(., "NaN")))
 
 ptt_rd_sf <- JoinPttShapes(
     ptt_data = ptt_rd_j,
     shapes = shapes_rd,
     geo_name = "RegionalDistrict"
-  )
+  ) %>%
+  mutate_if(is.numeric, list(~na_if(., "NaN")))
 
 ptt_mun_sf <- JoinPttShapes(
     ptt_data = ptt_mn_j,
     shapes = shapes_mun,
     geo_name = "Municipality"
-  )
+  ) %>%
+  mutate_if(is.numeric, list(~na_if(., "NaN")))
 
 # 10. Set up dashboard data ----
 # Last month for which PTT data is available
