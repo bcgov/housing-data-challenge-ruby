@@ -256,6 +256,9 @@ for (censusLevel in c("CMA", "CD", "CSD", "CT", "DA")) {
         "-{2,}", "-"
       ),
       "^-", ""
+    ),
+    sequence = stringr::str_to_title(
+      stringr::str_replace_all(sequence, ' Ratio', '')
     )
   ) %>%
   select(GeoUID, sequence, count)
