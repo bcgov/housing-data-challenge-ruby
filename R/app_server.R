@@ -168,7 +168,7 @@ app_server <- function(input, output, session) {
 
   ptRegionOptions <- reactive({
     ptRegionOptions <- ptDataPeriod() %>%
-      dplyr::mutate(label = ptDataPeriod()$GeoName) %>%
+      dplyr::mutate(label = as.character(ptDataPeriod()$GeoName)) %>%
       dplyr::select(label, value = GeoUID)
     sf::st_geometry(ptRegionOptions) <- NULL
 
@@ -178,8 +178,7 @@ app_server <- function(input, output, session) {
   ptGeoNameLabel <- reactive({
     locationLabel <- as.data.frame(ptRegionOptions()) %>%
       dplyr::filter(value == input$pt_location) %>%
-      dplyr::select(label) %>%
-      dplyr::distinct()
+      dplyr::pull(label)
     return(locationLabel)
   })
 
@@ -260,31 +259,31 @@ app_server <- function(input, output, session) {
     return(label)
   })
   output$fmv_perc_loc <- renderText({
-    ptt_data_location_period() %>% dplyr::pull(GeoName)
+    ptGeoNameLabel()
   })
   output$fmv_perc_month_mn <- renderText({
     ptt_data_location_period() %>% dplyr::pull(trans_period_label)
   })
   output$fmv_perc_loc_mn <- renderText({
-    ptt_data_location_period() %>% dplyr::pull(GeoName)
+    ptGeoNameLabel()
   })
   output$fmv_perc_month_ptt <- renderText({
     ptt_data_location_period() %>% dplyr::pull(trans_period_label)
   })
   output$fmv_perc_loc_ptt <- renderText({
-    ptt_data_location_period() %>% dplyr::pull(GeoName)
+    ptGeoNameLabel()
   })
   output$fmv_perc_month_n <- renderText({
     ptt_data_location_period() %>% dplyr::pull(trans_period_label)
   })
   output$fmv_perc_loc_n <- renderText({
-    ptt_data_location_period() %>% dplyr::pull(GeoName)
+    ptGeoNameLabel()
   })
   output$fmv_perc_month_res <- renderText({
     ptt_data_location_period() %>% dplyr::pull(trans_period_label)
   })
   output$fmv_perc_loc_res <- renderText({
-    ptt_data_location_period() %>% dplyr::pull(GeoName)
+    ptGeoNameLabel()
   })
   output$fmv_perc_res <- renderText({
     ptt_data_location_period() %>% dplyr::pull(fmv_perc_res)
