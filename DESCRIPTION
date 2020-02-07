@@ -40,7 +40,6 @@ Imports:
     treemap
 Remotes:
     andrewsali/shinycssloaders,
-    mtennekes/treemap,
     timelyportfolio/sunburstR
 RoxygenNote: 6.1.1
 URL: https://bcgov.github.com/housing-data-challenge-ruby, https://github.com/bcgov/housing-data-challenge-ruby
