@@ -696,7 +696,7 @@ app_ui <- function() {
     ),
 
     #
-    tabPanel("Feedback", id = "feedback"),
+    #tabPanel("Feedback", id = "feedback"),
     footer = HTML('
 <div id="footer">
   <div id="footerWrapper">
